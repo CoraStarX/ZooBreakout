@@ -10,7 +10,7 @@ SUITES=("$@")
 if [ ${#SUITES[@]} -eq 0 ]; then
   SUITES=(p0_regression p0_walkthrough p0_enclosure_check p0_climb_fly_repro
           p1_win_routes p1_monkey_walkthrough
-          p2_outer_walls p2_run_reset p2_day_cycle p2_gather p2_capture p2_intel p2_route_work p2_cart p2_hygiene p2_full_loop)
+          p2_outer_walls p2_run_reset p2_day_cycle p2_gather p2_capture p2_intel p2_route_work p2_cart p2_hygiene p2_ui p2_full_loop)
 fi
 LOG_DIR="${TMPDIR:-/tmp}/zoo_breakout_tests"
 mkdir -p "$LOG_DIR"

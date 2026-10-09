@@ -33,5 +33,6 @@ scenes/ prototypes/ tools/ docs/
 - **平衡 v2**：路线 4 档、期限 5 天、Open 75s、职员每日增强（`StaffActor.apply_day_scaling`）；全套 14 门禁绿
 - **材料 v2 Done**：`KitIds` 三原料；`Interactable.tier_cost` 路线配方；`StaffCart` 偷取；`StaffActor` 巡逻停步；门禁 15 套件
 - **技术债清理 Done**：legacy `scripts/`、`resources/` 迁入 core/gameplay/content；`RunLifecycle.reset()` 取代 `Game.reset_run_state()`（Core 不再认识 Alert/Clock）；`ProximityLabel` 升为 Core 通用件；OfficeChest 数据化+防连按；`p2_hygiene` 静态依赖门禁；门禁 16 套件
+- **UI/引导 Done**：`GameHUD`（顶栏/目标/状态/消息）、`HintDirector`（一次性新手提示，`UserPrefs` 持久化，无头不落盘）、`PauseMenu`（Esc）、调试面板改 F3；`p2_ui` 门禁（共 17 套件）；`.github/workflows/tests.yml`（CI，未在远端验证）
 - Architect 基线门禁：见 [ARCHITECTURE.md](ARCHITECTURE.md)
 - 重构落地：`RunSession` 场景级进度；`zoo_p0` 几何子场景；Capture 守门偏移门配置化；Interactable / AnimalDef / FollowCamera 按层迁移

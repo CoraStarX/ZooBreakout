@@ -9,7 +9,7 @@ extends Control
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	if _hint:
-		_hint.text = "选择开局动物（能力池载体）。另一只可稍后解救。"
+		_hint.text = "选择开局动物：浣熊（巧手：开锁、搜柜更稳）或 猴（攀爬：翻墙、够高处更稳）。\n另一只关在笼里，稍后解救。白天搜集、夜里施工，5 天内逃出动物园。"
 	# Connect in code so instance/main wrapping never drops .tscn connections.
 	if _raccoon_btn and not _raccoon_btn.pressed.is_connected(_on_raccoon_pressed):
 		_raccoon_btn.pressed.connect(_on_raccoon_pressed)

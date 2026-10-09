@@ -93,6 +93,17 @@ func _ready() -> void:
 	_result_ui = RUN_RESULT_SCENE.instantiate() as CanvasLayer
 	add_child(_result_ui)
 	add_child(DayBanner.new())
+	var hud := GameHUD.new()
+	hud.name = "GameHUD"
+	add_child(hud)
+	var hints := HintDirector.new()
+	hints.name = "Hints"
+	hints.hud = hud
+	add_child(hints)
+	var pause_menu := PauseMenu.new()
+	pause_menu.name = "PauseMenu"
+	pause_menu.hint_director = hints
+	add_child(pause_menu)
 	Bus.interact_feedback.emit("白天：搜集蓝点原料/★套件、侦察紫点 → 夜间去外墙施工出园")
 
 

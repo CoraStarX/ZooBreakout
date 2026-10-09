@@ -7,6 +7,7 @@ var _last_msg: String = "WASD相对相机 · E交互 · Tab换控 · F/H跟随�
 
 
 func _ready() -> void:
+	visible = false ## the real HUD is GameHUD; F3 toggles this developer panel
 	Bus.interact_feedback.connect(_on_feedback)
 	Bus.animal_switched.connect(func(_a): _refresh())
 	Bus.alert_changed.connect(func(_l): _refresh())
@@ -20,7 +21,13 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	_refresh()
+	if visible:
+		_refresh()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		visible = not visible
 
 
 func _inventory_text(a: AnimalActor) -> String:

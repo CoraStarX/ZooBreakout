@@ -14,7 +14,7 @@ func _ready() -> void:
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_panel.position.y = 24
+	_panel.position.y = 70
 	_panel.modulate.a = 0.0
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var box := VBoxContainer.new()

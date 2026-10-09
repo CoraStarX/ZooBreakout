@@ -35,6 +35,7 @@ tools/run_tests.sh p0_regression p2_run_reset   # 指定套件
 - 新增 `class_name` 脚本后先跑 `godot --headless --path . --import` 刷新类缓存，否则其他脚本报找不到类型。
 - 关卡数据（搜集点等）写在 `content/levels/*_gather.gd` 这类数据文件，几何脚本只负责实例化。
 
+- 玩家可见 UI 一律走 `GameHUD`/`UIKit`；开发期信息放 F3 调试面板（`debug_hud.gd`），不要往 `GameHUD` 里塞调试文本。偏好存取走 `UserPrefs`（无头不落盘）；截图/实机脚本跑完要清 `~/Library/Application Support/Godot/app_userdata/Zoo Breakout/prefs.cfg`，否则会污染引导状态。
 - 世界空间文字一律用 `ProximityLabel`（`set_info(全文)`，首行即远距离短名），不要再手写 `Label3D` 字号/billboard。
 - 测试里要走完整夜间施工用 `RouteHelper.finish(tree, interactable, actor)`；需要加速读条设 `Game.work_time_scale`。
 

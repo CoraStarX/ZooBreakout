@@ -25,6 +25,8 @@ func _ensure_input_map() -> void:
 	_bind_joy_button("switch_animal", JOY_BUTTON_Y)
 	_bind_key("order_follow", KEY_F)
 	_bind_joy_button("order_follow", JOY_BUTTON_LEFT_SHOULDER)
+	_bind_key("pause", KEY_ESCAPE)
+	_bind_joy_button("pause", JOY_BUTTON_START)
 	_bind_key("order_hold", KEY_H)
 	_bind_joy_button("order_hold", JOY_BUTTON_RIGHT_SHOULDER)
 	## Debug-only shortcuts (gated in zoo_world when debug_enabled).
