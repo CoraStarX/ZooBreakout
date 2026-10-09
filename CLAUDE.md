@@ -38,6 +38,13 @@ tools/run_tests.sh p0_regression p2_run_reset   # 指定套件
 - 世界空间文字一律用 `ProximityLabel`（`set_info(全文)`，首行即远距离短名），不要再手写 `Label3D` 字号/billboard。
 - 测试里要走完整夜间施工用 `RouteHelper.finish(tree, interactable, actor)`；需要加速读条设 `Game.work_time_scale`。
 
+## Git
+
+- 远程：`origin` = `https://github.com/CoraStarX/ZooBreakout.git`，主分支 `main`。
+- 提交署名（仓库本地配置）：`corax <CoraStarX@users.noreply.github.com>`；提交信息末尾带 Claude 的 Co-Authored-By。
+- 只在用户要求时提交；**推送前必须得到用户明确同意**（推送即发布）。提交前先跑 `tools/run_tests.sh`，红了不提交。
+- `.agents/`、`skills-lock.json` 是 Cursor 遗留工具，已 gitignore。
+
 ## 二进制路径
 
 `/Applications/Godot.app/Contents/MacOS/Godot`（可用 `GODOT=` 覆盖）。
