@@ -1,0 +1,17 @@
+# Godot 4+
+.godot/
+*.translation
+export_presets.cfg
+*.apk
+*.aab
+*.zip
+*.pck
+.mono/
+data_*/
+.DS_Store
+
+# Cursor/skills tooling, not game assets
+.agents/
+skills-lock.json
+# Local test artifacts
+*.log

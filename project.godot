@@ -1,0 +1,44 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Zoo Breakout"
+config/description="Collective zoo escape prototype."
+run/main_scene="res://scenes/boot/start_select.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Bus="*res://core/autoload/bus.gd"
+Game="*res://core/autoload/game.gd"
+Clock="*res://gameplay/clock.gd"
+Alert="*res://gameplay/alert.gd"
+OfficeStorage="*res://gameplay/office_storage.gd"
+CaptureFlow="*res://gameplay/capture_flow.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[layer_names]
+
+3d_physics/layer_1="world"
+3d_physics/layer_2="animals"
+3d_physics/layer_3="staff"
+3d_physics/layer_4="interact"
+3d_physics/layer_5="detect"
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=1
