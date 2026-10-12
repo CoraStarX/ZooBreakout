@@ -30,8 +30,6 @@ signal tier_completed(done: int, total: int)
 @export var use_range: float = 1.85
 ## When false, interactions without the required verb are refused (no Hard). Default true.
 @export var allow_hard: bool = true
-## Other verbs that also count as Soft here (e.g. cage: climb out from inside OR pick the lock from outside).
-@export var alt_required: Array[CapabilityIds.Id] = []
 ## Cage door reinforced after a capture (until dawn): costs a part, or double time.
 var reinforced: bool = false
 ## World-space offset from the interact point for staff door-guard stance (no species branching).
@@ -113,29 +111,22 @@ func _hard_allowed_now() -> bool:
 	return true
 
 
-func _accepted_caps() -> Array[CapabilityIds.Id]:
-	var out: Array[CapabilityIds.Id] = [required]
-	for c in alt_required:
-		if c != CapabilityIds.Id.NONE and not out.has(c):
-			out.append(c)
-	return out
-
-
 func _cap_text() -> String:
-	var parts := PackedStringArray()
-	for c in _accepted_caps():
-		parts.append(CapabilityIds.to_label(c))
-	return " 或 ".join(parts)
+	return CapabilityIds.to_label(required)
+
+
+## Whether this animal could ever open it (talent, or Hard allowed). Ignores phase, cargo and payment.
+func can_be_opened_by(def: AnimalDef) -> bool:
+	if required == CapabilityIds.Id.NONE or allow_hard:
+		return true
+	return def != null and def.has_capability(required)
 
 
 ## ignore_heavy = true: has the talent at all; false: can use it right now (heavy cargo blocks climb).
 func _qualifies(user: AnimalActor, ignore_heavy: bool) -> bool:
 	if required == CapabilityIds.Id.NONE:
 		return true
-	for c in _accepted_caps():
-		if (user.has_capability(c) if ignore_heavy else user.effective_has_capability(c)):
-			return true
-	return false
+	return user.has_capability(required) if ignore_heavy else user.effective_has_capability(required)
 
 
 func _refresh_label() -> void:

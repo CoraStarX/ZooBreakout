@@ -259,6 +259,15 @@ func _spawn_party() -> void:
 	caged.home_position = caged.position
 	add_child(caged)
 	party.register_caged(other_id, caged)
+	_validate_cages(starter_id)
+
+
+func _validate_cages(starter_id: StringName) -> void:
+	var defs := {}
+	for id in cage_doors.keys():
+		defs[id] = Spawns.def_for(id)
+	for e in CageDependencyCheck.validate(cage_doors, defs, starter_id):
+		push_error("关卡配置错误：%s" % e)
 
 
 func _wire_cage_door(door: Interactable, animal_id: StringName) -> void:

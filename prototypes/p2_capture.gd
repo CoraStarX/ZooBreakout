@@ -89,27 +89,23 @@ func _ready() -> void:
 	Clock.advance()
 	_check(not door.reinforced, "天亮后加固解除")
 
-	## --- Teammate rescue before timer ends ---
-	starter.is_controlled = false
-	CaptureFlow.apply_capture(starter, "测试")
-	var left := CaptureFlow.detention_left(starter)
+	## --- Teammate rescue before timer ends: raccoon picks the detained monkey's lock ---
+	var mdoor: Interactable = world.call("door_for_animal", monkey)
+	CaptureFlow.apply_capture(monkey, "测试")
+	var left := CaptureFlow.detention_left(monkey)
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 	## Guard stands at the door on purpose (rescuing under its nose = instant catch). Lure it away for the test.
 	var staff: StaffActor = world.call("get_staff")
 	staff.clear_guard()
 	staff.global_position = Vector3(10, 0.05, 10)
-	monkey.order_hold()
-	monkey.global_position = door.global_position + Vector3(0, 0, -0.9)
-	monkey._hold_position = monkey.global_position
-	monkey.inventory.clear()
-	## 开锁硬门槛：须巧手 Soft（猴默认无此才能 — 测试临时赋予，表示「巧手同伴撬门」）。
-	var pry := monkey.def.duplicate(true) as AnimalDef
-	pry.capabilities.append(CapabilityIds.Id.DEXTERITY)
-	monkey.def = pry
-	door.try_use(monkey)
-	await _idle(door)
-	_check(not starter.is_confined and left > 5.0, "同伴撬门提前营救（剩余 %.1fs 时）" % left)
-	_check(CaptureFlow.detention_left(starter) == 0.0, "营救后无短押计时")
+	starter.is_confined = false
+	starter.global_position = mdoor.global_position + Vector3(-1.1, 0.05, 0)
+	starter.inventory.clear()
+	starter.give_items([KitIds.WOOD]) ## reinforced door: pay the extra material
+	mdoor.try_use(starter)
+	await _idle(mdoor)
+	_check(not monkey.is_confined and left > 5.0, "浣熊撬开猴笼提前营救（剩余 %.1fs 时）" % left)
+	_check(CaptureFlow.detention_left(monkey) == 0.0, "营救后无短押计时")
 
 	print("")
 	print("=== P2 CAPTURE SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])

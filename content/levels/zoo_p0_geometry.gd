@@ -94,12 +94,11 @@ func _build_level() -> void:
 	_wall(Vector3(4.2, 0.75, -1.45), Vector3(0.4, 1.5, 1.2)) # west north pillar
 	var monkey_door_body := _wall(Vector3(4.2, 0.75, -3.0), Vector3(0.4, 1.5, 1.6), Color(0.6, 0.4, 0.25))
 	monkey_door_body.name = "MonkeyDoor"
-	## 猴笼：猴从内攀栏翻出，或巧手同伴从外开锁；禁止强行。
+	## 笼门要求的是「救它的那只」的才能：浣熊开锁救猴。禁止强行。
 	var monkey_door := _make_interactable(
-		Vector3(3.2, 0.5, -3.0), "猴笼门", CapabilityIds.Id.CLIMB, monkey_door_body,
+		Vector3(3.2, 0.5, -3.0), "猴笼门", CapabilityIds.Id.DEXTERITY, monkey_door_body,
 		0.0, true, true, Interactable.BreachStyle.DESTROY, Vector3(-1.2, 0, 0)
 	)
-	monkey_door.alt_required = [CapabilityIds.Id.DEXTERITY]
 	monkey_door.allow_hard = false
 	monkey_door._refresh_label()
 	cage_doors[&"monkey"] = monkey_door

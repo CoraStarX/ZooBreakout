@@ -5,7 +5,6 @@ extends Node
 func _ready() -> void:
 	print("=== Enclosure check ===")
 	await _check_starter(&"raccoon")
-	await _check_starter(&"monkey")
 	print("=== END ===")
 	get_tree().quit(0)
 

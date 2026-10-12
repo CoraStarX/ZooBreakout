@@ -30,6 +30,7 @@ static func companion_id(starter_id: StringName) -> StringName:
 
 
 static func resolve_starter(starter_id: StringName) -> StringName:
-	if def_for(starter_id) != null:
+	var def := def_for(starter_id)
+	if def != null and def.can_start:
 		return starter_id
 	return &"raccoon"

@@ -10,4 +10,4 @@ capabilities = Array[int]([2])
 body_color = Color(0.55, 0.38, 0.28, 1)
 move_speed = 5.5
 inventory_capacity = 2
-can_start = true
+can_start = false
