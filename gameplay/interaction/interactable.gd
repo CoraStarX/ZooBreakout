@@ -39,6 +39,10 @@ var reinforced: bool = false
 var tier_done: int = 0
 ## Free tiers left from a consumed kit.
 var _kit_credit: int = 0
+## Recipe materials / this route's kit left here by any animal. Construction pays from here first.
+var stash: Array[StringName] = []
+## What the running tier took, as [item_id, from_stash] pairs — refunded to the same place on cancel.
+var _paid: Array = []
 
 var _done: bool = false
 var _busy: bool = false
@@ -175,6 +179,7 @@ func _refresh_label() -> void:
 		]
 		if _kit_credit > 0:
 			line += "\n[套件余 %d 档免费]" % _kit_credit
+		line += "\n[存料：%s · X 放入]" % _stash_text()
 		if not _hard_allowed_now():
 			line += "\n[本档禁止强行]"
 	if reinforced and not _done:
@@ -185,7 +190,7 @@ func _refresh_label() -> void:
 func try_use(user: AnimalActor) -> void:
 	if _done or _busy:
 		return
-	## Tiered work: plan payment first (may consume metal so climb Soft is not blocked by cargo).
+	## Tiered work: plan payment first (a carried kit is spent up-front, so it does not block climb Soft).
 	var pay := &""
 	if tiers > 1:
 		pay = _plan_payment(user)
@@ -194,11 +199,11 @@ func try_use(user: AnimalActor) -> void:
 				_cost_text(), _kit_label(route_kit_id), _missing_text(user)
 			])
 			return
-	## After hypothetical pay, climb Soft must not be blocked by metal that is about to be spent.
+	## After hypothetical pay, climb Soft must not be blocked by a kit that is about to be spent.
 	var soft := _qualifies(user, true)
-	## One-shot gates: heavy cargo blocks climb right now. Construction pays metal up-front below.
+	## One-shot gates: heavy cargo blocks climb right now. Construction pays up-front below.
 	if soft and tiers <= 1 and not _qualifies(user, false):
-		Bus.interact_feedback.emit("%s：背着重物（套件）无法攀爬 — 先把套件用在外墙施工点" % display_name)
+		Bus.interact_feedback.emit("%s：背着重物（套件）无法攀爬 — 先用掉或按 X 放下" % display_name)
 		return
 	if not soft and not _hard_allowed_now():
 		var why := "最后一档须具备才能，禁止强行" if (tiers > 1 and tier_done >= tiers - 1) else "此处禁止强行"
@@ -298,7 +303,7 @@ func _channel(user: AnimalActor, wait: float) -> bool:
 func _plan_payment(user: AnimalActor) -> StringName:
 	if _kit_credit > 0:
 		return &"credit"
-	if route_kit_id != &"" and user.has_item(route_kit_id):
+	if route_kit_id != &"" and _available(user, route_kit_id) > 0:
 		return &"kit"
 	if _has_materials(user):
 		return &"materials"
@@ -309,6 +314,11 @@ func _has_materials(user: AnimalActor) -> bool:
 	return not tier_cost.is_empty() and _missing(user).is_empty()
 
 
+## Stash + what the user carries.
+func _available(user: AnimalActor, id: StringName) -> int:
+	return stash.count(id) + user.item_count(id)
+
+
 ## Materials still lacking for one tier (counts duplicates in the recipe).
 func _missing(user: AnimalActor) -> Array[StringName]:
 	var out: Array[StringName] = []
@@ -316,9 +326,49 @@ func _missing(user: AnimalActor) -> Array[StringName]:
 	for m in tier_cost:
 		need[m] = int(need.get(m, 0)) + 1
 	for m in need:
-		if user.item_count(m) < int(need[m]):
+		if _available(user, m) < int(need[m]):
 			out.append(m)
 	return out
+
+
+func accepts_stash(id: StringName) -> bool:
+	if tiers <= 1 or _done:
+		return false
+	return tier_cost.has(id) or (route_kit_id != &"" and id == route_kit_id)
+
+
+## Moves every carried item this point can use into its stash. Returns how many moved.
+func deposit_from(user: AnimalActor) -> int:
+	var moved := 0
+	for id in user.inventory.duplicate():
+		if accepts_stash(id):
+			user.consume_item(id)
+			stash.append(id)
+			moved += 1
+	if moved > 0:
+		_refresh_label()
+	return moved
+
+
+func _stash_text() -> String:
+	if stash.is_empty():
+		return "空"
+	var counts := {}
+	for id in stash:
+		counts[id] = int(counts.get(id, 0)) + 1
+	var parts := PackedStringArray()
+	for id in counts:
+		parts.append("%s×%d" % [KitIds.display_name(id), counts[id]])
+	return " ".join(parts)
+
+
+func _take(user: AnimalActor, id: StringName) -> void:
+	if stash.has(id):
+		stash.erase(id)
+		_paid.append([id, true])
+	else:
+		user.consume_item(id)
+		_paid.append([id, false])
 
 
 func _cost_text() -> String:
@@ -338,15 +388,17 @@ func _missing_text(user: AnimalActor) -> String:
 
 
 func _pay_tier(user: AnimalActor, pay: StringName) -> void:
+	_paid.clear()
 	match pay:
 		&"credit":
 			_kit_credit -= 1
 		&"kit":
-			user.consume_item(route_kit_id)
+			_take(user, route_kit_id)
 			_kit_credit = GameConst.KIT_TIERS - 1
 		&"materials":
 			for m in tier_cost:
-				user.consume_item(m)
+				_take(user, m)
+	_refresh_label()
 
 
 func _refund_tier(user: AnimalActor, pay: StringName) -> void:
@@ -354,13 +406,16 @@ func _refund_tier(user: AnimalActor, pay: StringName) -> void:
 		&"credit":
 			_kit_credit += 1
 		&"kit":
-			## Undo kit consume: give kit back and clear the free credit it granted.
+			## Undo kit consume: clear the free credit it granted.
 			_kit_credit = 0
-			user.give_items([route_kit_id])
-		&"materials":
-			for m in tier_cost:
-				user.give_items([m])
-	Bus.interact_feedback.emit("施工取消，原料已退回")
+	for p in _paid:
+		if p[1]:
+			stash.append(p[0])
+		else:
+			user.give_items([p[0]])
+	_paid.clear()
+	_refresh_label()
+	Bus.interact_feedback.emit("施工取消，原料已退回原处")
 
 
 func _kit_label(id: StringName) -> String:

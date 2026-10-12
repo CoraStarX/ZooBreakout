@@ -3,7 +3,7 @@ extends CanvasLayer
 
 @onready var label: Label = $Panel/Label
 
-var _last_msg: String = "WASD相对相机 · E交互 · G叫嚷 · Tab换控 · F/H跟随待命 · V标记 · 夜间破障 · 躲开红扇形视线"
+var _last_msg: String = "WASD相对相机 · E交互 · G叫嚷 · Tab换控 · F/H跟随待命 · V标记 · X放下/存料 · 夜间破障 · 躲开红扇形视线"
 var _staff_ai_check: CheckButton
 
 

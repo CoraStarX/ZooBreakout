@@ -91,7 +91,7 @@ func try_use(user: AnimalActor) -> void:
 		Bus.interact_feedback.emit("夜里看不清 — 搜集请等白天（夜间专心施工）")
 		return
 	if user.inventory_free_slots() <= 0:
-		Bus.interact_feedback.emit("背包满了（%d/%d）— 先卸下或用掉一些" % [user.inventory.size(), user.inventory_capacity()])
+		Bus.interact_feedback.emit("背包满了（%d/%d）— 按 X 放下或存到施工点" % [user.inventory.size(), user.inventory_capacity()])
 		return
 	var rich := required == CapabilityIds.Id.NONE or user.effective_has_capability(required)
 	var amount := yield_rich if rich else yield_poor

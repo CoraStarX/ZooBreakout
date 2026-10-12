@@ -37,6 +37,9 @@ func _ensure_input_map() -> void:
 	## 主動製造噪音引開職員（叫嚷／砸地）。
 	_bind_key("make_noise", KEY_G)
 	_bind_joy_button("make_noise", JOY_BUTTON_B)
+	## 放下物品；在施工點旁則存入點位。
+	_bind_key("drop_item", KEY_X)
+	_bind_joy_button("drop_item", JOY_BUTTON_X)
 	## Debug-only shortcuts (gated in zoo_world when debug_enabled).
 	_bind_key("debug_rescue_monkey", KEY_R)
 	_bind_key("debug_advance_phase", KEY_T)

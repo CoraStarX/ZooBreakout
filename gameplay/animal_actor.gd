@@ -199,6 +199,8 @@ func _process_controlled() -> void:
 		_try_interact()
 	if Input.is_action_just_pressed("make_noise"):
 		try_make_noise()
+	if Input.is_action_just_pressed("drop_item"):
+		try_drop()
 	## 隊長留下麵包屑供夥伴跟隨。
 	follow_trail.record(global_position, _fp.trail_spacing, _fp.trail_max_points)
 
@@ -652,6 +654,45 @@ func capture_return_home(reason: String = "") -> void:
 	Alert.bump(1)
 	Bus.captured.emit(self)
 	Bus.interact_feedback.emit("%s 被抓送回！警戒 %d" % [display_name(), Alert.level])
+
+
+## X: next to a route point → store every usable item there; elsewhere → drop one item (heavy first).
+func try_drop() -> bool:
+	if is_confined or inventory.is_empty():
+		if inventory.is_empty():
+			Bus.interact_feedback.emit("背包是空的")
+		return false
+	var point := _nearby_stash_point()
+	if point:
+		var moved := point.deposit_from(self)
+		Bus.interact_feedback.emit("存入%s ×%d — 施工时先用这里的料（背包 %d/%d）" % [
+			point.display_name, moved, inventory.size(), inventory_capacity()
+		])
+		return true
+	var idx := inventory.size() - 1
+	for i in inventory.size():
+		if KitIds.is_heavy(inventory[i]):
+			idx = i
+			break
+	var id: StringName = inventory[idx]
+	inventory.remove_at(idx)
+	var parent_n := get_parent() if get_parent() else get_tree().current_scene
+	GroundItem.spawn(parent_n, id, global_position + _facing * 0.6 + Vector3(0, 0.02, 0))
+	Bus.interact_feedback.emit("放下 %s（E 可捡回）" % KitIds.display_name(id))
+	return true
+
+
+func _nearby_stash_point() -> Interactable:
+	if _interact_area == null:
+		return null
+	for area in _interact_area.get_overlapping_areas():
+		var it := area as Interactable
+		if it == null or global_position.distance_to(it.global_position) > it.use_range:
+			continue
+		for id in inventory:
+			if it.accepts_stash(id):
+				return it
+	return null
 
 
 func _try_interact() -> void:
