@@ -9,6 +9,7 @@ enum Id {
 	DIG = 3, ## 挖掘 — 留给獾；现有路线均不要求
 	RAM = 4, ## 冲撞
 	SQUEEZE = 5, ## 钻缝
+	THROW = 6, ## 投掷 — 丢石子到远处制造声响引开职员
 }
 
 
@@ -24,5 +25,7 @@ static func to_label(id: Id) -> String:
 			return "冲撞"
 		Id.SQUEEZE:
 			return "钻缝"
+		Id.THROW:
+			return "投掷"
 		_:
 			return "—"

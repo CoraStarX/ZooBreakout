@@ -10,5 +10,5 @@ extends Resource
 @export var night_quiet_sec: float = 32.0
 ## Day index that ends the run if still not escaped (1-based).
 @export var deadline_day: int = 5
-## Player shout uses per day (knife 4 wires this).
+## Player shout uses per day, shared by the whole party (resets at dawn).
 @export var shout_daily_limit: int = 4

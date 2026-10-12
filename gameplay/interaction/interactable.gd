@@ -8,6 +8,10 @@ signal used(success: bool, soft: bool)
 ## Night construction progress on a tiered route point.
 signal tier_completed(done: int, total: int)
 
+## Trace markers one Hard attempt leaves at the point.
+const TRACES_PER_HARD := 1
+const GROUP := &"interactables"
+
 @export var display_name: String = "交互点"
 @export var required: CapabilityIds.Id = CapabilityIds.Id.NONE
 ## Other capabilities that also count as Soft (any one is enough). Only meaningful with `required` set.
@@ -53,6 +57,7 @@ var _progress_label: Label3D
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	collision_layer = 8
 	collision_mask = 0
 	monitoring = true
@@ -163,6 +168,38 @@ func _qualifies(user: AnimalActor, ignore_heavy: bool) -> bool:
 	return false
 
 
+## Pre-press summary for `user`: Soft/Hard, what gets paid, and the trace a Hard attempt leaves.
+func cost_preview(user: AnimalActor) -> String:
+	if _done or user == null:
+		return ""
+	if tiers > 1 and Alert.is_full_search():
+		return "E %s：全园搜查中，施工全部中止" % display_name
+	var step := "第 %d/%d 档" % [tier_done + 1, tiers] if tiers > 1 else ""
+	var pay_text := ""
+	if tiers > 1:
+		match _plan_payment(user):
+			&"credit":
+				pay_text = "套件余档（免费）"
+			&"kit":
+				pay_text = "扣%s（顶 %d 档）" % [_kit_label(route_kit_id), GameConst.KIT_TIERS]
+			&"materials":
+				pay_text = "扣 %s" % _cost_text()
+			_:
+				return "E %s%s：缺料（%s）" % [display_name, step, _missing_text(user)]
+	var parts := PackedStringArray()
+	if pay_text != "":
+		parts.append(pay_text)
+	if _qualifies(user, true):
+		parts.append("不留痕迹")
+		return "E %s%s（Soft·稳）：%s" % [display_name, step, " · ".join(parts)]
+	if not _hard_allowed_now():
+		return "E %s%s：须%s，禁止强行" % [display_name, step, _cap_text()]
+	var rw := GameConst.route_work()
+	parts.append("时×%.0f 噪×%.0f" % [rw.hard_time_mult, rw.hard_noise_mult])
+	parts.append("会留下痕迹 ×%d（强度 %.1f，被发现警戒 +1）" % [TRACES_PER_HARD, rw.hard_trace_mult])
+	return "E 强行%s%s：%s" % [display_name, step, " · ".join(parts)]
+
+
 func _refresh_label() -> void:
 	if _label == null:
 		return
@@ -170,7 +207,7 @@ func _refresh_label() -> void:
 	var line := display_name
 	if required != CapabilityIds.Id.NONE:
 		if _hard_allowed_now():
-			line = "%s\n[%s · Soft / 可强行(慢吵留痕)]" % [display_name, cap]
+			line = "%s\n[%s · Soft / 可强行(慢吵·留痕迹×%d)]" % [display_name, cap, TRACES_PER_HARD]
 		else:
 			line = "%s\n[%s · 须 Soft · 禁止强行]" % [display_name, cap]
 	if tiers > 1 and not _done:
@@ -250,8 +287,8 @@ func try_use(user: AnimalActor) -> void:
 	if soft:
 		Bus.interact_feedback.emit("使用%s：%s%s（稳）" % [label if required != CapabilityIds.Id.NONE else "通用", display_name, step])
 	else:
-		Bus.interact_feedback.emit("强行%s%s（无%s · 时×%.0f 噪×%.0f 痕×%.0f）…" % [
-			display_name, step, label, rw.hard_time_mult, rw.hard_noise_mult, rw.hard_trace_mult
+		Bus.interact_feedback.emit("强行%s%s（无%s · 时×%.0f 噪×%.0f · 会留下痕迹×%d）…" % [
+			display_name, step, label, rw.hard_time_mult, rw.hard_noise_mult, TRACES_PER_HARD
 		])
 	if not await _channel(user, wait):
 		if paid_upfront:
@@ -265,7 +302,8 @@ func try_use(user: AnimalActor) -> void:
 			_busy = false
 			return
 		## Traces only — never Alert.bump here. Staff discovery settles once.
-		TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
+		for _i in TRACES_PER_HARD:
+			TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
 	if pay_part:
 		user.consume_any_material(GameConst.REINFORCE_EXTRA_MATERIALS)
 	if tiers > 1:
@@ -454,9 +492,13 @@ func _emit_noise(amount: float, user: AnimalActor) -> bool:
 	## 統一走 Bus.noise_made；職員自行按聽距判定（不直接點名呼叫）。
 	## Route work is its own kind so staff can scale how far it carries (Alert 3+).
 	var kind := &"construction" if tiers > 1 else &"interact_hard"
+	var frame := Engine.get_process_frames()
 	Bus.noise_made.emit(user.global_position, clampf(amount, 0.1, 1.5), kind)
 	var instant := false
+	var heard := false
 	for s in get_tree().get_nodes_in_group("staff"):
+		if s is StaffActor and (s as StaffActor).last_heard_frame == frame:
+			heard = true
 		if s is Node3D:
 			var d := user.global_position.distance_to((s as Node3D).global_position)
 			## Only instant-catch when staff is already on top of the noise.
@@ -466,7 +508,10 @@ func _emit_noise(amount: float, user: AnimalActor) -> bool:
 		Bus.interact_feedback.emit("硬闯噪音就在职员耳边，当场被抓！")
 		user.capture_return_home("硬闯噪音")
 		return true
-	Bus.interact_feedback.emit("噪音惊动了职员，正在赶来查看 — 快离开！")
+	if heard:
+		Bus.interact_feedback.emit("噪音惊动了职员，正在赶来查看 — 快离开！")
+	else:
+		Bus.interact_feedback.emit("动静很大，但附近没有职员听见（痕迹仍会留下）")
 	return false
 
 

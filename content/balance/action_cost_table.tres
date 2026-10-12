@@ -15,4 +15,6 @@ shout_cooldown_sec = 6.0
 shout_loudness = 0.85
 throw_cooldown_sec = 8.0
 throw_loudness = 0.7
+throw_range = 7.0
+throw_flight_sec = 0.45
 heavy_speed_mult = 0.6

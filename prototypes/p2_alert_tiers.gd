@@ -50,6 +50,7 @@ func _ready() -> void:
 	await _ground_confiscation(raccoon)
 	await _alert_4(raccoon)
 	await _alert_5(raccoon)
+	await _full_search(raccoon)
 
 	print("")
 	print("=== P2 ALERT TIERS SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])
@@ -79,22 +80,33 @@ func _noise_never_raises_alert(raccoon: AnimalActor) -> void:
 	Alert.level = 0
 
 
-## Alert 2: staff hear ×1.25 farther (noises and footsteps).
+## Alert 2: staff hear ×1.25 farther (noises and footsteps). Real shout from the dig point, staff on a real patrol point.
 func _hearing_tiers(raccoon: AnimalActor) -> void:
 	var p := _staff._params
+	_check(is_equal_approx(p.hear_noise_range, 13.0), "hear_noise_range = 13（Params）")
+	Clock.set_phase(Clock.Phase.OPEN)
+	await _stand(raccoon, _geo.dig_interactable.global_position + Vector3(1.4, 0.05, 0))
 	var origin := raccoon.global_position
-	_staff.global_position = origin + Vector3(p.hear_noise_range * 1.12, 0, 0)
+	var post: Vector3 = _staff.patrol_network.find(&"plaza_mid").position
+	_staff.global_position = post
+	var dist := origin.distance_to(post)
 	Alert.level = 1
-	Bus.noise_made.emit(origin, 1.0, &"shout")
+	raccoon._shout_cooldown = 0.0
+	raccoon.try_make_noise()
 	await get_tree().process_frame
 	var heard_1 := _staff.state != StaffActor.State.WORK
 	_reset_staff()
 	Alert.level = 2
-	Bus.noise_made.emit(origin, 1.0, &"shout")
+	raccoon._shout_cooldown = 0.0
+	raccoon.try_make_noise()
 	await get_tree().process_frame
 	_check(not heard_1 and _staff.state == StaffActor.State.INVESTIGATE,
-		"警戒 2 听距×%.2f：%.1fm 外的叫声 警戒1 听不到、警戒2 听到" % [Alert.hearing_mult(), p.hear_noise_range * 1.12])
+		"挖洞点叫嚷 → 广场巡逻点 %.1fm：警戒1 听不到（%.1fm）、警戒2 听到（%.1fm）" % [
+			dist, p.hear_noise_range * GameConst.SHOUT_LOUDNESS, p.hear_noise_range * GameConst.SHOUT_LOUDNESS * 1.25])
 	_reset_staff()
+	var session: RunSession = _world.get("session")
+	session.shouts_used_today = 0
+	origin = raccoon.global_position
 	_staff.global_position = origin + Vector3(p.hear_walk_range * 1.6 * 1.12, 0, 0)
 	Alert.level = 1
 	Bus.noise_made.emit(origin, 1.0, &"footstep")
@@ -150,22 +162,35 @@ func _construction_noise(raccoon: AnimalActor, monkey: AnimalActor) -> void:
 	var rw := GameConst.route_work()
 	var loud := clampf(clampf(climb.hard_noise * rw.hard_noise_mult, 0.1, 1.5), 0.15, 1.35)
 	var r2 := _staff._params.hear_noise_range * loud * GameConst.alert_params().hearing_mult_at_alert_2
-	var dist := r2 * 1.15
-	_staff.global_position = raccoon.global_position + Vector3(dist, 0, 0)
+	var post: Vector3 = _staff.patrol_network.find(&"wide_n").position
+	var dist := raccoon.global_position.distance_to(post)
+	_staff.global_position = post
 	Alert.level = 2
 	Game.work_time_scale = 0.05
+	_face(raccoon, climb.global_position)
+	var preview := raccoon.interact_preview()
+	_check(preview.begins_with("E 强行") and preview.contains("会留下痕迹 ×1"), "施工前预览：%s" % preview)
+	await get_tree().create_timer(0.2).timeout
+	var use_l: Label = _world.get_node("GameHUD").get("_use_l")
+	_check(use_l.visible and use_l.text == preview, "HUD 显示同一预览")
+	_msgs.clear()
 	climb.try_use(raccoon)
 	await _idle(climb)
 	_check(climb.tier_done == 1 and _staff.state == StaffActor.State.WORK and Alert.level == 2,
-		"警戒 2：强行施工第 1 档，%.1fm 外职员听不到（听距 %.1fm）" % [dist, r2])
+		"警戒 2：强行施工第 1 档，宽环巡逻点 %.1fm 外职员听不到（听距 %.1fm）" % [dist, r2])
+	_check(get_tree().get_nodes_in_group("traces").size() == 1, "预览说的痕迹 ×1 确实留下")
+	_check(not _msgs.any(func(m: String) -> bool: return m.contains("正在赶来")) and _msgs.any(func(m: String) -> bool: return m.contains("没有职员听见")),
+		"没人听到：不显示「正在赶来」")
 	await _stand(raccoon, work_pos)
-	_staff.global_position = raccoon.global_position + Vector3(dist, 0, 0)
+	_staff.global_position = post
 	Alert.level = 3
-	_check(_msgs.any(func(m: String) -> bool: return m.begins_with("警戒 3：")), "升到警戒 3 有后果提示")
+	_check(_msgs.any(func(m: String) -> bool: return m.begins_with("警戒 3：") and m.contains("听得更远")), "升到警戒 3 有后果提示（听得更远）")
+	_msgs.clear()
 	climb.try_use(raccoon)
 	await _idle(climb)
+	_check(_msgs.any(func(m: String) -> bool: return m.contains("正在赶来")), "有职员听到才显示「正在赶来」")
 	_check(climb.tier_done == 2 and _staff.state == StaffActor.State.INVESTIGATE,
-		"警戒 3：施工声×%.1f，同距离职员听到前去查看" % Alert.construction_noise_mult())
+		"警戒 3：施工声听得更远（听距×%.1f），同距离职员听到前去查看" % Alert.construction_noise_mult())
 	_check(_staff.head_icon() == "!", "被施工声引来的职员头上显示 !")
 	_check(Alert.level == 3, "施工噪音不升警戒（仍为 3）")
 	_reset_staff()
@@ -181,6 +206,9 @@ func _ground_confiscation(raccoon: AnimalActor) -> void:
 	raccoon.try_drop()
 	var stash_before := dig.stash.duplicate()
 	_check(stash_before.has(KitIds.WOOD), "浣熊把木料存进挖洞点：%s" % [dig.stash])
+	_face(raccoon, dig.global_position)
+	var soft_preview := raccoon.interact_preview()
+	_check(soft_preview.contains("Soft") and soft_preview.contains("不留痕迹"), "钻缝 Soft 预览：%s" % soft_preview)
 	await _gather(raccoon, "南侧杂物堆")
 	var drop_at := Vector3(2.0, 0.05, 6.0)
 	await _stand(raccoon, drop_at)
@@ -281,6 +309,77 @@ func _alert_5(raccoon: AnimalActor) -> void:
 	await get_tree().create_timer(0.3).timeout
 	var warn: Label = _world.get_node("GameHUD").get("_alert_warn_l")
 	_check(warn.visible and warn.text.contains("全园搜查"), "HUD 警戒 5 红字：%s" % warn.text)
+
+
+## Alert 5 minimal full search: no quiet window, patrol picks pinned to route points + last known position.
+func _full_search(raccoon: AnimalActor) -> void:
+	var net := _staff.patrol_network
+	Alert.level = 5
+	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
+	var expect := GameConst.NIGHT_PATROL_BASE_SEC + 5.0 * GameConst.NIGHT_PATROL_PER_ALERT_SEC + GameConst.NIGHT_QUIET_SEC * 0.75
+	_check(is_equal_approx(Clock.night_patrol_duration(), expect), "警戒 5：歇岗并入夜巡（夜巡 %.0fs）" % Clock.night_patrol_duration())
+	var phases: Array[int] = []
+	var on_phase := func(p: int) -> void: phases.append(p)
+	Bus.phase_changed.connect(on_phase)
+	var day0 := Clock.day
+	Clock.advance()
+	Bus.phase_changed.disconnect(on_phase)
+	_check(Clock.day == day0 + 1 and not phases.has(Clock.Phase.NIGHT_QUIET), "警戒 5：夜巡后直接天亮，不进歇岗（%s）" % [phases])
+	Alert.level = 4
+	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	Alert.level = 5
+	_check(Clock.phase == Clock.Phase.NIGHT_PATROL, "歇岗中升到 5：职员结束歇岗回到夜巡")
+	await get_tree().create_timer(0.3).timeout
+	var rest_l: Label = _world.get_node("GameHUD").get("_rest_l")
+	_check(rest_l.text.contains("取消"), "HUD 歇岗显示：%s" % rest_l.text)
+
+	_staff._last_known = Vector3(1.0, 0.05, 2.0)
+	_staff._last_known_valid = true
+	_staff._sync_full_search_focus()
+	var dig := _geo.dig_interactable
+	var dig_spot := dig.global_position + dig.guard_offset
+	var has_dig := net.focus_points.any(func(fp: PatrolPointData) -> bool: return Vector2(fp.position.x, fp.position.z).distance_to(Vector2(dig_spot.x, dig_spot.z)) < 0.01)
+	_check(net.focus_points.size() == 3 and has_dig, "焦点 = 挖洞点、攀爬点（未完工）+ 最后已知位置（%d 个）" % net.focus_points.size())
+	_staff.global_position = Vector3(5.5, _staff.global_position.y, 5.5)
+	var picks := 0
+	for i in 6:
+		_staff._pick_next_patrol_point(false)
+		if _staff.is_heading_to_focus():
+			picks += 1
+		_staff._arrive_network_point()
+	_check(picks == 6, "警戒 5：连续 6 次选点都落在焦点（%d/6）" % picks)
+	Alert.level = 4
+	_staff._sync_full_search_focus()
+	picks = 0
+	for i in 6:
+		_staff._pick_next_patrol_point(false)
+		if _staff.is_heading_to_focus():
+			picks += 1
+		_staff._arrive_network_point()
+	_check(net.focus_points.is_empty() and picks == 0, "降到 4：焦点清空，回到一般巡逻")
+
+	Alert.level = 5
+	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
+	_reset_staff()
+	await _stand(raccoon, Vector3(-8.0, 0.05, 6.0))
+	_staff.global_position = Vector3(5.5, _staff.global_position.y, 5.5)
+	_staff._dwell_left = 0.0
+	_staff._motor.clear_target()
+	_staff.set_physics_process(true)
+	var states_ok := true
+	for i in 60:
+		await get_tree().physics_frame
+		if _staff.state == StaffActor.State.REST:
+			states_ok = false
+	_staff.set_physics_process(false)
+	_check(states_ok and _staff.is_heading_to_focus(), "实际运行：职员不歇岗，正前往焦点（目标 %s）" % _staff._patrol_point_id)
+	Alert.level = 0
+
+
+func _face(a: AnimalActor, at: Vector3) -> void:
+	var d := at - a.global_position
+	d.y = 0.0
+	a._facing = d.normalized()
 
 
 func _reset_staff() -> void:

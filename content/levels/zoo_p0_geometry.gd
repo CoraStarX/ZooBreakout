@@ -68,7 +68,7 @@ func _build_level() -> void:
 	## Dig = west outer wall. Corridor from courtyard to the wall is open after exhibit escape.
 	dig_interactable = _make_interactable(
 		Vector3(-11.2, 0.5, 1.5), "外墙挖洞", CapabilityIds.Id.SQUEEZE, west_outer_gate,
-		0.0, true, false, Interactable.BreachStyle.DIG_HOLE
+		0.0, true, false, Interactable.BreachStyle.DIG_HOLE, Vector3(1.4, 0, 0)
 	)
 	dig_interactable.also_accepts = [CapabilityIds.Id.DEXTERITY]
 	dig_interactable.route_kit_id = KitIds.DIG
@@ -78,7 +78,7 @@ func _build_level() -> void:
 	## Climb = south outer wall (flip out of the zoo, not an inner yard shortcut).
 	climb_interactable = _make_interactable(
 		Vector3(-4.5, 0.5, -11.1), "外墙攀爬出园", CapabilityIds.Id.CLIMB, south_outer_gate,
-		0.0, true, false, Interactable.BreachStyle.CLIMB_LEDGE
+		0.0, true, false, Interactable.BreachStyle.CLIMB_LEDGE, Vector3(0, 0, 1.0)
 	)
 	climb_interactable.route_kit_id = KitIds.CLIMB
 	climb_interactable.tiers = GameConst.ROUTE_TIERS
@@ -142,6 +142,7 @@ func _build_gather_points() -> void:
 		gp.yield_rich = d["rich"]
 		gp.yield_poor = d["poor"]
 		gp.hint = d["hint"]
+		gp.risky = bool(d.get("risky", false))
 		gp.position = d["pos"]
 		add_child(gp)
 		gather_points.append(gp)

@@ -240,7 +240,7 @@ func _debug_rescue_other() -> void:
 
 func _debug_advance_phase() -> void:
 	Clock.advance()
-	Bus.interact_feedback.emit("时段 → %s（剩余可等自动，或再按 T）" % Clock.phase_name())
+	Bus.interact_feedback.emit("时段 → %s（剩余可等自动，或再按 N）" % Clock.phase_name())
 
 
 func _spawn_party() -> void:

@@ -60,8 +60,12 @@ func phase_remaining() -> float:
 	return maxf(0.0, _phase_duration() - _phase_elapsed)
 
 
+## Full search folds the quiet window into the patrol (night length unchanged, no rest).
 func night_patrol_duration() -> float:
-	return GameConst.NIGHT_PATROL_BASE_SEC + float(Alert.level) * GameConst.NIGHT_PATROL_PER_ALERT_SEC
+	var sec := GameConst.NIGHT_PATROL_BASE_SEC + float(Alert.level) * GameConst.NIGHT_PATROL_PER_ALERT_SEC
+	if Alert.quiet_cancelled():
+		sec += GameConst.NIGHT_QUIET_SEC * Alert.quiet_window_mult()
+	return sec
 
 
 ## Dig / climb / cage breakouts only during night.
@@ -99,9 +103,26 @@ func advance() -> void:
 		Phase.CLOSE:
 			phase = Phase.NIGHT_PATROL
 		Phase.NIGHT_PATROL:
-			phase = Phase.NIGHT_QUIET
+			if Alert.quiet_cancelled():
+				_new_day()
+			else:
+				phase = Phase.NIGHT_QUIET
 		Phase.NIGHT_QUIET:
 			_new_day()
+
+
+func _ready() -> void:
+	Bus.alert_changed.connect(_on_alert_changed)
+
+
+## Reaching full search mid-rest wakes the staff for the rest of the night.
+func _on_alert_changed(_level: int) -> void:
+	if phase != Phase.NIGHT_QUIET or not Alert.quiet_cancelled():
+		return
+	var left := phase_remaining()
+	phase = Phase.NIGHT_PATROL
+	_phase_elapsed = maxf(0.0, night_patrol_duration() - left)
+	Bus.interact_feedback.emit("全园搜查：职员结束歇岗，继续巡逻到天亮")
 
 
 func _new_day() -> void:
@@ -111,8 +132,10 @@ func _new_day() -> void:
 	phase = Phase.OPEN
 
 
-## Seconds until Night-Quiet starts (0 while it is on). Assumes current alert for the night length.
+## Seconds until Night-Quiet starts (0 while it is on; INF when full search cancels it).
 func seconds_until_quiet() -> float:
+	if Alert.quiet_cancelled():
+		return INF
 	match phase:
 		Phase.OPEN:
 			return phase_remaining() + GameConst.CLOSE_PHASE_SEC + night_patrol_duration()

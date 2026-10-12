@@ -3,6 +3,8 @@ extends RefCounted
 ## 加權巡邏點網 + 極簡預約（reserve/release）。單職員也走同一流程。
 
 var points: Array[PatrolPointData] = []
+## Temporary extra points (full search): scored like any other point, heat pinned by the caller.
+var focus_points: Array[PatrolPointData] = []
 ## point_id -> staff get_instance_id()
 var _reserved: Dictionary = {}
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -23,6 +25,32 @@ func add_point(p: PatrolPointData) -> void:
 func clear() -> void:
 	points.clear()
 	_reserved.clear()
+
+
+## Replaces focus points (ids focus_0..n keep their visit history), each with `heat`. Empty clears.
+func set_focus(positions: Array[Vector3], heat: float, dwell_min: float, dwell_max: float) -> void:
+	while focus_points.size() > positions.size():
+		var gone: PatrolPointData = focus_points.pop_back()
+		_reserved.erase(gone.id)
+	for i in positions.size():
+		if i >= focus_points.size():
+			focus_points.append(PatrolPointData.new().configure(StringName("focus_%d" % i), positions[i], 1.0, dwell_min, dwell_max))
+		focus_points[i].position = positions[i]
+		focus_points[i].heat = heat
+
+
+func find(point_id: StringName) -> PatrolPointData:
+	for p in points:
+		if p.id == point_id:
+			return p
+	for p in focus_points:
+		if p.id == point_id:
+			return p
+	return null
+
+
+func is_focus_id(point_id: StringName) -> bool:
+	return String(point_id).begins_with("focus_")
 
 
 func positions() -> Array[Vector3]:
@@ -77,7 +105,8 @@ func pick_next(
 		return null
 	var scores: Array = []
 	var candidates: Array[PatrolPointData] = []
-	for p in points:
+	var all: Array[PatrolPointData] = points + focus_points
+	for p in all:
 		if p.id == current_id:
 			continue
 		if is_reserved_by_other(p.id, staff_id):
@@ -86,7 +115,7 @@ func pick_next(
 		scores.append(PatrolScoreMath.score_point(p, now_sec, from_pos, params, recent_ids, _rng))
 	if candidates.is_empty():
 		## 全被預約時放寬：允許選分最高者（仍跳過當前點）。
-		for p in points:
+		for p in all:
 			if p.id == current_id:
 				continue
 			candidates.append(p)

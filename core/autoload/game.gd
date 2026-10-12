@@ -40,9 +40,12 @@ func _ensure_input_map() -> void:
 	## 放下物品；在施工點旁則存入點位。
 	_bind_key("drop_item", KEY_X)
 	_bind_joy_button("drop_item", JOY_BUTTON_X)
+	## 投掷（有投掷才能者）：石子落点发声引开职员。
+	_bind_key("throw", KEY_T)
+	_bind_joy_button("throw", JOY_BUTTON_DPAD_UP)
 	## Debug-only shortcuts (gated in zoo_world when debug_enabled).
 	_bind_key("debug_rescue_monkey", KEY_R)
-	_bind_key("debug_advance_phase", KEY_T)
+	_bind_key("debug_advance_phase", KEY_N)
 
 
 func _bind_key(action: StringName, primary: Key, secondary: Key = KEY_NONE) -> void:

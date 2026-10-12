@@ -4,3 +4,4 @@
 
 [resource]
 script = ExtResource("1")
+hear_noise_range = 13.0

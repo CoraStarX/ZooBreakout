@@ -17,3 +17,8 @@ extends Resource
 @export var awareness_gain_mult_at_alert_4: float = 1.35
 ## Quiet window scale when Alert >= 4 (< 1 shortens).
 @export var quiet_window_mult_at_alert_4: float = 0.75
+## Full search (max Alert): staff keep patrolling through what would be the quiet window.
+@export var full_search_cancels_quiet: bool = true
+## Full search: patrol heat pinned on route points and the last known animal position (existing heat weight).
+## Must outweigh staleness (seconds since visit; never-visited points ≈ 1e4) to keep the staff there.
+@export var full_search_focus_heat: float = 10000.0

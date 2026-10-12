@@ -56,10 +56,14 @@ func is_full_search() -> bool:
 	return level >= GameConst.MAX_ALERT_LEVEL
 
 
+func quiet_cancelled() -> bool:
+	return is_full_search() and GameConst.alert_params().full_search_cancels_quiet
+
+
 ## Persistent HUD warning for the current tier ("" when none).
 func warning_text() -> String:
 	if is_full_search():
-		return "全园搜查中：外墙施工全部中止"
+		return "全园搜查中：外墙施工全部中止%s" % ("、今晚不歇岗" if quiet_cancelled() else "")
 	if level == GameConst.MAX_ALERT_LEVEL - 1:
 		return "再升一档将全园搜查"
 	return ""
@@ -71,7 +75,7 @@ func effects_text() -> String:
 	if level >= 2:
 		parts.append("听觉×%.2f" % hearing_mult())
 	if level >= 3:
-		parts.append("施工声×%.1f" % construction_noise_mult())
+		parts.append("施工声听得更远（听距×%.1f）" % construction_noise_mult())
 	if confiscates_ground_items():
 		parts.append("收走地上物品")
 	if level >= 4:
@@ -83,12 +87,14 @@ func effects_text() -> String:
 ## One-line summary of what the tier just reached changes (shown on the way up).
 func tier_change_text() -> String:
 	if is_full_search():
-		return "警戒 %d：全园搜查 — 外墙施工被迫中止，进行中的施工已取消" % level
+		return "警戒 %d：全园搜查 — 外墙施工被迫中止，进行中的施工已取消；%s巡逻集中到施工点和最后见到你的地方" % [
+			level, "职员不歇岗，" if quiet_cancelled() else ""
+		]
 	match level:
 		2:
-			return "警戒 2：职员听觉变灵（×%.2f）" % hearing_mult()
+			return "警戒 2：职员听得更远（听距×%.2f）" % hearing_mult()
 		3:
-			return "警戒 3：施工声传得更远（×%.1f），职员会收走看到的地上物品" % construction_noise_mult()
+			return "警戒 3：施工声听得更远（职员听距×%.1f），职员会收走看到的地上物品" % construction_noise_mult()
 		4:
 			return "警戒 4：职员更快起疑，歇岗缩短 — 再升一档将全园搜查！"
 	return ""

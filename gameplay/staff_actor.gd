@@ -99,6 +99,14 @@ var _now_sec: float = 0.0
 var _use_network: bool = false
 var _debug_draw: StaffDebugDraw
 var _head_icon: Label3D
+## Process frame of the last non-footstep noise this staff heard (callers check "did anyone hear it").
+var last_heard_frame: int = -1
+const STUCK_CHECK_SEC := 1.5
+const STUCK_MIN_MOVE := 0.3
+var _stuck_t: float = 0.0
+var _stuck_from: Vector3 = Vector3.ZERO
+var _last_seen_pos: Vector3 = Vector3.ZERO
+var _has_last_seen: bool = false
 
 
 func _ready() -> void:
@@ -306,6 +314,7 @@ func _physics_process(delta: float) -> void:
 	_now_sec += delta
 	if patrol_network and _params:
 		patrol_network.tick_heat(delta, _params)
+		_sync_full_search_focus()
 	if _recovery_left > 0.0:
 		_recovery_left -= delta
 		velocity = Vector3.ZERO
@@ -640,6 +649,32 @@ func _try_discover_traces() -> void:
 			awareness = maxf(awareness, _params.investigate_threshold if _params else 48.0)
 
 
+## Full search: unfinished route points (at their staff stance) and the last known animal position
+## become patrol focus points; cleared below max Alert.
+func _sync_full_search_focus() -> void:
+	if _last_known_valid:
+		_last_seen_pos = _last_known
+		_has_last_seen = true
+	if not Alert.is_full_search():
+		if not patrol_network.focus_points.is_empty():
+			patrol_network.set_focus([], 0.0, 0.0, 0.0)
+		return
+	var spots: Array[Vector3] = []
+	for n in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var it := n as Interactable
+		if it and it.tiers > 1 and not it._done:
+			var p := it.global_position + it.guard_offset
+			spots.append(Vector3(p.x, global_position.y, p.z))
+	if _has_last_seen:
+		spots.append(Vector3(_last_seen_pos.x, global_position.y, _last_seen_pos.z))
+	patrol_network.set_focus(spots, GameConst.alert_params().full_search_focus_heat, _params.dwell_sec_min, _params.dwell_sec_max)
+
+
+## Patrol target point id is a full-search focus point (tests / debug).
+func is_heading_to_focus() -> bool:
+	return patrol_network != null and patrol_network.is_focus_id(_patrol_point_id)
+
+
 ## Alert 3+: dropped items the staff can see go to the office (stash in route points is left alone).
 func _try_confiscate_ground_items() -> void:
 	if not Alert.confiscates_ground_items() or _params == null:
@@ -706,6 +741,8 @@ func _on_bus_noise(position: Vector3, loudness: float, kind: StringName) -> void
 	var falloff := 1.0 - dist / max_r
 	## 腳步：只抬 awareness，近距才起疑；叫嚷／硬闖才強制調查。
 	## 噪音本身永不 Alert.bump — 只改變職員行為。
+	if kind != &"footstep":
+		last_heard_frame = Engine.get_process_frames()
 	if kind == &"footstep":
 		awareness = minf(
 			_params.awareness_max,
@@ -799,8 +836,19 @@ func _patrol_network(delta: float) -> void:
 		_pick_next_patrol_point(false)
 	_motor.speed = _patrol_move_speed()
 	velocity = _motor.tick_velocity(global_position)
-	if _motor.arrived(global_position):
+	if _motor.arrived(global_position) or _patrol_blocked(delta):
 		_arrive_network_point()
+
+
+## Straight-line motor: walking into a wall for a while counts as arriving (look around there).
+func _patrol_blocked(delta: float) -> bool:
+	_stuck_t += delta
+	if _stuck_t < STUCK_CHECK_SEC:
+		return false
+	var moved := global_position.distance_to(_stuck_from)
+	_stuck_t = 0.0
+	_stuck_from = global_position
+	return moved < STUCK_MIN_MOVE
 
 
 func _pick_next_patrol_point(snap_pos: bool) -> void:
@@ -825,6 +873,8 @@ func _pick_next_patrol_point(snap_pos: bool) -> void:
 
 func _arrive_network_point() -> void:
 	velocity = Vector3.ZERO
+	_stuck_t = 0.0
+	_stuck_from = global_position
 	var dwell_lo := _params.dwell_sec_min if _params else 3.0
 	var dwell_hi := _params.dwell_sec_max if _params else 8.0
 	var rng := RandomNumberGenerator.new()
@@ -833,10 +883,9 @@ func _arrive_network_point() -> void:
 	_reset_look_around()
 	_dwell_face0 = _facing if _facing.length() > 0.1 else Vector3(0, 0, 1)
 	if patrol_network:
-		for p in patrol_network.points:
-			if p.id == _patrol_point_id:
-				p.last_visited = _now_sec
-				break
+		var visited := patrol_network.find(_patrol_point_id)
+		if visited:
+			visited.last_visited = _now_sec
 	_recent_point_ids.append(_patrol_point_id)
 	while _recent_point_ids.size() > 3:
 		_recent_point_ids.pop_front()

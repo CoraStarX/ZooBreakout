@@ -3,7 +3,7 @@ extends CanvasLayer
 
 @onready var label: Label = $Panel/Label
 
-var _last_msg: String = "WASD相对相机 · E交互 · G叫嚷 · Tab换控 · F/H跟随待命 · V标记 · X放下/存料 · 夜间破障 · 躲开红扇形视线"
+var _last_msg: String = "WASD相对相机 · E交互 · G叫嚷 · T投掷 · Tab换控 · F/H跟随待命 · V标记 · X放下/存料 · 夜间破障 · 躲开红扇形视线"
 var _staff_ai_check: CheckButton
 
 
@@ -114,7 +114,9 @@ func _refresh() -> void:
 	if world and world.get("session") is RunSession:
 		var sess: RunSession = world.get("session")
 		intel_line = sess.intel_line()
-		if sess.has_intel(IntelIds.REST_TIME):
+		if Alert.quiet_cancelled():
+			rest_text = "歇岗:取消(全园搜查)"
+		elif sess.has_intel(IntelIds.REST_TIME):
 			rest_text = "歇岗中" if Clock.phase == Clock.Phase.NIGHT_QUIET else "距歇岗 %.0fs" % Clock.seconds_until_quiet()
 	var route_line := ""
 	var prep_line := ""

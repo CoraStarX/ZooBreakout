@@ -32,6 +32,10 @@ var _who_l: Label
 var _item_rows: Dictionary = {}
 ## What X does right now (store at route point / drop on ground).
 var _drop_l: Label
+## What E does at the point in front (Soft/Hard, payment, traces left).
+var _use_l: Label
+## Shouts left today · throw ready / cooldown.
+var _voice_l: Label
 var _alert_pips: Array[ColorRect] = []
 var _alert_fx_l: Label
 var _alert_warn_l: Label
@@ -150,10 +154,16 @@ func _build() -> void:
 		row.add_child(l)
 		inv.add_child(row)
 		_item_rows[id] = {"row": row, "label": l}
+	_use_l = UIKit.label("", 14, UIKit.ACCENT)
+	_use_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_use_l.custom_minimum_size = Vector2(230, 0)
+	rv.add_child(_use_l)
 	_drop_l = UIKit.label("", 14, UIKit.ACCENT)
 	_drop_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_drop_l.custom_minimum_size = Vector2(230, 0)
 	rv.add_child(_drop_l)
+	_voice_l = UIKit.label("", 13, UIKit.TEXT_DIM)
+	rv.add_child(_voice_l)
 	rv.add_child(UIKit.label("警戒", 13, UIKit.TEXT_DIM))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
@@ -221,7 +231,7 @@ func _build() -> void:
 	hv.add_child(_hint_l)
 
 	## --- key legend (bottom right) ---
-	_keys_l = UIKit.label("WASD 移动 · E 交互 · X 放下/存料 · Tab 换控 · F/H 跟随/待命 · Esc 暂停", 13, UIKit.TEXT_DIM)
+	_keys_l = UIKit.label("WASD 移动 · E 交互 · X 放下/存料 · G 叫嚷 · T 投掷 · Tab 换控 · F/H 跟随/待命 · Esc 暂停", 13, UIKit.TEXT_DIM)
 	_keys_l.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_keys_l.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_keys_l.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -278,7 +288,9 @@ func _refresh() -> void:
 	_phase_chip.color = PHASE_COLORS.get(Clock.phase, Color.WHITE)
 	_time_l.text = "剩 %d 秒" % int(ceil(Clock.phase_remaining()))
 	_rest_l.text = "歇岗：未知"
-	if session and session.has_intel(IntelIds.REST_TIME):
+	if Alert.quiet_cancelled():
+		_rest_l.text = "歇岗：取消（全园搜查）"
+	elif session and session.has_intel(IntelIds.REST_TIME):
 		_rest_l.text = "歇岗中" if Clock.phase == Clock.Phase.NIGHT_QUIET else "距歇岗 %d 秒" % int(Clock.seconds_until_quiet())
 
 	if world and world.has_method("current_objective"):
@@ -300,6 +312,9 @@ func _refresh() -> void:
 			(entry["label"] as Label).modulate = Color.WHITE if n > 0 else Color(1, 1, 1, 0.4)
 		_drop_l.text = me.drop_preview() if me.is_controlled else ""
 		_drop_l.visible = _drop_l.text != ""
+		_use_l.text = me.interact_preview() if me.is_controlled else ""
+		_use_l.visible = _use_l.text != ""
+		_voice_l.text = me.noise_tools_line()
 	for i in _alert_pips.size():
 		_alert_pips[i].color = Color(0.9, 0.25, 0.2) if i < Alert.level else Color(0.3, 0.3, 0.3)
 	_alert_fx_l.text = Alert.effects_text()

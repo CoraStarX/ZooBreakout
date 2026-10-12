@@ -20,9 +20,12 @@ var _captures_today: int = 0
 var _breach_at_day_start: float = 0.0
 var _rescued_today: int = 0
 var outcome_reason: String = ""
+## Shouts used today by the whole party (DayCycleParams.shout_daily_limit).
+var shouts_used_today: int = 0
 
 
 func _ready() -> void:
+	Bus.day_changed.connect(func(_d: int) -> void: shouts_used_today = 0)
 	Bus.day_changed.connect(_on_day_changed)
 	Bus.captured.connect(func(_a: Node3D) -> void: _captures_today += 1)
 	Bus.animal_rescued.connect(func(_id: StringName) -> void: _rescued_today += 1)
@@ -51,6 +54,10 @@ func _on_day_changed(new_day: int) -> void:
 		return
 	lines.append("距封园检修还剩 %d 天" % (GameConst.DEADLINE_DAY - ended))
 	Bus.day_summary.emit(ended, lines)
+
+
+func shouts_left() -> int:
+	return maxi(0, GameConst.day_cycle().shout_daily_limit - shouts_used_today)
 
 
 func try_lose_deadline() -> bool:

@@ -12,6 +12,8 @@ const _KitIds := preload("res://content/kit_ids.gd")
 @export var yield_poor: int = 1
 @export var hint: String = ""
 @export var use_range: float = 1.85
+## Gather B (risky point): time / noise / trace from ActionCostTable.gather_risky_*. No P0 point uses it yet.
+@export var risky: bool = false
 
 var stocked: bool = true
 var _busy: bool = false
@@ -73,6 +75,8 @@ func _refresh() -> void:
 			line = "%s\n[%s·%s · %s ×%d / 无则 ×%d 且慢" % [
 				display_name, _KitIds.display_name(material), hint, CapabilityIds.to_label(required), yield_rich, yield_poor
 			]
+		if risky:
+			line += " · 有风险"
 		_label.set_info(line + " · E]")
 	else:
 		mat.albedo_color = Color(0.25, 0.25, 0.28)
@@ -96,7 +100,10 @@ func try_use(user: AnimalActor) -> void:
 	var rich := required == CapabilityIds.Id.NONE or user.effective_has_capability(required)
 	var amount := yield_rich if rich else yield_poor
 	amount = mini(amount, user.inventory_free_slots())
-	var wait := GameConst.GATHER_SEC if rich else GameConst.GATHER_POOR_SEC
+	var cost := GameConst.action_cost()
+	var wait := cost.gather_seconds(rich)
+	if risky and rich:
+		wait = cost.gather_risky_sec
 	_busy = true
 	_progress.visible = true
 	if rich:
@@ -124,9 +131,19 @@ func try_use(user: AnimalActor) -> void:
 		parts.append(material)
 	user.give_items(parts)
 	_refresh()
+	if risky:
+		_risky_aftermath(cost)
 	Bus.material_gathered.emit(material, amount)
 	var rich_note := "" if rich else "（没有%s，只拿到一部分）" % CapabilityIds.to_label(required)
 	Bus.interact_feedback.emit("获得 %s ×%d%s — 背包共 %d" % [_KitIds.display_name(material), amount, rich_note, user.item_count(material)])
+
+
+## B points: optional noise (kind `gather`) and trace at the point. Noise never raises Alert by itself.
+func _risky_aftermath(cost: ActionCostTable) -> void:
+	if cost.gather_risky_noise > 0.0 and Clock.phase != Clock.Phase.NIGHT_QUIET:
+		Bus.noise_made.emit(global_position, cost.gather_risky_noise, &"gather")
+	if cost.gather_risky_trace > 0.0:
+		TraceService.spawn_at(get_tree(), global_position, cost.gather_risky_trace, &"gather")
 
 
 func _abort(msg: String) -> void:

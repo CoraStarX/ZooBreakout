@@ -16,7 +16,7 @@
 | F / LB | 队友 Follow |
 | H / RB | 队友 Hold |
 | R | **【Debug 默认关】** 跳过笼门解救（`Game.debug_enabled`） |
-| T | **【Debug 默认关】** 推进时段 |
+| N | **【Debug 默认关】** 推进时段（原 T；T 现为投掷，见 README） |
 
 正式解救路径：打开同伴笼门自动入队（勿依赖 R）。
 

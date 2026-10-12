@@ -30,6 +30,7 @@ var _stuck_phase: int = 0 ## 0 換目標 → 1 回退軌跡 → 2 可傳送
 var _stuck_anchor: Vector3 = Vector3.ZERO
 var _status_label: Label3D
 var _shout_cooldown: float = 0.0
+var _throw_cooldown: float = 0.0
 var _footstep_noise_acc: float = 0.0
 var _fp: CompanionFollowParams
 
@@ -74,6 +75,8 @@ func _physics_process(delta: float) -> void:
 		and not is_confined
 	)
 	var pos_before := global_position
+	if _throw_cooldown > 0.0:
+		_throw_cooldown = maxf(0.0, _throw_cooldown - delta)
 	if is_controlled:
 		_process_controlled()
 	else:
@@ -201,6 +204,8 @@ func _process_controlled() -> void:
 		try_make_noise()
 	if Input.is_action_just_pressed("drop_item"):
 		try_drop()
+	if Input.is_action_just_pressed("throw"):
+		try_throw()
 	## 隊長留下麵包屑供夥伴跟隨。
 	follow_trail.record(global_position, _fp.trail_spacing, _fp.trail_max_points)
 
@@ -212,10 +217,78 @@ func try_make_noise() -> bool:
 	if _shout_cooldown > 0.0:
 		Bus.interact_feedback.emit("还在喘口气…（噪音冷却 %.0fs）" % ceilf(_shout_cooldown))
 		return false
+	var session := _session()
+	if session and session.shouts_left() <= 0:
+		Bus.interact_feedback.emit("嗓子哑了 — 今天叫不出声了（明早恢复，每天 %d 次）" % GameConst.day_cycle().shout_daily_limit)
+		return false
 	_shout_cooldown = GameConst.SHOUT_COOLDOWN_SEC
+	if session:
+		session.shouts_used_today += 1
 	Bus.noise_made.emit(global_position, GameConst.SHOUT_LOUDNESS, &"shout")
-	Bus.interact_feedback.emit("你发出响动想引开职员！")
+	var left_note := "（今天还能叫 %d 次）" % session.shouts_left() if session else ""
+	Bus.interact_feedback.emit("你发出响动想引开职员！%s" % left_note)
 	return true
+
+
+## Throw a pebble ahead: it lands up to throw_range away (short of walls) and the noise comes from there.
+func try_throw() -> bool:
+	if not is_controlled or is_confined:
+		return false
+	if not has_capability(CapabilityIds.Id.THROW):
+		Bus.interact_feedback.emit("%s不会投掷（需要「投掷」才能）" % display_name())
+		return false
+	if _throw_cooldown > 0.0:
+		Bus.interact_feedback.emit("手还酸着…（投掷冷却 %.0fs）" % ceilf(_throw_cooldown))
+		return false
+	var cost := GameConst.action_cost()
+	_throw_cooldown = cost.throw_cooldown_sec
+	var land := throw_landing_point()
+	var parent := get_tree().get_first_node_in_group("zoo_world")
+	ThrownStone.launch(parent if parent else get_parent(), global_position + Vector3(0, 0.6, 0), land, cost.throw_flight_sec, cost.throw_loudness)
+	Bus.interact_feedback.emit("%s丢出一颗石子 — 落点会发出声响" % display_name())
+	return true
+
+
+## Where a throw from here would land (ground level, stopped short of walls).
+func throw_landing_point() -> Vector3:
+	var dir := Vector3(_facing.x, 0.0, _facing.z)
+	if dir.length() < 0.01:
+		dir = Vector3(0, 0, -1)
+	dir = dir.normalized()
+	var reach := GameConst.action_cost().throw_range
+	var from := global_position + Vector3(0, 0.6, 0)
+	var space := get_world_3d().direct_space_state if get_world_3d() else null
+	if space:
+		var q := PhysicsRayQueryParameters3D.create(from, from + dir * reach)
+		q.collision_mask = 1
+		q.exclude = [get_rid()]
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty():
+			reach = maxf(0.5, from.distance_to(hit["position"]) - 0.35)
+	var p := global_position + dir * reach
+	return Vector3(p.x, 0.05, p.z)
+
+
+func throw_cooldown_left() -> float:
+	return _throw_cooldown
+
+
+## HUD line: shouts left today, and throw state when this animal can throw.
+func noise_tools_line() -> String:
+	var session := _session()
+	var line := "G 叫嚷 %d/%d" % [session.shouts_left(), GameConst.day_cycle().shout_daily_limit] if session else "G 叫嚷"
+	if session and session.shouts_left() <= 0:
+		line += "（嗓子哑了）"
+	if has_capability(CapabilityIds.Id.THROW):
+		line += " · T 投掷 %s" % ("就绪" if _throw_cooldown <= 0.0 else "%.0fs" % ceilf(_throw_cooldown))
+	return line
+
+
+func _session() -> RunSession:
+	var world := get_tree().get_first_node_in_group("zoo_world") if is_inside_tree() else null
+	if world and world.get("session") is RunSession:
+		return world.get("session")
+	return null
 
 
 ## 擴充點：奔跑自動產生輕腳步噪音（職員可聽，但不保證調查）。
@@ -716,6 +789,24 @@ func _nearby_stash_point() -> Interactable:
 func _try_interact() -> void:
 	if _interact_area == null:
 		return
+	var best := _interact_target()
+	if best:
+		best.call("try_use", self)
+	else:
+		Bus.interact_feedback.emit("附近没有可交互物（对准黄柱再按 E）")
+
+
+## What E would do on the route point in front, before pressing ("" when not at one).
+func interact_preview() -> String:
+	if is_confined or _interact_area == null:
+		return ""
+	var it := _interact_target() as Interactable
+	if it == null:
+		return ""
+	return it.cost_preview(self)
+
+
+func _interact_target() -> Node:
 	var best: Node = null
 	var best_score := -INF
 	for area in _interact_area.get_overlapping_areas():
@@ -739,7 +830,4 @@ func _try_interact() -> void:
 		if score > best_score:
 			best_score = score
 			best = target
-	if best:
-		best.call("try_use", self)
-	else:
-		Bus.interact_feedback.emit("附近没有可交互物（对准黄柱再按 E）")
+	return best

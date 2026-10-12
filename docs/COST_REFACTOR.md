@@ -92,8 +92,8 @@
 - 搜集点每天补货，所以跨天累计的原料没有上限，「材料不够做双线」只能靠单日产量、背包容量（浣熊 4 + 猴 2 = 6 格；刀 2b 存料后不再是瓶颈）或套件唯一性来卡。
 - 只做一条线、走不冒险的路（金属 2）时：用套件第 1 天就够；不用套件需要 2 天（金属 2/天）。
 | **3（C）** | Alert 后果表；头上 ?/!；Alert4 预警文案；Alert5 中止施工原因；`p2_alert_tiers` | 升档可读性 | ✅ |
-| **4** | 叫嚷每日 4；投掷 T（冷却 8s、无消耗石子）；Gather B 接口预留 | 声东击西 |
-| **5** | `p2_full_loop` 预算断言；全量 `run_tests.sh` | 闭环 |
+| **4** | 叫嚷每日 4；投掷 T（冷却 8s、无消耗石子）；Gather B 接口预留 | 声东击西 | ✅ |
+| **5** | `p2_full_loop` 预算断言；全量 `run_tests.sh`；**职员实际巡逻看到地上物品而收缴的整合测试**（刀 3 只测了判定函式） | 闭环 |
 
 ### 刀 3 进度笔记
 
@@ -106,6 +106,24 @@
 - 升档时一行后果提示；HUD 警戒格下列出当前生效后果
 - 职员头上 `HeadIcon`：起疑 `?`（黄）/ 调查·搜索 `!`（橙）/ 追捕 `!!`（红）；精确 awareness 仍只在 F3
 - 门禁 `p2_alert_tiers`（34 项）：正式开局、真实搜集、无临时能力；档位直接设定（升档来源已由痕迹/被抓测试覆盖）
+
+### 刀 3 后补修（刀 4 开头，2026-10-12）
+
+- `hear_noise_range` 22 → **13**（`default_staff_ai_params.tres`）。现图实测：挖洞点叫嚷到广场巡逻点 12.1m，警戒 1 听不到（11.05m）、警戒 2 听到（13.8m）；攀爬点强行施工到宽环巡逻点 23.2m，警戒 2 听不到（21.9m）、警戒 3 听到（28.5m）
+- Alert 5 最小版全园搜查：`AlertParams.full_search_cancels_quiet`（歇岗并入夜巡，夜长不变；歇岗中升到 5 立刻回夜巡）、`full_search_focus_heat`（焦点＝未完工施工点站位 + 最后已知位置，`PatrolNetwork.focus_points`，沿用 heat 加权，不新增状态）；HUD 歇岗显示「取消（全园搜查）」
+- 职员直线移动撞墙 1.5 秒视同抵达（全园搜查焦点在墙边，避免卡死）
+- 强行后「职员正在赶来」改为至少一名职员实际听到（`StaffActor.last_heard_frame`）才显示；否则「附近没有职员听见（痕迹仍会留下）」
+- 文案「施工声×1.3」→「施工声听得更远（听距×1.3）」
+- 施工前预览 `Interactable.cost_preview()` / `AnimalActor.interact_preview()`：HUD 显示 Soft/强行、扣料/缺料、「会留下痕迹 ×1」（`TRACES_PER_HARD`）
+- `p2_alert_tiers` 扩为 49 项
+
+### 刀 4 进度笔记
+
+- 叫嚷：`RunSession.shouts_used_today`（全队共用，天亮归零），上限 `DayCycleParams.shout_daily_limit`=4；冷却中按下不扣次数；用尽「嗓子哑了」
+- 投掷：`CapabilityIds.THROW`（猴）；`AnimalActor.try_throw()` → `ThrownStone`（0.45s 弧线，落地发 `throw` 噪音）；射程 7m，撞墙落在墙内侧；冷却 8s；参数 `ActionCostTable.throw_*`
+- Gather B 接口：`GatherPoint.risky` + `ActionCostTable.gather_risky_sec/noise/trace`；现有点都不是 B 类，默认值不加风险
+- 键位：T＝投掷（手柄上十字键）；Debug 推进时段改 **N**；README / 暂停菜单 / HUD 键位行同步
+- 门禁 `p2_noise_tools`（28 项）：正式开局、无临时能力
 
 ## R6 前置清单
 

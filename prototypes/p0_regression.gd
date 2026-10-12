@@ -161,8 +161,8 @@ func _reg_hard_investigate() -> void:
 	staff.state = StaffActor.State.PATROL
 	var actor := _party.controlled()
 	actor.set_confined(false)
-	# Far from staff: hard noise should investigate, not instant catch
-	staff.global_position = Vector3(8, 0.05, 8)
+	# Within earshot (hear_noise_range 13) but well beyond instant-catch range: investigate, not catch
+	staff.global_position = Vector3(1, 0.05, 1)
 	actor.global_position = Vector3(-5, 0.05, -5)
 	var dig := _find_interactable("挖洞")
 	if dig == null:
