@@ -20,7 +20,15 @@
 | 刀 | 内容 | 人手玩点 |
 |----|------|----------|
 | **0** | 文档：DESIGN 支柱与连带条目；本文件 | — ✅ |
-| **1** | Params 骨架 + `GameConst` 转发；先对齐旧值全绿，再改 Open→**180s**（两步提交） | 评估 Open 180 |
+| **1** | Params 骨架 + `GameConst` 转发；先对齐旧值全绿，再改 Open→**180s**（两步提交） | 评估 Open 180 | ✅ |
+
+### 刀 1 进度笔记
+
+- 提交 `8627119`：Params + 转发，Open **75**（可回退至此再改 `.tres`）
+- 提交（Open 180）：仅改 `day_cycle_params` 默认 / `.tres`
+- **已转发**（唯一数据源 = `.tres`）：`OPEN/CLOSE/NIGHT_*`、`DEADLINE_DAY`、`MAX_ALERT_LEVEL`、`BASE_HEARING_RADIUS`、`HEARING_PER_ALERT`、`SOFT/HARD_INTERACT_SEC`、`GATHER_*`、`SHOUT_*`、`ROUTE_TIERS`、`KIT_TIERS`、`TIER_SOFT/HARD_SEC`
+- **仍待删的 GameConst 本地 const**（刀 2+ 再迁或保留）：`HARD_INSTANT_CATCH_RANGE`、`GRAVITY`、`DETENTION_SEC`、`REINFORCE_*`、`OBSERVE_*`、`CART_*`、`STAFF_DWELL_SEC`、`FOOTSTEP_*`、`RUN_SPEED_FOR_FOOTSTEP_NOISE`、`STAFF_VISION/SPEED_PER_DAY`、`STAFF_SCALE_MAX_DAYS`
+- Alert 后果倍率已在 `AlertParams` 占位（×1.3 等），**玩法接线在刀 3**
 | **2（A）** | 夜间施工 Soft/Hard；`allow_hard`；痕迹（单次结算）；背包容量（浣熊 4 / 猴 2）+ 重物（移速 −40%、禁攀爬）；`p2_action_cost` | Soft/Hard/背包体感 |
 | **3（C）** | Alert 后果表；头上 ?/!；Alert4 预警文案；Alert5 中止施工原因；`p2_alert_tiers` | 升档可读性 |
 | **4** | 叫嚷每日 4；投掷 T（冷却 8s、无消耗石子）；Gather B 接口预留 | 声东击西 |

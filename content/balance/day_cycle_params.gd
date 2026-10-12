@@ -3,7 +3,7 @@ extends Resource
 ## Open / Close / night lengths and run deadline. Tunable without code changes.
 
 
-@export var open_phase_sec: float = 75.0
+@export var open_phase_sec: float = 180.0
 @export var close_phase_sec: float = 15.0
 @export var night_patrol_base_sec: float = 28.0
 @export var night_patrol_per_alert_sec: float = 8.0
