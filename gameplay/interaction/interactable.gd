@@ -30,6 +30,8 @@ signal tier_completed(done: int, total: int)
 @export var use_range: float = 1.85
 ## When false, interactions without the required verb are refused (no Hard). Default true.
 @export var allow_hard: bool = true
+## Other verbs that also count as Soft here (e.g. cage: climb out from inside OR pick the lock from outside).
+@export var alt_required: Array[CapabilityIds.Id] = []
 ## Cage door reinforced after a capture (until dawn): costs a part, or double time.
 var reinforced: bool = false
 ## World-space offset from the interact point for staff door-guard stance (no species branching).
@@ -111,10 +113,35 @@ func _hard_allowed_now() -> bool:
 	return true
 
 
+func _accepted_caps() -> Array[CapabilityIds.Id]:
+	var out: Array[CapabilityIds.Id] = [required]
+	for c in alt_required:
+		if c != CapabilityIds.Id.NONE and not out.has(c):
+			out.append(c)
+	return out
+
+
+func _cap_text() -> String:
+	var parts := PackedStringArray()
+	for c in _accepted_caps():
+		parts.append(CapabilityIds.to_label(c))
+	return " 或 ".join(parts)
+
+
+## ignore_heavy = true: has the talent at all; false: can use it right now (heavy cargo blocks climb).
+func _qualifies(user: AnimalActor, ignore_heavy: bool) -> bool:
+	if required == CapabilityIds.Id.NONE:
+		return true
+	for c in _accepted_caps():
+		if (user.has_capability(c) if ignore_heavy else user.effective_has_capability(c)):
+			return true
+	return false
+
+
 func _refresh_label() -> void:
 	if _label == null:
 		return
-	var cap := CapabilityIds.to_label(required)
+	var cap := _cap_text()
 	var line := display_name
 	if required != CapabilityIds.Id.NONE:
 		if _hard_allowed_now():
@@ -147,15 +174,14 @@ func try_use(user: AnimalActor) -> void:
 			])
 			return
 	## After hypothetical pay, climb Soft must not be blocked by metal that is about to be spent.
-	var soft := required == CapabilityIds.Id.NONE or user.has_capability(required)
-	if soft and required == CapabilityIds.Id.CLIMB and user.is_carrying_heavy():
-		## One-shot climb gates (cage): refuse while heavy. Construction: metal in tier_cost is paid up-front below.
-		if tiers <= 1:
-			Bus.interact_feedback.emit("%s：负重（金属）无法攀爬 — 先卸下或用掉重物" % display_name)
-			return
+	var soft := _qualifies(user, true)
+	## One-shot gates: heavy cargo blocks climb right now. Construction pays metal up-front below.
+	if soft and tiers <= 1 and not _qualifies(user, false):
+		Bus.interact_feedback.emit("%s：负重（金属）无法攀爬 — 先卸下或用掉重物" % display_name)
+		return
 	if not soft and not _hard_allowed_now():
 		var why := "最后一档须具备才能，禁止强行" if (tiers > 1 and tier_done >= tiers - 1) else "此处禁止强行"
-		Bus.interact_feedback.emit("%s：%s（需要 %s）" % [display_name, why, CapabilityIds.to_label(required)])
+		Bus.interact_feedback.emit("%s：%s（需要 %s）" % [display_name, why, _cap_text()])
 		return
 	if opens_path and requires_night and not Clock.allows_escape_actions():
 		## Cage doors may be opened by day so animals can go out gathering; routes may not.
@@ -190,7 +216,7 @@ func try_use(user: AnimalActor) -> void:
 		else:
 			wait *= GameConst.REINFORCE_TIME_MULT
 			Bus.interact_feedback.emit("笼门已加固且没有原料 — 耗时 ×%.0f" % GameConst.REINFORCE_TIME_MULT)
-	var label := CapabilityIds.to_label(required)
+	var label := _cap_text()
 	var step := "（第 %d/%d 档）" % [tier_done + 1, tiers] if tiers > 1 else ""
 	if soft:
 		Bus.interact_feedback.emit("使用%s：%s%s（稳）" % [label if required != CapabilityIds.Id.NONE else "通用", display_name, step])

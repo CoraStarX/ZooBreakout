@@ -70,6 +70,17 @@ func _ready() -> void:
 	## Restore raccoon def from file.
 	raccoon.def = load("res://content/animals/raccoon.tres") as AnimalDef
 
+	## Monkey cage: climb (inside) or dexterity (outside); a verb-less animal is refused.
+	var mdoor: Interactable = geo.cage_doors[&"monkey"]
+	_check(mdoor._qualifies(raccoon, true), "浣熊（巧手）可 Soft 开猴笼 — 浣熊开局能解救")
+	_check(mdoor._qualifies(monkey, true), "猴（攀爬）可 Soft 翻出猴笼")
+	var nobody := raccoon.def.duplicate(true) as AnimalDef
+	nobody.capabilities.clear()
+	var real_def := raccoon.def
+	raccoon.def = nobody
+	_check(not mdoor._qualifies(raccoon, true) and not mdoor.allow_hard, "无才能者开猴笼被拒")
+	raccoon.def = real_def
+
 	## Noise with no staff nearby must not raise Alert.
 	Alert.level = 0
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)

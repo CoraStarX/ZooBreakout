@@ -136,12 +136,7 @@ func _beat_rescue_companion() -> void:
 	if monkey_door == null:
 		_find("P0", "[流程] 无猴笼门")
 		return
-	## 猴笼认攀爬且禁止强行；浣熊临时赋予攀爬表示「有攀栏才能的同伴解救」。
-	var climber := actor.def.duplicate(true) as AnimalDef
-	climber.capabilities.append(CapabilityIds.Id.CLIMB)
-	actor.def = climber
 	await _use_at(actor, monkey_door, monkey_door.global_position + Vector3(-1.1, 0, 0))
-	actor.def = load("res://content/animals/raccoon.tres") as AnimalDef
 	var d_staff := actor.global_position.distance_to(_staff.global_position)
 	_note("解救时距职员 %.1fm" % d_staff)
 	if _party.party().size() >= 2:
