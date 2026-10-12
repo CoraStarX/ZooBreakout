@@ -98,6 +98,7 @@ var _recent_point_ids: Array[StringName] = []
 var _now_sec: float = 0.0
 var _use_network: bool = false
 var _debug_draw: StaffDebugDraw
+var _head_icon: Label3D
 
 
 func _ready() -> void:
@@ -309,6 +310,7 @@ func _physics_process(delta: float) -> void:
 		_recovery_left -= delta
 		velocity = Vector3.ZERO
 		_set_vision_visible(false)
+		_update_head_icon()
 		move_and_slide()
 		return
 
@@ -317,6 +319,7 @@ func _physics_process(delta: float) -> void:
 		_clear_combat_memory()
 		velocity = Vector3.ZERO
 		_set_vision_visible(false)
+		_update_head_icon()
 		return
 	_set_vision_visible(state != State.REST)
 
@@ -343,7 +346,9 @@ func _physics_process(delta: float) -> void:
 		_last_known_valid = true
 		_pending_noise = false
 
-	awareness = StaffAwarenessMath.tick(awareness, delta, snap.visibility_mult, _params, spike)
+	_try_confiscate_ground_items()
+	var gain := Alert.awareness_gain_mult()
+	awareness = StaffAwarenessMath.tick(awareness, delta, snap.visibility_mult * gain, _params, spike * gain)
 	_tick_state(delta, snap)
 	move_and_slide()
 	if _dwell_left <= 0.0 and velocity.length() > 0.1:
@@ -359,7 +364,9 @@ func _sense_now():
 		global_position,
 		_facing,
 		[get_rid()],
-		get_tree().get_nodes_in_group("animals")
+		get_tree().get_nodes_in_group("animals"),
+		[],
+		Alert.hearing_mult()
 	)
 
 
@@ -633,6 +640,56 @@ func _try_discover_traces() -> void:
 			awareness = maxf(awareness, _params.investigate_threshold if _params else 48.0)
 
 
+## Alert 3+: dropped items the staff can see go to the office (stash in route points is left alone).
+func _try_confiscate_ground_items() -> void:
+	if not Alert.confiscates_ground_items() or _params == null:
+		return
+	var space := get_world_3d().direct_space_state if get_world_3d() else null
+	for node in get_tree().get_nodes_in_group(GroundItem.GROUP):
+		var item := node as GroundItem
+		if item == null or not is_instance_valid(item):
+			continue
+		var pos := item.global_position
+		if not StaffSense.in_vision_cone(global_position, _facing, pos, _params.vision_range, _params.vision_angle_deg):
+			continue
+		if not StaffSense.has_line_of_sight(space, global_position, pos, [get_rid()]):
+			continue
+		var taken: Array[StringName] = [item.item_id]
+		OfficeStorage.deposit(taken)
+		item.remove_from_group(GroundItem.GROUP)
+		item.queue_free()
+		Bus.interact_feedback.emit("职员收走了地上的%s（警戒 %d：地面物品收缴，可去办公室夺回）" % [
+			KitIds.display_name(taken[0]), Alert.level
+		])
+
+
+## Head icon tiers: ? suspicious · ! investigating/searching · !! chasing. Exact awareness only on F3.
+func head_icon() -> String:
+	match state:
+		State.SUSPICIOUS:
+			return "?"
+		State.INVESTIGATE, State.SEARCH:
+			return "!"
+		State.CHASE:
+			return "!!"
+	return ""
+
+
+func _update_head_icon() -> void:
+	if _head_icon == null:
+		return
+	var icon := head_icon()
+	_head_icon.text = icon
+	_head_icon.visible = icon != ""
+	match icon:
+		"?":
+			_head_icon.modulate = Color(1.0, 0.9, 0.3)
+		"!":
+			_head_icon.modulate = Color(1.0, 0.55, 0.15)
+		_:
+			_head_icon.modulate = Color(1.0, 0.2, 0.15)
+
+
 func _on_bus_noise(position: Vector3, loudness: float, kind: StringName) -> void:
 	if Clock.phase == Clock.Phase.NIGHT_QUIET:
 		return
@@ -640,7 +697,9 @@ func _on_bus_noise(position: Vector3, loudness: float, kind: StringName) -> void
 		return
 	if _params == null:
 		return
-	var max_r := _params.hear_noise_range * clampf(loudness, 0.15, 1.35)
+	var max_r := _params.hear_noise_range * clampf(loudness, 0.15, 1.35) * Alert.hearing_mult()
+	if kind == &"construction":
+		max_r *= Alert.construction_noise_mult()
 	var dist := global_position.distance_to(position)
 	if dist > max_r:
 		return
@@ -650,9 +709,9 @@ func _on_bus_noise(position: Vector3, loudness: float, kind: StringName) -> void
 	if kind == &"footstep":
 		awareness = minf(
 			_params.awareness_max,
-			awareness + _params.hearing_awareness_spike * falloff * 0.4
+			awareness + _params.hearing_awareness_spike * falloff * 0.4 * Alert.awareness_gain_mult()
 		)
-		if dist <= _params.hear_walk_range * 1.6 and state == State.WORK:
+		if dist <= _params.hear_walk_range * Alert.hearing_mult() * 1.6 and state == State.WORK:
 			state = State.SUSPICIOUS
 			_last_known = position
 			_last_known_valid = true
@@ -1018,6 +1077,15 @@ func _ensure_visual() -> void:
 	_vision_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_vision_mesh.material_override = _vision_mat
 	add_child(_vision_mesh)
+	_head_icon = Label3D.new()
+	_head_icon.name = "HeadIcon"
+	_head_icon.position = Vector3(0, 1.35, 0)
+	_head_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_head_icon.no_depth_test = true
+	_head_icon.font_size = 72
+	_head_icon.outline_size = 14
+	_head_icon.visible = false
+	add_child(_head_icon)
 
 
 func _build_vision_wedge_mesh() -> ArrayMesh:
@@ -1038,6 +1106,7 @@ func _build_vision_wedge_mesh() -> ArrayMesh:
 
 
 func _update_vision_mesh() -> void:
+	_update_head_icon()
 	if _vision_mesh == null:
 		return
 	## 視錐嚴格跟 _facing（日後精靈也只讀此來源）。

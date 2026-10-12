@@ -82,9 +82,14 @@ func _phase_duration() -> float:
 		Phase.NIGHT_PATROL:
 			return night_patrol_duration()
 		Phase.NIGHT_QUIET:
-			return GameConst.NIGHT_QUIET_SEC
+			return quiet_duration()
 		_:
 			return 10.0
+
+
+## Safe window; Alert 4+ shortens it.
+func quiet_duration() -> float:
+	return GameConst.NIGHT_QUIET_SEC * Alert.quiet_window_mult()
 
 
 func advance() -> void:

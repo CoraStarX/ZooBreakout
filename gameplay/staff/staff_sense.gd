@@ -55,7 +55,8 @@ static func scan(
 	facing: Vector3,
 	exclude_rids: Array,
 	animal_nodes: Array,
-	extra_mults: Array = []
+	extra_mults: Array = [],
+	hear_mult: float = 1.0
 ) -> Snapshot:
 	var best := Snapshot.new()
 	if params == null:
@@ -72,7 +73,7 @@ static func scan(
 		to.y = 0.0
 		var dist := to.length()
 		var speed := Vector3(animal.velocity.x, 0.0, animal.velocity.z).length()
-		var heard := dist <= params.hear_walk_range and speed > params.still_speed_threshold
+		var heard := dist <= params.hear_walk_range * hear_mult and speed > params.still_speed_threshold
 		var in_cone := in_vision_cone(origin, facing, pos, params.vision_range, params.vision_angle_deg)
 		var los := false
 		if in_cone:

@@ -190,6 +190,9 @@ func _refresh_label() -> void:
 func try_use(user: AnimalActor) -> void:
 	if _done or _busy:
 		return
+	if tiers > 1 and Alert.is_full_search():
+		Bus.interact_feedback.emit("%s：全园搜查中（警戒 %d）— 外墙施工全部中止，等警戒降下来" % [display_name, Alert.level])
+		return
 	## Tiered work: plan payment first (a carried kit is spent up-front, so it does not block climb Soft).
 	var pay := &""
 	if tiers > 1:
@@ -292,6 +295,9 @@ func _channel(user: AnimalActor, wait: float) -> bool:
 			return false
 		if user.global_position.distance_to(global_position) > use_range:
 			_cancel_use("离开范围，交互取消")
+			return false
+		if tiers > 1 and Alert.is_full_search():
+			_cancel_use("警戒升至 %d，全园搜查 — %s 施工被迫中止" % [Alert.level, display_name])
 			return false
 		elapsed += get_process_delta_time()
 		if _progress_label:
@@ -446,7 +452,9 @@ func _emit_noise(amount: float, user: AnimalActor) -> bool:
 		Bus.interact_feedback.emit("噪音很大，但夜巡已歇岗…")
 		return false
 	## 統一走 Bus.noise_made；職員自行按聽距判定（不直接點名呼叫）。
-	Bus.noise_made.emit(user.global_position, clampf(amount, 0.1, 1.5), &"interact_hard")
+	## Route work is its own kind so staff can scale how far it carries (Alert 3+).
+	var kind := &"construction" if tiers > 1 else &"interact_hard"
+	Bus.noise_made.emit(user.global_position, clampf(amount, 0.1, 1.5), kind)
 	var instant := false
 	for s in get_tree().get_nodes_in_group("staff"):
 		if s is Node3D:

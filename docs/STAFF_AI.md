@@ -87,8 +87,8 @@ awareness 带 + 流程 ──► 状态 ──► StaffMotor.move_to / 巡逻点
 
 - 玩家噪音经 `Bus.noise_made`；**无员工在场时噪音不得升 Alert**（门禁断言）。
 - 施工 Hard 留**痕迹**；员工发现痕迹 → `Alert.bump`（每条痕迹只结算一次）。
-- Alert 档对员工：听距（≥2）、awareness 加速（≥4）、Alert5 全园搜查姿态；施工侧噪音倍率（≥3，起点×1.3）见 `AlertParams`。
-- **玩家可读**：员工头上三阶图标（起疑 `?` → 调查 `!` → 追击）；精确 `awareness` 仅 F3。
+- Alert 档对员工：听距×1.25（≥2）、对 kind=`construction` 噪音听距再×1.3（≥3）、收缴视野内 `ground_items`（≥3）、awareness 上升×1.35（≥4）；Alert5 目前只中止施工，员工行为未另做「全园搜查」姿态。数值见 `AlertParams`，经 `Alert` 查询。
+- **玩家可读**：员工头上 `HeadIcon`（起疑 `?` → 调查/搜索 `!` → 追捕 `!!`）；精确 `awareness` 仅 F3。门禁 `p2_alert_tiers`。
 - **投掷**（本轮）：有 `THROW` 者键 T，冷却 8s，石子表现、无拾取系统；落地噪音 kind=`throw` 引开。
 
 ## 后续建议（本阶段刻意不做）

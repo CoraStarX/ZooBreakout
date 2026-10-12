@@ -28,7 +28,7 @@
 - 提交（Open 180）：仅改 `day_cycle_params` 默认 / `.tres`
 - **已转发**（唯一数据源 = `.tres`）：`OPEN/CLOSE/NIGHT_*`、`DEADLINE_DAY`、`MAX_ALERT_LEVEL`、`BASE_HEARING_RADIUS`、`HEARING_PER_ALERT`、`SOFT/HARD_INTERACT_SEC`、`GATHER_*`、`SHOUT_*`、`ROUTE_TIERS`、`KIT_TIERS`、`TIER_SOFT/HARD_SEC`
 - **仍待删的 GameConst 本地 const**（刀 2+ 再迁或保留）：`HARD_INSTANT_CATCH_RANGE`、`GRAVITY`、`DETENTION_SEC`、`REINFORCE_*`、`OBSERVE_*`、`CART_*`、`STAFF_DWELL_SEC`、`FOOTSTEP_*`、`RUN_SPEED_FOR_FOOTSTEP_NOISE`、`STAFF_VISION/SPEED_PER_DAY`、`STAFF_SCALE_MAX_DAYS`
-- Alert 后果倍率已在 `AlertParams` 占位（×1.3 等），**玩法接线在刀 3**
+- Alert 后果倍率在 `AlertParams`，刀 3 已接线（见刀 3 进度笔记）
 | **2（A）** | 夜间施工 Soft/Hard；`allow_hard`；痕迹（单次结算）；背包容量（浣熊 4 / 猴 2）+ 重物（移速 −40%、禁攀爬）；`p2_action_cost` | Soft/Hard/背包体感 | ✅ |
 
 ### 刀 2 进度笔记
@@ -91,9 +91,21 @@
 - 不用套件时，金属（5 < 6）是唯一挡住「第 1 天做完两条线」的原料；只要用套件，两条线的需求都远低于第 1 天的产量。
 - 搜集点每天补货，所以跨天累计的原料没有上限，「材料不够做双线」只能靠单日产量、背包容量（浣熊 4 + 猴 2 = 6 格；刀 2b 存料后不再是瓶颈）或套件唯一性来卡。
 - 只做一条线、走不冒险的路（金属 2）时：用套件第 1 天就够；不用套件需要 2 天（金属 2/天）。
-| **3（C）** | Alert 后果表；头上 ?/!；Alert4 预警文案；Alert5 中止施工原因；`p2_alert_tiers` | 升档可读性 |
+| **3（C）** | Alert 后果表；头上 ?/!；Alert4 预警文案；Alert5 中止施工原因；`p2_alert_tiers` | 升档可读性 | ✅ |
 | **4** | 叫嚷每日 4；投掷 T（冷却 8s、无消耗石子）；Gather B 接口预留 | 声东击西 |
 | **5** | `p2_full_loop` 预算断言；全量 `run_tests.sh` | 闭环 |
+
+### 刀 3 进度笔记
+
+- 后果一律经 `Alert` 查询（`hearing_mult` / `construction_noise_mult` / `confiscates_ground_items` / `awareness_gain_mult` / `quiet_window_mult` / `is_full_search`），数值在 `AlertParams`（新增 `ground_confiscate_from_alert`=3）
+- Alert 2：职员听距×1.25（噪音 `hear_noise_range`、脚步 `hear_walk_range`、`Alert.hearing_radius()`）
+- Alert 3：路线施工 Hard 噪音改用 kind `construction`，职员对它的听距再×1.3。**乘在听距上而非响度**：Hard 响度 2.0 已被钳到 1.35，乘响度不会有任何效果
+- Alert 3：职员视野锥内且有视线的 `ground_items` 收进办公室（可去夺回）；施工点存料不收
+- Alert 4：awareness 上升（视线 + 噪音尖峰 + 脚步）×1.35；歇岗 `Clock.quiet_duration()`×0.75；HUD 红字「再升一档将全园搜查」
+- Alert 5：路线施工拒绝开工；进行中的施工当帧取消并退料，原因「警戒升至 5，全园搜查 — … 施工被迫中止」；HUD 红字
+- 升档时一行后果提示；HUD 警戒格下列出当前生效后果
+- 职员头上 `HeadIcon`：起疑 `?`（黄）/ 调查·搜索 `!`（橙）/ 追捕 `!!`（红）；精确 awareness 仍只在 F3
+- 门禁 `p2_alert_tiers`（34 项）：正式开局、真实搜集、无临时能力；档位直接设定（升档来源已由痕迹/被抓测试覆盖）
 
 ## R6 前置清单
 

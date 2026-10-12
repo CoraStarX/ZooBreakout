@@ -33,6 +33,8 @@ var _item_rows: Dictionary = {}
 ## What X does right now (store at route point / drop on ground).
 var _drop_l: Label
 var _alert_pips: Array[ColorRect] = []
+var _alert_fx_l: Label
+var _alert_warn_l: Label
 var _intel_l: Label
 var _dig_bar: ProgressBar
 var _climb_bar: ProgressBar
@@ -160,6 +162,14 @@ func _build() -> void:
 		var pip := UIKit.swatch(Color(0.3, 0.3, 0.3), Vector2(26, 10))
 		pips.add_child(pip)
 		_alert_pips.append(pip)
+	_alert_fx_l = UIKit.label("", 13, UIKit.TEXT_DIM)
+	_alert_fx_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_alert_fx_l.custom_minimum_size = Vector2(230, 0)
+	rv.add_child(_alert_fx_l)
+	_alert_warn_l = UIKit.label("", 15, Color(1.0, 0.35, 0.3))
+	_alert_warn_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_alert_warn_l.custom_minimum_size = Vector2(230, 0)
+	rv.add_child(_alert_warn_l)
 	rv.add_child(UIKit.label("施工进度", 13, UIKit.TEXT_DIM))
 	var dig_row := HBoxContainer.new()
 	_dig_l = UIKit.label("挖洞", 15)
@@ -292,6 +302,10 @@ func _refresh() -> void:
 		_drop_l.visible = _drop_l.text != ""
 	for i in _alert_pips.size():
 		_alert_pips[i].color = Color(0.9, 0.25, 0.2) if i < Alert.level else Color(0.3, 0.3, 0.3)
+	_alert_fx_l.text = Alert.effects_text()
+	_alert_fx_l.visible = _alert_fx_l.text != ""
+	_alert_warn_l.text = Alert.warning_text()
+	_alert_warn_l.visible = _alert_warn_l.text != ""
 
 	if session:
 		var dig: int = session.route_tiers[RunSession.ExitRoute.DIG]
