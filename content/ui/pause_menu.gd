@@ -70,7 +70,7 @@ func _build() -> void:
 	help_btn.pressed.connect(func() -> void: _help.visible = not _help.visible)
 	v.add_child(help_btn)
 	_help = UIKit.label(
-		"WASD / 左摇杆  移动（相对相机）\nE / 手柄 A  交互：搜集、观察、施工、开笼门\nTab / 手柄 Y  换控\nF · H / LB · RB  队友跟随 · 待命\nEsc  暂停\n\n红色扇形 = 职员视线。夜间施工，白天搜集。",
+		"WASD / 左摇杆  移动（相对相机）\nE / 手柄 A  交互：搜集、观察、施工、开笼门\nG / 手柄 B  叫嚷砸地（引开职员，有冷却）\nTab / 手柄 Y  换控（退下者待命）\nF · H / LB · RB  队友跟随 · 待命\nV / 下十字键  放标记并令队友前往\nEsc  暂停\n\n红色扇形 = 职员视线。夜间施工，白天搜集。",
 		15, UIKit.TEXT_DIM)
 	_help.visible = false
 	_help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

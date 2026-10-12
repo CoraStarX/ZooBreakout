@@ -15,3 +15,5 @@ signal breach_changed(value: float)
 signal office_items_changed(items: Array)
 signal detention_changed(animal: Node3D)
 signal run_outcome_changed(outcome: int)
+## position, loudness 0~1+, kind（footstep / shout / interact_hard …）
+signal noise_made(position: Vector3, loudness: float, kind: StringName)

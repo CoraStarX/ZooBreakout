@@ -63,6 +63,7 @@ func _loot(user: AnimalActor) -> void:
 		if Clock.phase == Clock.Phase.NIGHT_QUIET:
 			Bus.interact_feedback.emit("噪音很大，但夜巡已歇岗…")
 		else:
+			Bus.noise_made.emit(user.global_position, 1.0, &"interact_hard")
 			var staffs := get_tree().get_nodes_in_group("staff")
 			for s in staffs:
 				if s is Node3D and user.global_position.distance_to((s as Node3D).global_position) <= Alert.hearing_radius():

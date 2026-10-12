@@ -63,7 +63,14 @@ func _ready() -> void:
 	_check(staff._route_node == null, "未获情报时不画路线")
 	session.learn_intel(IntelIds.PATROL_ROUTE)
 	_check(staff._route_node != null and staff._route_node.visible, "获得路线情报后画出巡逻线")
-	_check(staff._route_node.get_child_count() == staff.waypoints.size(), "路线段数 = 路点数")
+	_check(
+		staff._route_node.get_child_count() == staff.route_preview_segment_count(),
+		"路线段数 = 巡逻册全部路段"
+	)
+	_check(
+		staff.patrol_network != null and staff.patrol_network.points.size() >= 8,
+		"巡逻点网覆盖多区域（≥8）"
+	)
 
 	## 6) Clock helper.
 	Clock.set_phase(Clock.Phase.OPEN)

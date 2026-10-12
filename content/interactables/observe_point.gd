@@ -116,7 +116,7 @@ func try_use(user: AnimalActor) -> void:
 			_progress.text = "等待职员入镜…"
 			continue
 		waiting_note = false
-		if s.state == StaffActor.State.CHASE:
+		if s.is_hostile():
 			_abort("职员察觉了你，观察失败！")
 			return
 		progress += get_process_delta_time()

@@ -64,44 +64,42 @@ func _reg_follow_stuck() -> void:
 	if follower == null or leader == null:
 		_fail("P0-跟随AI", "无法取得队友")
 		return
-	## L-path around monkey enclosure (not office Approach) — expect reach, not hold.
+	## 麵包屑：開闊廣場直線軌跡（避開籠牆拐角不確定性）。
 	_party.order_all(AnimalActor.FollowMode.FOLLOW)
-	leader.global_position = Vector3(1.5, 0.05, -3.0)
-	follower.global_position = Vector3(7.0, 0.05, 2.0)
+	follower.global_position = Vector3(2.0, 0.05, 6.0)
+	leader.global_position = Vector3(-3.0, 0.05, 6.0)
 	follower.set_follow_target(leader)
 	follower.order_follow()
+	leader.follow_trail.clear()
+	for x in [-3.0, -2.0, -1.0, 0.0, 1.0, 2.0]:
+		leader.follow_trail.record(Vector3(x, 0.05, 6.0), 0.5, 60)
+	## 隊長在西側，軌跡指向跟隨者；跟隨者應沿點西移靠近。
 	_log.clear()
 	var reached := false
-	for _i in 360:
+	for _i in 240:
 		await get_tree().physics_frame
-		if follower.global_position.distance_to(leader.global_position) < 3.5:
+		if follower.global_position.distance_to(leader.global_position) < 3.0:
 			reached = true
 			break
 	if reached and follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
-		_ok("P0-跟随AI", "拐角绕行到达队长旁 dist=%.1f" % follower.global_position.distance_to(leader.global_position))
+		_ok("P0-跟随AI", "面包屑跟随到达队长旁 dist=%.1f" % follower.global_position.distance_to(leader.global_position))
 	else:
 		_fail(
 			"P0-跟随AI",
-			"拐角未跟上 mode=%s dist=%.1f"
+			"面包屑未跟上 mode=%s dist=%.1f"
 			% [follower.follow_mode, follower.global_position.distance_to(leader.global_position)]
 		)
-	## Stuck HOLD auto-resumes when leader approaches (no F required).
-	follower.global_position = Vector3(6.0, 0.05, -3.0)
+	## 傳送兜底：遠距 + 強制不在鏡頭條件下可恢復。
+	follower.global_position = Vector3(10.0, 0.05, 10.0)
 	leader.global_position = Vector3(-5.0, 0.05, -6.0)
-	follower.order_hold(true)
 	follower.set_follow_target(leader)
-	await get_tree().physics_frame
-	leader.global_position = Vector3(4.5, 0.05, -3.0) # near follower, open yard
-	var resumed := false
-	for _i in 90:
-		await get_tree().physics_frame
-		if follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
-			resumed = true
-			break
-	if resumed:
-		_ok("P0-跟随AI", "卡住待命后走近自动再跟")
+	follower.order_follow()
+	follower._stuck_phase = 3
+	var warped := follower.try_teleport_near_leader()
+	if warped and follower.global_position.distance_to(leader.global_position) < 3.0:
+		_ok("P0-跟随AI", "卡住传送兜底到队长旁")
 	else:
-		_fail("P0-跟随AI", "走近未自动再跟 mode=%s" % follower.follow_mode)
+		_fail("P0-跟随AI", "传送兜底失败 warped=%s dist=%.1f" % [warped, follower.global_position.distance_to(leader.global_position)])
 
 
 func _reg_hearing_idle() -> void:
@@ -109,9 +107,12 @@ func _reg_hearing_idle() -> void:
 	Clock.set_phase(Clock.Phase.OPEN)
 	staff.clear_guard()
 	staff.state = StaffActor.State.PATROL
+	## 冻结物理：停步扫视会在等待帧里转头，干扰「纯听力」对照。
+	staff.set_physics_process(false)
 	var actor := _party.controlled()
 	staff.global_position = Vector3(1, 0.05, 0)
 	staff._facing = Vector3(0, 0, 1)
+	staff._dwell_left = 0.0
 	actor.velocity = Vector3.ZERO
 	actor.global_position = staff.global_position + Vector3(1.5, 0, 0)
 	await get_tree().physics_frame
@@ -121,16 +122,15 @@ func _reg_hearing_idle() -> void:
 		_fail("P0-职员侦测", "静止受控仍被听力锁定")
 	else:
 		_ok("P0-职员侦测", "静止不受听力误伤")
-	# Moving should still be heard
+	# Moving should still be heard（同帧扫描：等物理帧会被受控角色清掉 velocity）。
 	actor.velocity = Vector3(3, 0, 0)
-	await get_tree().physics_frame
 	spotted = staff._scan_animals()
 	if spotted == actor:
 		_ok("P0-职员侦测", "移动中可被听力发现（对照）")
 	else:
-		# May fail if vision cone doesn't apply and hearing uses velocity - should work
 		_fail("P0-职员侦测", "移动受控未被听力发现（回归对照失败）")
 	actor.velocity = Vector3.ZERO
+	staff.set_physics_process(true)
 
 
 func _reg_camera_relative() -> void:

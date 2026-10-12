@@ -2,6 +2,8 @@ extends Node
 ## Boot helpers, input map, run session flags (starter choice).
 
 var debug_enabled: bool = false
+## F3 面板勾選：職員 AI 視錐／聽覺／目標／awareness Debug。
+var staff_ai_debug: bool = false
 ## Test/debug knob: scales construction channel time (1.0 = shipped feel).
 var work_time_scale: float = 1.0
 ## Set by start select before loading zoo. Default raccoon.
@@ -29,6 +31,12 @@ func _ensure_input_map() -> void:
 	_bind_joy_button("pause", JOY_BUTTON_START)
 	_bind_key("order_hold", KEY_H)
 	_bind_joy_button("order_hold", JOY_BUTTON_RIGHT_SHOULDER)
+	## 標記點：同伴前往此處（與 F 跟隨 / H 待命並存）。
+	_bind_key("order_goto", KEY_V)
+	_bind_joy_button("order_goto", JOY_BUTTON_DPAD_DOWN)
+	## 主動製造噪音引開職員（叫嚷／砸地）。
+	_bind_key("make_noise", KEY_G)
+	_bind_joy_button("make_noise", JOY_BUTTON_B)
 	## Debug-only shortcuts (gated in zoo_world when debug_enabled).
 	_bind_key("debug_rescue_monkey", KEY_R)
 	_bind_key("debug_advance_phase", KEY_T)

@@ -1,17 +1,22 @@
 class_name PartyController
 extends Node
-## GamePlay: switch control, follow/hold orders, rescue into party.
+## GamePlay: switch control, follow/hold/goto orders, rescue into party.
 
 signal party_changed
+signal marker_changed(valid: bool, pos: Vector3)
 
 var _animals: Array[AnimalActor] = []
 var _controlled_index: int = 0
 var _pending_rescues: Dictionary = {} ## StringName id -> AnimalActor not yet in party
+var marker_valid: bool = false
+var marker_position: Vector3 = Vector3.ZERO
+var _marker_mesh: MeshInstance3D
 
 
 func setup_starter(animal: AnimalActor) -> void:
 	_animals.clear()
 	_pending_rescues.clear()
+	marker_valid = false
 	animal.is_rescued = true
 	_animals.append(animal)
 	_set_controlled(0)
@@ -60,6 +65,8 @@ func switch_next() -> void:
 	var a := controlled()
 	if a and a.is_confined:
 		Bus.interact_feedback.emit("%s 在本区关禁闭（可区内活动，门有人守）" % a.display_name())
+	else:
+		Bus.interact_feedback.emit("换控 — 刚退下的同伴已待命（按 F 再跟随）")
 
 
 func order_all(mode: AnimalActor.FollowMode) -> void:
@@ -71,25 +78,36 @@ func order_all(mode: AnimalActor.FollowMode) -> void:
 			continue
 		if mode == AnimalActor.FollowMode.FOLLOW:
 			a.order_follow()
+		elif mode == AnimalActor.FollowMode.GOTO:
+			if marker_valid:
+				a.order_goto(marker_position)
 		else:
-			a.order_hold(false) # player H — do not auto-resume
-	Bus.interact_feedback.emit("队友：%s" % ("跟随" if mode == AnimalActor.FollowMode.FOLLOW else "待命"))
+			a.order_hold(false)
+	var label := "跟随"
+	if mode == AnimalActor.FollowMode.HOLD:
+		label = "待命"
+	elif mode == AnimalActor.FollowMode.GOTO:
+		label = "前往标记点"
+	Bus.interact_feedback.emit("队友：%s" % label)
+
+
+## 在當前控制者位置放下標記，並命令同伴前往。
+func order_goto_marker() -> void:
+	var leader := controlled()
+	if leader == null:
+		return
+	marker_position = leader.global_position
+	marker_valid = true
+	_ensure_marker_visual()
+	_marker_mesh.global_position = marker_position + Vector3(0, 0.05, 0)
+	_marker_mesh.visible = true
+	marker_changed.emit(true, marker_position)
+	order_all(AnimalActor.FollowMode.GOTO)
 
 
 func on_danger_approach_leader() -> void:
-	## Leader nearing office: park all free followers outside core.
-	var any := false
-	for a in _animals:
-		if a.is_controlled or a.is_confined:
-			continue
-		var was_follow := a.follow_mode == AnimalActor.FollowMode.FOLLOW
-		a.order_hold(false)
-		if was_follow:
-			any = true
-	if any:
-		Bus.interact_feedback.emit("前方是办公室危险区 — 队友已在入口外待命")
-	else:
-		Bus.interact_feedback.emit("前方是办公室危险区")
+	## 只提示，不強制隊友停止（玩家保有控制權）。
+	Bus.interact_feedback.emit("前方是办公室危险区 — 队友仍跟随（H 待命 / F 跟上 / V 去标记）")
 
 
 func on_danger_entered(body: Node3D) -> void:
@@ -113,3 +131,25 @@ func _set_controlled(index: int) -> void:
 	var cur := controlled()
 	if cur:
 		Bus.animal_switched.emit(cur)
+
+
+func _ensure_marker_visual() -> void:
+	if _marker_mesh != null and is_instance_valid(_marker_mesh):
+		return
+	_marker_mesh = MeshInstance3D.new()
+	_marker_mesh.name = "PartyGotoMarker"
+	var box := BoxMesh.new()
+	box.size = Vector3(0.55, 0.12, 0.55)
+	_marker_mesh.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.3, 0.85, 1.0, 0.85)
+	mat.emission_enabled = true
+	mat.emission = Color(0.2, 0.6, 0.9)
+	mat.emission_energy_multiplier = 0.8
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_marker_mesh.material_override = mat
+	var parent_n := get_parent()
+	if parent_n:
+		parent_n.add_child(_marker_mesh)
+	else:
+		add_child(_marker_mesh)

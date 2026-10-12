@@ -270,13 +270,15 @@ func _check_office_chest() -> void:
 		for a in _party.party():
 			if not a.is_controlled:
 				follower = a
+		follower.order_follow()
 		_party.on_danger_entered(follower)
 		_party.on_danger_entered(actor)
 		await get_tree().process_frame
-		if follower and follower.follow_mode == AnimalActor.FollowMode.HOLD:
-			_pass("危险区自动待命")
+		## 危險區不再強制待命：夥伴應仍跟隨，玩家可用 H/F 覆寫。
+		if follower and follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
+			_pass("危险区不强制待命（仍跟随，玩家可覆写）")
 		else:
-			_find("P0", "危险区自动待命未触发")
+			_find("P0", "危险区后跟随被错误打断 mode=%s" % follower.follow_mode)
 
 
 func _check_staff_fairness() -> void:
