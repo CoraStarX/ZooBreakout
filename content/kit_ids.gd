@@ -16,6 +16,11 @@ static func is_material(id: StringName) -> bool:
 	return MATERIALS.has(id)
 
 
+## Heavy cargo: move −40% and climb verb disabled while any such item is carried.
+static func is_heavy(id: StringName) -> bool:
+	return id == METAL
+
+
 static func display_name(id: StringName) -> String:
 	match id:
 		DIG:

@@ -87,6 +87,10 @@ func _beat_rescue_raccoon() -> void:
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	actor.global_position = raccoon_door.global_position + Vector3(0, 0, 1.1)
 	actor.velocity = Vector3.ZERO
+	## 浣熊笼门锁认巧手且禁止强行 — 测试赋予临时巧手，表示「有开锁才能的同伴」。
+	var unlocker := actor.def.duplicate(true) as AnimalDef
+	unlocker.capabilities.append(CapabilityIds.Id.DEXTERITY)
+	actor.def = unlocker
 	raccoon_door.try_use(actor)
 	var t := 0.0
 	while raccoon_door._busy and t < 4.0:

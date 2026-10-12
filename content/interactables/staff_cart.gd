@@ -78,6 +78,9 @@ func try_use(user: AnimalActor) -> void:
 	if loot_left <= 0:
 		Bus.interact_feedback.emit("工具车已经被你搜空了 — 明早补货")
 		return
+	if user.inventory_free_slots() <= 0:
+		Bus.interact_feedback.emit("背包满了 — 偷不到金属")
+		return
 	_busy = true
 	_progress.visible = true
 	Bus.interact_feedback.emit("伸手摸工具车…（别被职员发现！）")
@@ -87,7 +90,7 @@ func try_use(user: AnimalActor) -> void:
 		if not is_instance_valid(user) or user.is_confined:
 			_abort("偷取中断（被抓）")
 			return
-		if staff.state == StaffActor.State.CHASE:
+		if staff.is_hostile():
 			_abort("职员回头了！偷取失败")
 			return
 		if user.global_position.distance_to(global_position) > 1.9:

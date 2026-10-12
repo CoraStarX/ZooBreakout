@@ -194,7 +194,7 @@ func _test_soft_climb_lands_outside() -> void:
 
 
 func _test_hard_climb_raccoon_movable() -> void:
-	## Repro: raccoon Hard-climbs without CLIMB — must eject outside and still accept move input.
+	## 中间档可 Hard；最后一档须 Soft。先强行两档再临时赋予攀爬 Soft 完工，验证弹出后可走。
 	var raccoon := _party.controlled()
 	var climb := _geometry.climb_interactable
 	if raccoon == null or climb == null or raccoon.def.id != &"raccoon":
@@ -206,7 +206,11 @@ func _test_hard_climb_raccoon_movable() -> void:
 	var gate_z := climb.global_position.z
 	raccoon.global_position = climb.global_position + Vector3(0, 0, 1.0)
 	raccoon.velocity = Vector3.ZERO
-	await RouteHelper.finish(get_tree(), climb, raccoon)
+	await RouteHelper.finish(get_tree(), climb, raccoon) ## Hard mid-tiers; last forbids Hard
+	var soft_def := raccoon.def.duplicate(true) as AnimalDef
+	soft_def.capabilities.append(CapabilityIds.Id.CLIMB)
+	raccoon.def = soft_def
+	await RouteHelper.finish(get_tree(), climb, raccoon) ## Soft last → eject
 	var t := 0.0
 	while climb._busy and t < 8.0:
 		await get_tree().process_frame

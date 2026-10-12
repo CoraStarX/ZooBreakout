@@ -65,6 +65,9 @@ func _ready() -> void:
 	session = RunSession.new()
 	session.name = "RunSession"
 	add_child(session)
+	var traces := TraceService.new()
+	traces.name = "TraceService"
+	add_child(traces)
 	party = PartyController.new()
 	party.name = "Party"
 	add_child(party)
@@ -196,6 +199,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("order_hold"):
 		party.order_all(AnimalActor.FollowMode.HOLD)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("order_goto"):
+		party.order_goto_marker()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("debug_rescue_monkey"):
 		if Game.debug_enabled:
@@ -407,6 +413,7 @@ func _on_danger_approach_entered(body: Node3D) -> void:
 	if not (body is AnimalActor):
 		return
 	var actor := body as AnimalActor
+	## 危險區只提示，不強制夥伴停止。
 	if actor.is_controlled:
 		party.on_danger_approach_leader()
 	else:

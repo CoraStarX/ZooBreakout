@@ -7,14 +7,24 @@ extends RefCounted
 static func finish(tree: SceneTree, it: Interactable, actor: AnimalActor, auto_supply: bool = true) -> void:
 	Game.work_time_scale = 0.03
 	var guard := 0
-	while not it._done and guard < it.tiers + 2:
+	var stuck := 0
+	var last_tier := it.tier_done
+	while not it._done and guard < it.tiers + 4:
 		guard += 1
 		if auto_supply:
+			actor.inventory.clear()
 			for m in it.tier_cost:
 				actor.give_items([m])
 		it.try_use(actor)
 		await tree.process_frame
 		var t := 0.0
-		while it._busy and t < 8.0:
+		while it._busy and t < 12.0:
 			await tree.process_frame
 			t += tree.root.get_process_delta_time()
+		if it.tier_done == last_tier and not it._busy:
+			stuck += 1
+			if stuck >= 2:
+				break ## refused (e.g. last tier forbid Hard)
+		else:
+			stuck = 0
+			last_tier = it.tier_done

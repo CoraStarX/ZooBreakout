@@ -15,6 +15,8 @@ extends Resource
 @export var shout_loudness: float = 0.85
 @export var throw_cooldown_sec: float = 8.0
 @export var throw_loudness: float = 0.7
+## Carrying any heavy item: multiply planar move speed (0.6 = −40%).
+@export var heavy_speed_mult: float = 0.6
 
 
 func interact_seconds(soft: bool) -> float:

@@ -90,8 +90,12 @@ func try_use(user: AnimalActor) -> void:
 	if Clock.allows_escape_actions():
 		Bus.interact_feedback.emit("夜里看不清 — 搜集请等白天（夜间专心施工）")
 		return
+	if user.inventory_free_slots() <= 0:
+		Bus.interact_feedback.emit("背包满了（%d/%d）— 先卸下或用掉一些" % [user.inventory.size(), user.inventory_capacity()])
+		return
 	var rich := required == CapabilityIds.Id.NONE or user.has_capability(required)
 	var amount := yield_rich if rich else yield_poor
+	amount = mini(amount, user.inventory_free_slots())
 	var wait := GameConst.GATHER_SEC if rich else GameConst.GATHER_POOR_SEC
 	_busy = true
 	_progress.visible = true

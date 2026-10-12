@@ -136,7 +136,12 @@ func _beat_rescue_companion() -> void:
 	if monkey_door == null:
 		_find("P0", "[流程] 无猴笼门")
 		return
+	## 猴笼认攀爬且禁止强行；浣熊临时赋予攀爬表示「有攀栏才能的同伴解救」。
+	var climber := actor.def.duplicate(true) as AnimalDef
+	climber.capabilities.append(CapabilityIds.Id.CLIMB)
+	actor.def = climber
 	await _use_at(actor, monkey_door, monkey_door.global_position + Vector3(-1.1, 0, 0))
+	actor.def = load("res://content/animals/raccoon.tres") as AnimalDef
 	var d_staff := actor.global_position.distance_to(_staff.global_position)
 	_note("解救时距职员 %.1fm" % d_staff)
 	if _party.party().size() >= 2:
@@ -177,7 +182,7 @@ func _beat_soft_climb_as_monkey() -> void:
 
 
 func _beat_follow_across_yard() -> void:
-	_note("【Beat5】空地 Follow + 隔墙退出策略")
+	_note("【Beat5】空地面包屑 Follow + 传送兜底")
 	if _party.party().size() < 2:
 		_find("P1", "[跟随] 无队友，跳过")
 		return
@@ -187,56 +192,47 @@ func _beat_follow_across_yard() -> void:
 	for a in _party.party():
 		if not a.is_controlled:
 			follower = a
-	leader.global_position = Vector3(-2, 0.05, 4)
-	follower.global_position = Vector3(2, 0.05, 4)
+	leader.global_position = Vector3(-2, 0.05, 6)
+	follower.global_position = Vector3(2, 0.05, 6)
 	follower.set_follow_target(leader)
 	follower.order_follow()
-	await get_tree().create_timer(1.5).timeout
+	leader.follow_trail.clear()
+	for x in [-2.0, -1.0, 0.0, 1.0, 2.0]:
+		leader.follow_trail.record(Vector3(x, 0.05, 6.0), 0.5, 60)
+	for _i in 180:
+		await get_tree().physics_frame
 	var d_open := follower.global_position.distance_to(leader.global_position)
 	if d_open < 3.5:
 		_pass("空地 Follow 跟上（%.1fm）" % d_open)
 	else:
 		_find("P0", "[跟随AI] 空地掉队 %.1fm" % d_open)
-	## L-path around monkey enclosure (avoid office Approach): expect catch-up.
-	leader.global_position = Vector3(1.5, 0.05, -3.0)
-	follower.global_position = Vector3(7.0, 0.05, 2.0)
-	follower.order_follow()
+	## 遠距傳送兜底（取代舊「拐角待命」策略）。
+	follower.global_position = Vector3(10, 0.05, 10)
+	leader.global_position = Vector3(-4, 0.05, -5)
 	follower.set_follow_target(leader)
-	_log.clear()
-	var reached := false
-	for _i in 360:
-		await get_tree().physics_frame
-		if follower.global_position.distance_to(leader.global_position) < 3.5 \
-				and follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
-			reached = true
-			break
-	if reached:
-		_pass("拐角 Follow 绕到队长旁（%.1fm）" % follower.global_position.distance_to(leader.global_position))
+	follower.order_follow()
+	if follower.try_teleport_near_leader() \
+			and follower.global_position.distance_to(leader.global_position) < 3.0:
+		_pass("远距卡住可传送回队长旁")
 	else:
-		_find("P0", "[跟随AI] 拐角掉队 mode=%s dist=%.1f" % [
-			follower.follow_mode, follower.global_position.distance_to(leader.global_position)
-		])
-	follower.order_hold(true)
-	leader.global_position = follower.global_position + Vector3(2.0, 0, 0)
-	var resumed := false
-	for _i in 60:
-		await get_tree().physics_frame
-		if follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
-			resumed = true
-			break
-	if resumed:
-		_pass("卡住待命后走近自动再跟")
+		_find("P0", "[跟随AI] 传送兜底失败")
+	## F 強制跟隨可覆寫待命。
+	follower.order_hold(false)
+	_party.order_all(AnimalActor.FollowMode.FOLLOW)
+	if follower.follow_mode == AnimalActor.FollowMode.FOLLOW:
+		_pass("F 可强制跟随（覆写待命）")
 	else:
-		_find("P0", "[跟随AI] 走近未自动再跟")
+		_find("P0", "[跟随AI] F 无法强制跟随")
 
 
 func _beat_office_approach() -> void:
-	_note("【Beat6】接近办公室危险区")
+	_note("【Beat6】接近办公室危险区（仅提示，不强制待命）")
 	var leader := _party.controlled()
 	_party.order_all(AnimalActor.FollowMode.FOLLOW)
 	leader.global_position = Vector3(-9, 0.05, 4.2)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+	_log.clear()
 	## 推进入 Approach 盒
 	leader.global_position = Vector3(-9, 0.05, 5.8)
 	for _i in 8:
@@ -247,20 +243,24 @@ func _beat_office_approach() -> void:
 		if c is Label3D and "危险" in (c as Label3D).text:
 			warn_seen = true
 			break
-	var follower_held := false
+	var warn_msg := false
+	for m in _log:
+		if "危险" in m:
+			warn_msg = true
+	var follower_still := true
 	for a in _party.party():
 		if not a.is_controlled and a.follow_mode == AnimalActor.FollowMode.HOLD:
-			follower_held = true
+			follower_still = false
 	if floor_ok and warn_seen:
 		_pass("危险区地面+标签可读")
 	else:
 		_find("P1", "[危险区UX] 标识不完整")
-	if follower_held:
-		_pass("Approach 触发队友入口待命")
+	if warn_msg and follower_still:
+		_pass("Approach 仅提示且队友仍跟随（玩家可覆写）")
 	else:
 		_find(
 			"P1",
-			"[危险区UX] 队长进入 Approach 后队友未 Hold — 重叠检测不可靠或需更大 Approach"
+			"[危险区UX] 期望提示+仍跟随 warn=%s still=%s" % [warn_msg, follower_still]
 		)
 
 

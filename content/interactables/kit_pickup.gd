@@ -94,6 +94,9 @@ func try_use(user: AnimalActor) -> void:
 	if user.has_item(kit_id):
 		Bus.interact_feedback.emit("已有%s" % _KitIds.display_name(kit_id))
 		return
+	if user.inventory_free_slots() <= 0:
+		Bus.interact_feedback.emit("背包满了 — 拿不动%s" % _KitIds.display_name(kit_id))
+		return
 	_taken = true
 	user.give_items([kit_id])
 	visible = false

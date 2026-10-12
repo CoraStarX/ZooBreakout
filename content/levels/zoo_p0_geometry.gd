@@ -60,6 +60,7 @@ func _build_level() -> void:
 		Vector3(-2.5, 0.5, -1.2), "笼门锁", CapabilityIds.Id.DEXTERITY, lock_blocker,
 		0.0, true, true, Interactable.BreachStyle.DESTROY, Vector3(0, 0, 1.2)
 	)
+	raccoon_door.allow_hard = false ## 开锁硬门槛
 	cage_doors[&"raccoon"] = raccoon_door
 	_wall(Vector3(-0.5, 0.75, -2), Vector3(2.0, 1.5, 0.4)) # north-east: x -1.5 → 0.5 (covers east corner)
 	## Yard south fully sealed — Soft climb is the zoo's south OUTER wall (exit exhibit via cage door).
@@ -93,27 +94,24 @@ func _build_level() -> void:
 	_wall(Vector3(4.2, 0.75, -1.45), Vector3(0.4, 1.5, 1.2)) # west north pillar
 	var monkey_door_body := _wall(Vector3(4.2, 0.75, -3.0), Vector3(0.4, 1.5, 1.6), Color(0.6, 0.4, 0.25))
 	monkey_door_body.name = "MonkeyDoor"
+	## 猴笼：攀栏翻出（认攀爬才能）；浣熊笼仍是巧手开锁。两者皆禁止强行。
 	var monkey_door := _make_interactable(
-		Vector3(3.2, 0.5, -3.0), "猴笼门", CapabilityIds.Id.DEXTERITY, monkey_door_body,
+		Vector3(3.2, 0.5, -3.0), "猴笼门", CapabilityIds.Id.CLIMB, monkey_door_body,
 		0.0, true, true, Interactable.BreachStyle.DESTROY, Vector3(-1.2, 0, 0)
 	)
+	monkey_door.allow_hard = false
 	cage_doors[&"monkey"] = monkey_door
-	# Staff patrol NE loop
+	# Staff weighted patrol network（由舊路點生成；route_book 僅對照保留）
 	staff = StaffActor.new()
 	staff.name = "Staff"
 	add_child(staff)
-	var patrol: Array[Vector3] = [
-		Vector3(5.5, 0.05, 5.5),
-		Vector3(8.5, 0.05, 7.0),
-		Vector3(7.0, 0.05, 9.0),
-		Vector3(4.0, 0.05, 7.5),
-	]
-	staff.setup_patrol(patrol)
+	staff.setup_patrol_network(ZooP0Patrol.make_patrol_network())
 	staff_cart = StaffCart.new()
 	staff_cart.name = "StaffCart"
 	staff_cart.staff = staff
 	add_child(staff_cart)
-	staff_cart.global_position = patrol[0] - Vector3(0, 0, GameConst.CART_TRAIL_DIST)
+	var start_pt: Vector3 = staff.waypoints[0] if not staff.waypoints.is_empty() else Vector3(5.5, 0.05, 5.5)
+	staff_cart.global_position = start_pt - Vector3(0, 0, GameConst.CART_TRAIL_DIST)
 	_build_office_danger()
 	_build_exit_zones()
 

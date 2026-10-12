@@ -43,8 +43,10 @@ func _ready() -> void:
 
 	await _gather_day(actor)
 	var metal := actor.item_count(KitIds.METAL)
-	_check(metal < GameConst.ROUTE_TIERS, "第 1 天稳妥玩法金属不够整条路线（金属 %d < %d）" % [metal, GameConst.ROUTE_TIERS])
-	var tiers_affordable := mini(metal, actor.item_count(KitIds.WOOD))
+	## 背包上限后稳妥一天仍凑不齐整条线（或最多做到非最后一档）。
+	var max_hard_tiers := GameConst.ROUTE_TIERS - 1 ## 最后一档禁强行且无 DIG
+	var tiers_affordable := mini(mini(metal, actor.item_count(KitIds.WOOD)), max_hard_tiers)
+	_check(tiers_affordable < GameConst.ROUTE_TIERS, "第 1 天无法 Soft 完工挖掘线（档 %d < %d）" % [tiers_affordable, GameConst.ROUTE_TIERS])
 
 	var rest_pt: ObservePoint = _geo.observe_points[0]
 	staff.global_position = rest_pt.global_position + Vector3(5, 0, 0)
@@ -54,10 +56,10 @@ func _ready() -> void:
 	_check(_session.has_intel(IntelIds.REST_TIME), "白天侦察得到歇岗情报")
 	staff.global_position = Vector3(10, 0.05, 10)
 
-	## --- Night 1: build as far as the materials go ---
+	## --- Night 1: Hard mid-tiers only ---
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	var dig := _geo.dig_interactable
-	actor.global_position = dig.global_position + Vector3(0.9, 0.05, 0.4) ## the walk over, abbreviated
+	actor.global_position = dig.global_position + Vector3(0.9, 0.05, 0.4)
 	await RouteHelper.finish(get_tree(), dig, actor, false)
 	_check(dig.tier_done == tiers_affordable and not _session.route_dig_ready,
 		"第 1 夜只能做 %d/%d 档，路线未通" % [dig.tier_done, GameConst.ROUTE_TIERS])
@@ -72,8 +74,11 @@ func _ready() -> void:
 	var left := GameConst.ROUTE_TIERS - dig.tier_done
 	_check(actor.item_count(KitIds.METAL) >= left and actor.item_count(KitIds.WOOD) >= left, "第 2 天补够剩余 %d 档的原料" % left)
 
-	## --- Night 2: finish ---
+	## --- Night 2: grant DIG Soft for last tier (首发无挖掘动物时的测试替身) ---
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	var digger := actor.def.duplicate(true) as AnimalDef
+	digger.capabilities.append(CapabilityIds.Id.DIG)
+	actor.def = digger
 	actor.global_position = dig.global_position + Vector3(0.9, 0.05, 0.4)
 	await RouteHelper.finish(get_tree(), dig, actor, false)
 	_check(dig.tier_done == GameConst.ROUTE_TIERS and _session.route_dig_ready, "第 2 夜完工，挖掘线打通")
@@ -106,27 +111,48 @@ func _steal_cart(actor: AnimalActor, staff: StaffActor) -> void:
 
 
 func _gather_day(actor: AnimalActor) -> void:
+	## 背包有限：只收挖洞线木/金属；先金属后木料，避免木料占满拿不到金属。
+	var keep: Array[StringName] = []
+	for id in actor.inventory:
+		if id == KitIds.WOOD or id == KitIds.METAL:
+			keep.append(id)
+	actor.inventory.clear()
+	actor.give_items(keep)
 	var staff: StaffActor = _world.call("get_staff")
 	await _steal_cart(actor, staff)
-	for g in _geo.gather_points:
-		if g.yield_rich >= 3:
-			continue ## risky tool shed skipped
-		actor.global_position = g.global_position + Vector3(0.6, 0.05, 0)
-		g.try_use(actor)
-		var t := 0.0
-		await get_tree().process_frame
-		while g._busy and t < 5.0:
+	var want_metal := GameConst.ROUTE_TIERS
+	var want_wood := GameConst.ROUTE_TIERS
+	for pass_mat in [KitIds.METAL, KitIds.WOOD]:
+		for g in _geo.gather_points:
+			if g.yield_rich >= 3:
+				continue ## risky tool shed skipped
+			if g.material != pass_mat:
+				continue
+			if pass_mat == KitIds.METAL and actor.item_count(KitIds.METAL) >= want_metal:
+				break
+			if pass_mat == KitIds.WOOD and actor.item_count(KitIds.WOOD) >= want_wood:
+				break
+			if actor.inventory_free_slots() <= 0:
+				return
+			actor.global_position = g.global_position + Vector3(0.6, 0.05, 0)
+			g.try_use(actor)
+			var t := 0.0
 			await get_tree().process_frame
-			t += get_process_delta_time()
+			while g._busy and t < 5.0:
+				await get_tree().process_frame
+				t += get_process_delta_time()
 
 
-## 时间预算：最慢动词（全 Hard）一条路线的施工总时长必须塞得进一个夜晚（巡逻+歇岗）。
+## 时间预算：2×Hard（含×3）+ 最后 Soft 故意超过一夜 → 必须跨夜；全 Soft 须一夜内可完成。
 func _budget_check() -> void:
 	var night := GameConst.NIGHT_PATROL_BASE_SEC + GameConst.NIGHT_QUIET_SEC
-	var hard_route := GameConst.TIER_HARD_SEC * GameConst.ROUTE_TIERS
+	var rw := GameConst.route_work()
+	var mid_hard := GameConst.TIER_HARD_SEC * rw.hard_time_mult * float(GameConst.ROUTE_TIERS - 1)
+	var last_soft := GameConst.TIER_SOFT_SEC
+	var mixed := mid_hard + last_soft
 	var soft_route := GameConst.TIER_SOFT_SEC * GameConst.ROUTE_TIERS
-	print("NOTE 夜长 %.0fs · 全 Hard 一条路线 %.0fs · 全 Soft %.0fs" % [night, hard_route, soft_route])
-	_check(hard_route < night and hard_route >= night * 0.6, "全 Hard 路线 %.0fs：一夜能打通但占去大半（一夜 %.0fs）" % [hard_route, night])
+	print("NOTE 夜长 %.0fs · 2Hard+1Soft %.0fs · 全 Soft %.0fs" % [night, mixed, soft_route])
+	_check(mixed > night, "强行中间档偏慢，%.0fs > 一夜 %.0fs（须跨夜）" % [mixed, night])
 	_check(soft_route < night, "全 Soft 路线 %.0fs < 一夜 %.0fs" % [soft_route, night])
 
 

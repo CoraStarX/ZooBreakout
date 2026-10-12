@@ -102,6 +102,10 @@ func _ready() -> void:
 	monkey.global_position = door.global_position + Vector3(0, 0, -0.9)
 	monkey._hold_position = monkey.global_position
 	monkey.inventory.clear()
+	## 开锁硬门槛：须巧手 Soft（猴默认无此才能 — 测试临时赋予，表示「巧手同伴撬门」）。
+	var pry := monkey.def.duplicate(true) as AnimalDef
+	pry.capabilities.append(CapabilityIds.Id.DEXTERITY)
+	monkey.def = pry
 	door.try_use(monkey)
 	await _idle(door)
 	_check(not starter.is_confined and left > 5.0, "同伴撬门提前营救（剩余 %.1fs 时）" % left)

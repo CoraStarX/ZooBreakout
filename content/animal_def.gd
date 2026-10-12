@@ -7,6 +7,8 @@ extends Resource
 @export var capabilities: Array[CapabilityIds.Id] = []
 @export var body_color: Color = Color.WHITE
 @export var move_speed: float = 5.0
+## Max inventory slots (each item id instance counts as 1).
+@export var inventory_capacity: int = 4
 @export var can_start: bool = true
 
 

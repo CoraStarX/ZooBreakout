@@ -79,15 +79,16 @@ func _ready() -> void:
 	await get_tree().create_timer(0.3).timeout
 	_check(dig.tier_done == 0 and raccoon.material_count() == 2 and not dig._busy, "中途离开：不扣料、无进度")
 
-	## Hard (raccoon has no DIG): one tier for 2 parts, slow.
+	## Hard (raccoon has no DIG): mid-tier for 2 parts, slow × hard_time_mult.
 	_stand(raccoon, dig)
 	var t0 := Time.get_ticks_msec()
 	dig.try_use(raccoon)
 	await _idle(dig)
 	var hard_ms := Time.get_ticks_msec() - t0
+	var hard_expect := int(GameConst.TIER_HARD_SEC * GameConst.route_work().hard_time_mult * Game.work_time_scale * 1000.0 * 0.75)
 	_check(dig.tier_done == 1, "第 1 档完成")
 	_check(raccoon.material_count() == 0, "每档消耗配方原料（木料+金属）")
-	_check(hard_ms >= int(GameConst.TIER_HARD_SEC * Game.work_time_scale * 1000.0 * 0.8), "Hard 慢 %dms" % hard_ms)
+	_check(hard_ms >= hard_expect, "Hard 含时倍率 慢 %dms（≥%d）" % [hard_ms, hard_expect])
 	_check(session.route_tiers[RunSession.ExitRoute.DIG] == 1, "会话记录施工进度 1/3")
 	_check(is_equal_approx(session.breach, 1.0 / float(GameConst.ROUTE_TIERS)), "Breach = 进度 %.2f" % session.breach)
 	_check(not session.route_dig_ready, "未完工路线不开")
@@ -98,15 +99,27 @@ func _ready() -> void:
 	_check(dig.tier_done == 1, "施工进度跨天保留")
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 
-	## Kit pays tier 2 and covers tier 3 for free.
+	## Kit pays tier 2 (still Hard mid-tier).
+	raccoon.inventory.clear()
 	raccoon.give_items([KitIds.DIG])
 	_stand(raccoon, dig)
 	dig.try_use(raccoon)
 	await _idle(dig)
 	_check(dig.tier_done == 2 and not raccoon.has_item(KitIds.DIG), "套件付第 2 档并被消耗")
+
+	## Last tier: kit credit alone is not enough without DIG (forbid Hard).
+	dig.try_use(raccoon)
+	await get_tree().process_frame
+	_check(dig.tier_done == 2 and not dig._busy, "最后一档无挖掘才能禁止强行（套件余量也无效）")
+
+	## Soft last tier with DIG talent.
+	var digger := raccoon.def.duplicate(true) as AnimalDef
+	digger.capabilities.append(CapabilityIds.Id.DIG)
+	raccoon.def = digger
+	_stand(raccoon, dig)
 	dig.try_use(raccoon)
 	await _idle(dig)
-	_check(dig.tier_done == 3 and dig._done and raccoon.material_count() == 0, "套件余量免费付第 3 档（不耗原料）并完工")
+	_check(dig.tier_done == 3 and dig._done and raccoon.material_count() == 0, "有挖掘才能 Soft 用套件余量完成最后一档")
 	_check(session.route_dig_ready, "路线就绪")
 
 	## Soft is faster (monkey climbs).

@@ -28,6 +28,8 @@ signal tier_completed(done: int, total: int)
 @export var tier_cost: Array[StringName] = []
 ## Max distance from user while channeling; leave = cancel.
 @export var use_range: float = 1.85
+## When false, interactions without the required verb are refused (no Hard). Default true.
+@export var allow_hard: bool = true
 ## Cage door reinforced after a capture (until dawn): costs a part, or double time.
 var reinforced: bool = false
 ## World-space offset from the interact point for staff door-guard stance (no species branching).
@@ -100,19 +102,33 @@ func _ensure_world_label() -> void:
 	_refresh_label()
 
 
+func _hard_allowed_now() -> bool:
+	if not allow_hard:
+		return false
+	## Final construction tier cannot be forced.
+	if tiers > 1 and tier_done >= tiers - 1:
+		return false
+	return true
+
+
 func _refresh_label() -> void:
 	if _label == null:
 		return
 	var cap := CapabilityIds.to_label(required)
 	var line := display_name
 	if required != CapabilityIds.Id.NONE:
-		line = "%s\n[%s · Soft / 无则 Hard]" % [display_name, cap]
+		if _hard_allowed_now():
+			line = "%s\n[%s · Soft / 可强行(慢吵留痕)]" % [display_name, cap]
+		else:
+			line = "%s\n[%s · 须 Soft · 禁止强行]" % [display_name, cap]
 	if tiers > 1 and not _done:
 		line += "\n[施工 %d/%d · 夜间 · 每档 %s 或 %s]" % [
 			tier_done, tiers, _cost_text(), _kit_label(route_kit_id)
 		]
 		if _kit_credit > 0:
 			line += "\n[套件余 %d 档免费]" % _kit_credit
+		if not _hard_allowed_now():
+			line += "\n[本档禁止强行]"
 	if reinforced and not _done:
 		line += "\n[已加固：多耗原料×%d，没有则耗时×%.0f]" % [GameConst.REINFORCE_EXTRA_MATERIALS, GameConst.REINFORCE_TIME_MULT]
 	_label.set_info(line)
@@ -121,7 +137,26 @@ func _refresh_label() -> void:
 func try_use(user: AnimalActor) -> void:
 	if _done or _busy:
 		return
+	## Tiered work: plan payment first (may consume metal so climb Soft is not blocked by cargo).
+	var pay := &""
+	if tiers > 1:
+		pay = _plan_payment(user)
+		if pay == &"":
+			Bus.interact_feedback.emit("材料不足：每档需 %s 或 %s（缺：%s）" % [
+				_cost_text(), _kit_label(route_kit_id), _missing_text(user)
+			])
+			return
+	## After hypothetical pay, climb Soft must not be blocked by metal that is about to be spent.
 	var soft := required == CapabilityIds.Id.NONE or user.has_capability(required)
+	if soft and required == CapabilityIds.Id.CLIMB and user.is_carrying_heavy():
+		## One-shot climb gates (cage): refuse while heavy. Construction: metal in tier_cost is paid up-front below.
+		if tiers <= 1:
+			Bus.interact_feedback.emit("%s：负重（金属）无法攀爬 — 先卸下或用掉重物" % display_name)
+			return
+	if not soft and not _hard_allowed_now():
+		var why := "最后一档须具备才能，禁止强行" if (tiers > 1 and tier_done >= tiers - 1) else "此处禁止强行"
+		Bus.interact_feedback.emit("%s：%s（需要 %s）" % [display_name, why, CapabilityIds.to_label(required)])
+		return
 	if opens_path and requires_night and not Clock.allows_escape_actions():
 		## Cage doors may be opened by day so animals can go out gathering; routes may not.
 		var day_cage_outing := breach_style == BreachStyle.DESTROY and Clock.is_visitor_hours()
@@ -133,19 +168,20 @@ func try_use(user: AnimalActor) -> void:
 		else:
 			Bus.interact_feedback.emit("现在是%s — 越狱破障请等到夜间（笼门可在参观时段溜出搜集）" % Clock.phase_name())
 			return
-	## Tiered work: figure out how this tier is paid before committing time.
-	var pay := &""
-	if tiers > 1:
-		pay = _plan_payment(user)
-		if pay == &"":
-			Bus.interact_feedback.emit("材料不足：每档需 %s 或 %s（缺：%s）" % [
-				_cost_text(), _kit_label(route_kit_id), _missing_text(user)
-			])
-			return
 	_busy = true
+	## Pay construction costs up-front so Soft climb is not blocked mid-channel; refund on cancel.
+	var paid_upfront := false
+	if tiers > 1:
+		_pay_tier(user, pay)
+		paid_upfront = true
+	var rw := GameConst.route_work()
 	var wait := soft_seconds if soft else hard_seconds
 	if tiers > 1:
 		wait = (GameConst.TIER_SOFT_SEC if soft else GameConst.TIER_HARD_SEC) * Game.work_time_scale
+		if not soft:
+			wait *= rw.hard_time_mult
+	elif not soft:
+		wait *= rw.hard_time_mult
 	var pay_part := false
 	if reinforced:
 		pay_part = user.material_count() >= GameConst.REINFORCE_EXTRA_MATERIALS
@@ -159,17 +195,25 @@ func try_use(user: AnimalActor) -> void:
 	if soft:
 		Bus.interact_feedback.emit("使用%s：%s%s（稳）" % [label if required != CapabilityIds.Id.NONE else "通用", display_name, step])
 	else:
-		Bus.interact_feedback.emit("硬闯%s%s（无%s，吵且慢）…" % [display_name, step, label])
+		Bus.interact_feedback.emit("强行%s%s（无%s · 时×%.0f 噪×%.0f 痕×%.0f）…" % [
+			display_name, step, label, rw.hard_time_mult, rw.hard_noise_mult, rw.hard_trace_mult
+		])
 	if not await _channel(user, wait):
+		if paid_upfront:
+			_refund_tier(user, pay)
 		return
 	if not soft:
-		if _emit_noise(hard_noise, user):
+		var noise_amt := hard_noise * rw.hard_noise_mult
+		if _emit_noise(noise_amt, user):
+			if paid_upfront:
+				_refund_tier(user, pay)
 			_busy = false
 			return
+		## Traces only — never Alert.bump here. Staff discovery settles once.
+		TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
 	if pay_part:
 		user.consume_any_material(GameConst.REINFORCE_EXTRA_MATERIALS)
 	if tiers > 1:
-		_pay_tier(user, pay)
 		tier_done += 1
 		_refresh_label()
 		tier_completed.emit(tier_done, tiers)
@@ -258,6 +302,20 @@ func _pay_tier(user: AnimalActor, pay: StringName) -> void:
 				user.consume_item(m)
 
 
+func _refund_tier(user: AnimalActor, pay: StringName) -> void:
+	match pay:
+		&"credit":
+			_kit_credit += 1
+		&"kit":
+			## Undo kit consume: give kit back and clear the free credit it granted.
+			_kit_credit = 0
+			user.give_items([route_kit_id])
+		&"materials":
+			for m in tier_cost:
+				user.give_items([m])
+	Bus.interact_feedback.emit("施工取消，原料已退回")
+
+
 func _kit_label(id: StringName) -> String:
 	match id:
 		&"dig_kit":
@@ -282,10 +340,10 @@ func _emit_noise(amount: float, user: AnimalActor) -> bool:
 	if Clock.phase == Clock.Phase.NIGHT_QUIET:
 		Bus.interact_feedback.emit("噪音很大，但夜巡已歇岗…")
 		return false
+	## 統一走 Bus.noise_made；職員自行按聽距判定（不直接點名呼叫）。
+	Bus.noise_made.emit(user.global_position, clampf(amount, 0.1, 1.5), &"interact_hard")
 	var instant := false
 	for s in get_tree().get_nodes_in_group("staff"):
-		if s.has_method("alert_to_noise"):
-			s.call("alert_to_noise", user.global_position)
 		if s is Node3D:
 			var d := user.global_position.distance_to((s as Node3D).global_position)
 			## Only instant-catch when staff is already on top of the noise.
