@@ -42,11 +42,9 @@ func _ready() -> void:
 	_check(door._done and _session.exhibit_escaped, "白天溜出笼门")
 
 	await _gather_day(actor)
-	var metal := actor.item_count(KitIds.METAL)
-	## 背包上限后稳妥一天仍凑不齐整条线（或最多做到非最后一档）。
-	var max_hard_tiers := GameConst.ROUTE_TIERS - 1 ## 最后一档禁强行且无 DIG
-	var tiers_affordable := mini(mini(metal, actor.item_count(KitIds.WOOD)), max_hard_tiers)
-	_check(tiers_affordable < GameConst.ROUTE_TIERS, "第 1 天无法 Soft 完工挖掘线（档 %d < %d）" % [tiers_affordable, GameConst.ROUTE_TIERS])
+	## 背包上限：不拿套件、只走安全点，一天凑不齐整条线的原料。
+	var tiers_affordable := mini(actor.item_count(KitIds.METAL), actor.item_count(KitIds.WOOD))
+	_check(tiers_affordable < GameConst.ROUTE_TIERS, "第 1 天原料不够完工挖掘线（档 %d < %d）" % [tiers_affordable, GameConst.ROUTE_TIERS])
 
 	var rest_pt: ObservePoint = _geo.observe_points[0]
 	staff.global_position = rest_pt.global_position + Vector3(5, 0, 0)
@@ -56,7 +54,7 @@ func _ready() -> void:
 	_check(_session.has_intel(IntelIds.REST_TIME), "白天侦察得到歇岗情报")
 	staff.global_position = Vector3(10, 0.05, 10)
 
-	## --- Night 1: Hard mid-tiers only ---
+	## --- Night 1: raccoon lockpicks (Soft) as many tiers as the materials pay for ---
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	var dig := _geo.dig_interactable
 	actor.global_position = dig.global_position + Vector3(0.9, 0.05, 0.4)
@@ -74,11 +72,8 @@ func _ready() -> void:
 	var left := GameConst.ROUTE_TIERS - dig.tier_done
 	_check(actor.item_count(KitIds.METAL) >= left and actor.item_count(KitIds.WOOD) >= left, "第 2 天补够剩余 %d 档的原料" % left)
 
-	## --- Night 2: grant DIG Soft for last tier (首发无挖掘动物时的测试替身) ---
+	## --- Night 2 ---
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
-	var digger := actor.def.duplicate(true) as AnimalDef
-	digger.capabilities.append(CapabilityIds.Id.DIG)
-	actor.def = digger
 	actor.global_position = dig.global_position + Vector3(0.9, 0.05, 0.4)
 	await RouteHelper.finish(get_tree(), dig, actor, false)
 	_check(dig.tier_done == GameConst.ROUTE_TIERS and _session.route_dig_ready, "第 2 夜完工，挖掘线打通")

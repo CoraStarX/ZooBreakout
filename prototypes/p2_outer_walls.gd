@@ -63,11 +63,7 @@ func _ready() -> void:
 	var actor := party.controlled()
 	actor.global_position = dig_p + Vector3(0.8, 0, 0)
 	actor.velocity = Vector3.ZERO
-	await RouteHelper.finish(get_tree(), geom.dig_interactable, actor) ## Hard mid-tiers
-	var digger := actor.def.duplicate(true) as AnimalDef
-	digger.capabilities.append(CapabilityIds.Id.DIG)
-	actor.def = digger
-	await RouteHelper.finish(get_tree(), geom.dig_interactable, actor) ## Soft last
+	await RouteHelper.finish(get_tree(), geom.dig_interactable, actor) ## raccoon lockpick = Soft every tier
 	var t := 0.0
 	while geom.dig_interactable._busy and t < 8.0:
 		await get_tree().process_frame

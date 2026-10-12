@@ -62,14 +62,15 @@ static func dig_hole(blocker: Node3D, user: AnimalActor) -> void:
 
 
 static func climb_ledge(blocker: Node3D, user: AnimalActor, tree: SceneTree) -> void:
-	## Open south climb gap + low pads. Soft climb shows a brief vault over the wall.
+	## Open south climb gap + decorative pads. Soft climb shows a brief vault over the wall.
+	## Pads carry no collision: the climber is placed outside, and followers must walk through the gap.
 	var origin := blocker.global_position
 	var parent := blocker.get_parent()
 	if blocker is CollisionObject3D:
 		(blocker as CollisionObject3D).collision_layer = 0
 	blocker.visible = false
 	var approach := StaticBody3D.new()
-	approach.collision_layer = 1
+	approach.collision_layer = 0
 	approach.position = origin + Vector3(0, 0.12, 0.7)
 	var acol := CollisionShape3D.new()
 	var ashape := BoxShape3D.new()
@@ -86,7 +87,7 @@ static func climb_ledge(blocker: Node3D, user: AnimalActor, tree: SceneTree) -> 
 	approach.add_child(ami)
 	parent.add_child(approach)
 	var ledge := StaticBody3D.new()
-	ledge.collision_layer = 1
+	ledge.collision_layer = 0
 	ledge.position = origin + Vector3(0, 0.55, 0.0)
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
@@ -103,7 +104,7 @@ static func climb_ledge(blocker: Node3D, user: AnimalActor, tree: SceneTree) -> 
 	ledge.add_child(mi)
 	parent.add_child(ledge)
 	var land := StaticBody3D.new()
-	land.collision_layer = 1
+	land.collision_layer = 0
 	land.position = origin + Vector3(0, 0.12, -0.7)
 	var lcol := CollisionShape3D.new()
 	var lshape := BoxShape3D.new()

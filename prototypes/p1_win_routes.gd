@@ -194,11 +194,17 @@ func _test_soft_climb_lands_outside() -> void:
 
 
 func _test_hard_climb_raccoon_movable() -> void:
-	## 中间档可 Hard；最后一档须 Soft。先强行两档再临时赋予攀爬 Soft 完工，验证弹出后可走。
+	## 浣熊强行中间两档（最后一档禁强行），猴 Soft 收尾翻出；之后浣熊须能从南外墙缺口走出去。
+	_party.rescue(&"monkey", false)
+	await get_tree().process_frame
 	var raccoon := _party.controlled()
+	var monkey: AnimalActor = null
+	for a in _party.party():
+		if a != raccoon:
+			monkey = a
 	var climb := _geometry.climb_interactable
-	if raccoon == null or climb == null or raccoon.def.id != &"raccoon":
-		_fail("M1-HardClimb", "raccoon/climb missing")
+	if raccoon == null or monkey == null or climb == null or raccoon.def.id != &"raccoon":
+		_fail("M1-HardClimb", "raccoon/monkey/climb missing")
 		return
 	if raccoon.has_capability(CapabilityIds.Id.CLIMB):
 		_fail("M1-HardClimb", "raccoon 不应有攀爬能力")
@@ -207,45 +213,35 @@ func _test_hard_climb_raccoon_movable() -> void:
 	raccoon.global_position = climb.global_position + Vector3(0, 0, 1.0)
 	raccoon.velocity = Vector3.ZERO
 	await RouteHelper.finish(get_tree(), climb, raccoon) ## Hard mid-tiers; last forbids Hard
-	var soft_def := raccoon.def.duplicate(true) as AnimalDef
-	soft_def.capabilities.append(CapabilityIds.Id.CLIMB)
-	raccoon.def = soft_def
-	await RouteHelper.finish(get_tree(), climb, raccoon) ## Soft last → eject
+	if climb.tier_done != climb.tiers - 1 or climb._done:
+		_fail("M1-HardClimb", "浣熊应停在最后一档前 tier=%d/%d" % [climb.tier_done, climb.tiers])
+		return
+	monkey.order_hold()
+	monkey.global_position = climb.global_position + Vector3(0.6, 0, 1.0)
+	monkey.velocity = Vector3.ZERO
+	monkey._hold_position = monkey.global_position
+	await RouteHelper.finish(get_tree(), climb, monkey) ## monkey Soft last → eject
 	var t := 0.0
 	while climb._busy and t < 8.0:
 		await get_tree().process_frame
 		t += get_process_delta_time()
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	await get_tree().physics_frame
-	var pos0 := raccoon.global_position
-	if pos0.z >= gate_z - 0.5:
-		_fail("M1-HardClimb", "Hard 攀爬未弹出园外 pos=%s" % pos0)
+	if not _session.route_climb_ready or monkey.global_position.z >= gate_z - 0.5:
+		_fail("M1-HardClimb", "猴收尾后未翻出 ready=%s monkey=%s" % [_session.route_climb_ready, monkey.global_position])
 		return
-	if not _session.route_climb_ready:
-		_fail("M1-HardClimb", "route_climb_ready 未置位")
-		return
-	## Must not auto-win: landing is corridor, not ExitSouth (solo raccoon repro).
-	await get_tree().physics_frame
-	await get_tree().physics_frame
 	if _session.outcome != RunSession.Outcome.NONE:
-		_fail("M1-HardClimb", "攀爬落点误触结算 outcome=%s pos=%s" % [_session.outcome, pos0])
+		_fail("M1-HardClimb", "攀爬落点误触结算 outcome=%s" % _session.outcome)
 		return
-	var exit_z := _geometry.exit_south.global_position.z
-	if pos0.z <= exit_z + 1.0:
-		_fail("M1-HardClimb", "落点太靠南已进/贴出口区 pos=%s exit_z=%.1f" % [pos0, exit_z])
-		return
-	## Controlled input zeros velocity in headless — probe with test_move / displace.
-	var blocked := raccoon.test_move(raccoon.global_transform, Vector3(0, 0, -1.2))
-	raccoon.global_position = pos0 + Vector3(0.0, 0.0, -1.0)
+	## Raccoon still inside: walk through the opened gate (headless input is zero — probe with test_move).
+	raccoon.global_position = Vector3(climb.global_position.x, 0.05, gate_z)
 	raccoon.velocity = Vector3.ZERO
 	await get_tree().physics_frame
-	await get_tree().physics_frame
-	var pos1 := raccoon.global_position
-	if not blocked and pos1.z < pos0.z - 0.4 and pos1.y < 1.15:
-		_ok("M1-HardClimb", "浣熊 Hard 攀爬后可走且未秒结算 pos=%s→%s" % [pos0, pos1])
+	var blocked := raccoon.test_move(raccoon.global_transform, Vector3(0, 0, -2.4))
+	if not blocked:
+		_ok("M1-HardClimb", "浣熊 Hard 两档 + 猴 Soft 收尾；浣熊可穿过南外墙缺口")
 	else:
-		_fail("M1-HardClimb", "攀爬后卡住 blocked=%s pos0=%s pos1=%s" % [blocked, pos0, pos1])
+		_fail("M1-HardClimb", "南外墙缺口仍挡住浣熊 pos=%s" % raccoon.global_position)
 
 
 func _test_max_alert_lose() -> void:

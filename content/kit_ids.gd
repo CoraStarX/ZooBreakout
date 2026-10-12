@@ -16,9 +16,15 @@ static func is_material(id: StringName) -> bool:
 	return MATERIALS.has(id)
 
 
-## Heavy cargo: move −40% and climb verb disabled while any such item is carried.
+static func def_for(id: StringName) -> ItemDef:
+	var path := "res://content/items/%s.tres" % String(id)
+	return load(path) as ItemDef if ResourceLoader.exists(path) else null
+
+
+## Heavy flag lives in ItemDef data (content/items/<id>.tres); unknown ids are light.
 static func is_heavy(id: StringName) -> bool:
-	return id == METAL
+	var d := def_for(id)
+	return d != null and d.heavy
 
 
 static func display_name(id: StringName) -> String:

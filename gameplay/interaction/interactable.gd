@@ -10,6 +10,8 @@ signal tier_completed(done: int, total: int)
 
 @export var display_name: String = "交互点"
 @export var required: CapabilityIds.Id = CapabilityIds.Id.NONE
+## Other capabilities that also count as Soft (any one is enough). Only meaningful with `required` set.
+@export var also_accepts: Array[int] = []
 @export var soft_seconds: float = -1.0
 @export var hard_seconds: float = -1.0
 @export var hard_noise: float = 1.0
@@ -111,22 +113,50 @@ func _hard_allowed_now() -> bool:
 	return true
 
 
+## Every capability that counts as Soft here: `required` plus `also_accepts`.
+func accepted_caps() -> Array[int]:
+	var out: Array[int] = []
+	if required != CapabilityIds.Id.NONE:
+		out.append(required)
+	for c in also_accepts:
+		if not out.has(c):
+			out.append(c)
+	return out
+
+
+func requirement_text() -> String:
+	var parts := PackedStringArray()
+	for c in accepted_caps():
+		parts.append(CapabilityIds.to_label(c as CapabilityIds.Id))
+	return "或".join(parts) if not parts.is_empty() else "—"
+
+
 func _cap_text() -> String:
-	return CapabilityIds.to_label(required)
+	return requirement_text()
 
 
 ## Whether this animal could ever open it (talent, or Hard allowed). Ignores phase, cargo and payment.
 func can_be_opened_by(def: AnimalDef) -> bool:
 	if required == CapabilityIds.Id.NONE or allow_hard:
 		return true
-	return def != null and def.has_capability(required)
+	if def == null:
+		return false
+	for c in accepted_caps():
+		if def.has_capability(c as CapabilityIds.Id):
+			return true
+	return false
 
 
 ## ignore_heavy = true: has the talent at all; false: can use it right now (heavy cargo blocks climb).
 func _qualifies(user: AnimalActor, ignore_heavy: bool) -> bool:
 	if required == CapabilityIds.Id.NONE:
 		return true
-	return user.has_capability(required) if ignore_heavy else user.effective_has_capability(required)
+	for c in accepted_caps():
+		var cap := c as CapabilityIds.Id
+		var ok := user.has_capability(cap) if ignore_heavy else user.effective_has_capability(cap)
+		if ok:
+			return true
+	return false
 
 
 func _refresh_label() -> void:
@@ -168,7 +198,7 @@ func try_use(user: AnimalActor) -> void:
 	var soft := _qualifies(user, true)
 	## One-shot gates: heavy cargo blocks climb right now. Construction pays metal up-front below.
 	if soft and tiers <= 1 and not _qualifies(user, false):
-		Bus.interact_feedback.emit("%s：负重（金属）无法攀爬 — 先卸下或用掉重物" % display_name)
+		Bus.interact_feedback.emit("%s：背着重物（套件）无法攀爬 — 先把套件用在外墙施工点" % display_name)
 		return
 	if not soft and not _hard_allowed_now():
 		var why := "最后一档须具备才能，禁止强行" if (tiers > 1 and tier_done >= tiers - 1) else "此处禁止强行"

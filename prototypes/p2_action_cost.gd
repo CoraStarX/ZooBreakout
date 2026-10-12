@@ -42,45 +42,38 @@ func _ready() -> void:
 	var got := raccoon.give_items([KitIds.METAL])
 	_check(got == 0 and raccoon.item_count(KitIds.METAL) == 0, "满包拒收金属")
 
-	## Heavy: −40% speed, climb disabled.
-	raccoon.inventory.clear()
-	raccoon.give_items([KitIds.METAL])
-	_check(raccoon.is_carrying_heavy(), "持金属=重物")
-	_check(is_equal_approx(raccoon.current_move_speed(), raccoon.def.move_speed * 0.6), "重物移速 ×0.6")
-	_check(raccoon.has_capability(CapabilityIds.Id.CLIMB) == false, "浣熊本无攀爬")
+	## Heavy comes from ItemDef data: only kits; raw materials are light.
+	for id in [KitIds.ROPE, KitIds.WOOD, KitIds.METAL]:
+		_check(KitIds.def_for(id) != null and not KitIds.is_heavy(id), "%s 有 ItemDef 且不是重物" % KitIds.display_name(id))
+		monkey.inventory.clear()
+		monkey.give_items([id])
+		_check(is_equal_approx(monkey.current_move_speed(), monkey.def.move_speed)
+			and monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "带%s：移速与攀爬不受影响" % KitIds.display_name(id))
+	for id in [KitIds.DIG, KitIds.CLIMB]:
+		_check(KitIds.is_heavy(id), "%s 标记为重物" % KitIds.display_name(id))
+		monkey.inventory.clear()
+		monkey.give_items([id])
+		_check(is_equal_approx(monkey.current_move_speed(), monkey.def.move_speed * GameConst.action_cost().heavy_speed_mult)
+			and not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "带%s：移速 ×0.6 且禁用攀爬" % KitIds.display_name(id))
+	_check(monkey.has_capability(CapabilityIds.Id.CLIMB), "猴本身仍有攀爬动词")
 	monkey.inventory.clear()
-	monkey.give_items([KitIds.METAL])
-	_check(monkey.has_capability(CapabilityIds.Id.CLIMB), "猴有攀爬动词")
-	_check(not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "持重物时有效攀爬关闭")
 
-	## Cage lock: no Hard.
-	raccoon.inventory.clear()
-	## Strip dexterity temporarily.
-	var door_user_def := raccoon.def.duplicate(true) as AnimalDef
-	door_user_def.capabilities.clear()
-	raccoon.def = door_user_def
+	## Cage lock: no Hard. The monkey has no lockpick.
+	monkey.order_hold()
 	door.relock()
 	door._done = false
-	_stand(raccoon, door)
+	_stand(monkey, door)
+	monkey._hold_position = monkey.global_position
 	Clock.set_phase(Clock.Phase.OPEN)
-	door.try_use(raccoon)
+	door.try_use(monkey)
 	await get_tree().process_frame
-	_check(not door._done and not door._busy, "无巧手且 allow_hard=false → 拒绝")
-
-	## Restore raccoon def from file.
-	raccoon.def = load("res://content/animals/raccoon.tres") as AnimalDef
+	_check(not door._done and not door._busy, "猴无巧手且 allow_hard=false → 拒绝开浣熊笼")
 
 	## Monkey cage needs the rescuer's lockpick, not the monkey's climb.
 	var mdoor: Interactable = geo.cage_doors[&"monkey"]
 	_check(mdoor.required == CapabilityIds.Id.DEXTERITY and not mdoor.allow_hard, "猴笼 = 开锁（巧手）且禁止强行")
 	_check(mdoor._qualifies(raccoon, true), "浣熊（巧手）可 Soft 开猴笼")
-	_check(not mdoor.can_be_opened_by(monkey.def), "猴自己打不开猴笼")
-	var nobody := raccoon.def.duplicate(true) as AnimalDef
-	nobody.capabilities.clear()
-	var real_def := raccoon.def
-	raccoon.def = nobody
-	_check(not mdoor._qualifies(raccoon, true) and not mdoor.allow_hard, "无才能者开猴笼被拒")
-	raccoon.def = real_def
+	_check(not mdoor.can_be_opened_by(monkey.def) and not mdoor._qualifies(monkey, true), "猴自己打不开猴笼")
 
 	## Noise with no staff nearby must not raise Alert.
 	Alert.level = 0
@@ -89,21 +82,19 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_check(Alert.level == 0, "无员工在场：噪音不升 Alert")
 
-	## Hard mid-tier: time mult, trace spawn, still no Alert from noise alone.
+	## Hard mid-tier (raccoon has no climb): time mult, trace spawn, still no Alert from noise alone.
+	var climb := geo.climb_interactable
 	Game.work_time_scale = 0.08
-	dig.tier_done = 0
-	dig._done = false
-	dig._kit_credit = 0
 	raccoon.inventory.clear()
-	raccoon.give_items([KitIds.WOOD, KitIds.METAL])
-	_stand(raccoon, dig)
+	raccoon.give_items([KitIds.ROPE, KitIds.METAL])
+	_stand(raccoon, climb)
 	var alert_before := Alert.level
 	var t0 := Time.get_ticks_msec()
-	dig.try_use(raccoon)
-	await _idle(dig)
+	climb.try_use(raccoon)
+	await _idle(climb)
 	var hard_ms := Time.get_ticks_msec() - t0
 	var expect_ms := int(GameConst.TIER_HARD_SEC * GameConst.route_work().hard_time_mult * Game.work_time_scale * 1000.0 * 0.75)
-	_check(dig.tier_done == 1, "Hard 完成第 1 档")
+	_check(climb.tier_done == 1, "Hard 完成第 1 档")
 	_check(hard_ms >= expect_ms, "Hard 含时×3（%dms ≥ %dms）" % [hard_ms, expect_ms])
 	_check(Alert.level == alert_before, "Hard 噪音/完工不直接升 Alert（%d）" % Alert.level)
 	var traces := get_tree().get_nodes_in_group("traces")
@@ -127,26 +118,38 @@ func _ready() -> void:
 	staff.set_physics_process(false)
 	staff.global_position = Vector3(40, 0.05, 40)
 
-	## Last tier forbids Hard without DIG.
-	dig.tier_done = GameConst.ROUTE_TIERS - 1
-	dig._done = false
+	## Last tier forbids Hard: raccoon (no climb) is refused at the climb line.
+	climb.tier_done = GameConst.ROUTE_TIERS - 1
 	raccoon.inventory.clear()
-	raccoon.give_items([KitIds.WOOD, KitIds.METAL])
-	_stand(raccoon, dig)
-	dig.try_use(raccoon)
+	raccoon.give_items([KitIds.ROPE, KitIds.METAL])
+	_stand(raccoon, climb)
+	climb.try_use(raccoon)
 	await get_tree().process_frame
-	_check(dig.tier_done == GameConst.ROUTE_TIERS - 1 and not dig._busy, "最后一档无挖掘才能 → 拒绝强行")
+	_check(climb.tier_done == GameConst.ROUTE_TIERS - 1 and not climb._busy, "攀爬线最后一档：浣熊无攀爬 → 拒绝强行")
 
-	## Soft last tier with DIG granted on a duplicate def.
-	var digger := raccoon.def.duplicate(true) as AnimalDef
-	digger.capabilities.append(CapabilityIds.Id.DIG)
-	raccoon.def = digger
+	## Dig line takes squeeze or lockpick; DIG stays reserved for the badger.
+	for it in [dig, climb]:
+		_check(not (it as Interactable).accepted_caps().has(CapabilityIds.Id.DIG), "%s 不要求挖掘" % (it as Interactable).display_name)
+	_check(dig.accepted_caps().has(CapabilityIds.Id.SQUEEZE) and dig.accepted_caps().has(CapabilityIds.Id.DEXTERITY), "挖洞线 = 钻缝或巧手")
+	_check(not dig._qualifies(monkey, true), "猴（只有攀爬）在挖洞线不算 Soft")
+	monkey.order_hold()
+	monkey.inventory.clear()
+	monkey.give_items([KitIds.WOOD, KitIds.METAL])
+	dig.tier_done = GameConst.ROUTE_TIERS - 1
+	_stand(monkey, dig)
+	monkey._hold_position = monkey.global_position
+	dig.try_use(monkey)
+	await get_tree().process_frame
+	_check(dig.tier_done == GameConst.ROUTE_TIERS - 1 and not dig._busy, "挖洞线最后一档：猴无钻缝/巧手 → 拒绝强行")
+	monkey.inventory.clear()
 	raccoon.inventory.clear()
 	raccoon.give_items([KitIds.WOOD, KitIds.METAL])
 	_stand(raccoon, dig)
+	var traces_before := get_tree().get_nodes_in_group("traces").size()
 	dig.try_use(raccoon)
 	await _idle(dig)
-	_check(dig.tier_done == GameConst.ROUTE_TIERS and dig._done, "有挖掘才能 Soft 完成最后一档")
+	_check(dig.tier_done == GameConst.ROUTE_TIERS and dig._done, "浣熊（巧手）Soft 完成挖洞线最后一档")
+	_check(get_tree().get_nodes_in_group("traces").size() == traces_before, "Soft 不留痕迹")
 
 	print("")
 	print("=== P2 ACTION COST SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])

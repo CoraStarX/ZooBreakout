@@ -6,8 +6,9 @@ enum Id {
 	NONE = 0,
 	DEXTERITY = 1, ## 巧手
 	CLIMB = 2, ## 攀爬
-	DIG = 3, ## 挖掘
+	DIG = 3, ## 挖掘 — 留给獾；现有路线均不要求
 	RAM = 4, ## 冲撞
+	SQUEEZE = 5, ## 钻缝
 }
 
 
@@ -21,5 +22,7 @@ static func to_label(id: Id) -> String:
 			return "挖掘"
 		Id.RAM:
 			return "冲撞"
+		Id.SQUEEZE:
+			return "钻缝"
 		_:
 			return "—"

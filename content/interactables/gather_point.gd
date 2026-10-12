@@ -93,7 +93,7 @@ func try_use(user: AnimalActor) -> void:
 	if user.inventory_free_slots() <= 0:
 		Bus.interact_feedback.emit("背包满了（%d/%d）— 先卸下或用掉一些" % [user.inventory.size(), user.inventory_capacity()])
 		return
-	var rich := required == CapabilityIds.Id.NONE or user.has_capability(required)
+	var rich := required == CapabilityIds.Id.NONE or user.effective_has_capability(required)
 	var amount := yield_rich if rich else yield_poor
 	amount = mini(amount, user.inventory_free_slots())
 	var wait := GameConst.GATHER_SEC if rich else GameConst.GATHER_POOR_SEC
@@ -101,6 +101,8 @@ func try_use(user: AnimalActor) -> void:
 	_progress.visible = true
 	if rich:
 		Bus.interact_feedback.emit("搜集 %s…" % display_name)
+	elif user.has_capability(required):
+		Bus.interact_feedback.emit("背着重物（套件）用不了%s，只能慢慢扒拉 %s…" % [CapabilityIds.to_label(required), display_name])
 	else:
 		Bus.interact_feedback.emit("缺%s，只能慢慢扒拉 %s…" % [CapabilityIds.to_label(required), display_name])
 	var elapsed := 0.0

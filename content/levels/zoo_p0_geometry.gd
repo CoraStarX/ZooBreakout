@@ -67,9 +67,10 @@ func _build_level() -> void:
 	_wall(Vector3(-4.5, 0.75, -10), Vector3(3.2, 1.5, 0.4))
 	## Dig = west outer wall. Corridor from courtyard to the wall is open after exhibit escape.
 	dig_interactable = _make_interactable(
-		Vector3(-11.2, 0.5, 1.5), "外墙挖洞", CapabilityIds.Id.DIG, west_outer_gate,
+		Vector3(-11.2, 0.5, 1.5), "外墙挖洞", CapabilityIds.Id.SQUEEZE, west_outer_gate,
 		0.0, true, false, Interactable.BreachStyle.DIG_HOLE
 	)
+	dig_interactable.also_accepts = [CapabilityIds.Id.DEXTERITY]
 	dig_interactable.route_kit_id = KitIds.DIG
 	dig_interactable.tiers = GameConst.ROUTE_TIERS
 	dig_interactable.tier_cost = [KitIds.WOOD, KitIds.METAL]
