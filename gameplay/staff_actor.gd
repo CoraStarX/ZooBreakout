@@ -105,6 +105,13 @@ const STUCK_CHECK_SEC := 1.5
 const STUCK_MIN_MOVE := 0.3
 var _stuck_t: float = 0.0
 var _stuck_from: Vector3 = Vector3.ZERO
+## Last patrol arrival came from the wall fallback (shown on F3); cleared on the next pick.
+var stuck_fallback_active: bool = false
+var stuck_fallback_count: int = 0
+var focus_route_note: String = ""
+var _focus_trip: bool = false
+var _focus_goal: Vector3 = Vector3.ZERO
+var _focus_hop_final: bool = true
 var _last_seen_pos: Vector3 = Vector3.ZERO
 var _has_last_seen: bool = false
 
@@ -836,11 +843,35 @@ func _patrol_network(delta: float) -> void:
 		_pick_next_patrol_point(false)
 	_motor.speed = _patrol_move_speed()
 	velocity = _motor.tick_velocity(global_position)
-	if _motor.arrived(global_position) or _patrol_blocked(delta):
+	if _motor.arrived(global_position):
+		if _focus_trip and not _focus_hop_final:
+			_route_focus_hop()
+			return
+		_arrive_network_point()
+	elif _patrol_blocked(delta):
+		stuck_fallback_active = true
+		stuck_fallback_count += 1
 		_arrive_network_point()
 
 
-## Straight-line motor: walking into a wall for a while counts as arriving (look around there).
+## Full-search trip: walk straight if the goal is clear, else hop along patrol points; an unreachable
+## goal is replaced by the reachable patrol point nearest to it.
+func _route_focus_hop() -> void:
+	var space := get_world_3d().direct_space_state if get_world_3d() else null
+	var r := StaffReach.next_hop(space, global_position, _focus_goal, patrol_network.positions(), [get_rid()])
+	_focus_hop_final = bool(r["final"])
+	_motor.set_target(r["pos"])
+	if not bool(r["ok"]):
+		focus_route_note = "不可达（直走，靠撞墙兜底）"
+	elif bool(r["substitute"]):
+		focus_route_note = "目标不可达 → 改去最近可达巡逻点"
+	elif _focus_hop_final:
+		focus_route_note = "直达"
+	else:
+		focus_route_note = "经巡逻点接近"
+
+
+## Straight-line motor: walking into a wall for a while counts as arriving (last-resort fallback).
 func _patrol_blocked(delta: float) -> bool:
 	_stuck_t += delta
 	if _stuck_t < STUCK_CHECK_SEC:
@@ -849,6 +880,15 @@ func _patrol_blocked(delta: float) -> bool:
 	_stuck_t = 0.0
 	_stuck_from = global_position
 	return moved < STUCK_MIN_MOVE
+
+
+## F3 line: full-search routing and whether the wall fallback is in effect.
+func nav_debug_text() -> String:
+	var parts := PackedStringArray()
+	if _focus_trip:
+		parts.append("搜查:%s" % focus_route_note)
+	parts.append("撞墙兜底:%s（累计 %d）" % ["是" if stuck_fallback_active else "否", stuck_fallback_count])
+	return "  ".join(parts)
 
 
 func _pick_next_patrol_point(snap_pos: bool) -> void:
@@ -865,7 +905,12 @@ func _pick_next_patrol_point(snap_pos: bool) -> void:
 	if not patrol_network.reserve(pick.id, sid):
 		return
 	_patrol_point_id = pick.id
+	stuck_fallback_active = false
 	_motor.set_target(pick.position)
+	_focus_trip = patrol_network.is_focus_id(pick.id)
+	if _focus_trip:
+		_focus_goal = pick.position
+		_route_focus_hop()
 	if snap_pos:
 		global_position = pick.position
 		_arrive_network_point()

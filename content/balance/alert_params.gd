@@ -19,6 +19,10 @@ extends Resource
 @export var quiet_window_mult_at_alert_4: float = 0.75
 ## Full search (max Alert): staff keep patrolling through what would be the quiet window.
 @export var full_search_cancels_quiet: bool = true
-## Full search: patrol heat pinned on route points and the last known animal position (existing heat weight).
-## Must outweigh staleness (seconds since visit; never-visited points ≈ 1e4) to keep the staff there.
+## Full search: heat pinned on the focus points (unfinished route points + last known animal position).
+## Patrol pick score (PatrolScoreMath) = staleness×1.0 + importance×1.2 + heat×1.4 − distance×0.08 − recent 2.0,
+## where staleness = seconds since last visit and never-visited points start at last_visited = −9999
+## (staleness ≈ 1e4 + run time). Normal points' heat is capped at 100 (apply_heat_near), so it cannot win.
+## 10000 × 1.4 = 14000 beats any normal point for runs under ~4000 s (~1 h), so every pick lands on a focus
+## point while the search lasts. Lower it to let ordinary patrol points mix back in.
 @export var full_search_focus_heat: float = 10000.0

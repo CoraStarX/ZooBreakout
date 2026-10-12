@@ -358,21 +358,52 @@ func _full_search(raccoon: AnimalActor) -> void:
 		_staff._arrive_network_point()
 	_check(net.focus_points.is_empty() and picks == 0, "降到 4：焦点清空，回到一般巡逻")
 
+	## Reachability: a body-sized sweep through the west outer wall is blocked; a goal outside is substituted.
+	var space := _staff.get_world_3d().direct_space_state
+	var inside := dig.global_position + dig.guard_offset
+	var outside := Vector3(dig.global_position.x - 3.0, inside.y, inside.z)
+	_check(not StaffReach.clear_line(space, inside, outside, [_staff.get_rid()]), "直线可达检查：穿外墙判为不可达")
+	var hop := StaffReach.next_hop(space, Vector3(5.5, 0.05, 5.5), outside, net.positions(), [_staff.get_rid()])
+	_check(bool(hop["ok"]) and bool(hop["substitute"]), "墙外目标：改选最近的可达巡逻点")
+
+	## Real run: staff walk the focus trips; in the normal map the wall fallback never fires.
 	Alert.level = 5
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 	_reset_staff()
-	await _stand(raccoon, Vector3(-8.0, 0.05, 6.0))
+	_staff._last_known_valid = false
+	_staff._has_last_seen = false
+	_staff._sync_full_search_focus()
+	var animals := get_tree().get_nodes_in_group("animals")
+	for a in animals:
+		a.remove_from_group("animals") ## keep the staff on patrol, not chasing (sensing only)
 	_staff.global_position = Vector3(5.5, _staff.global_position.y, 5.5)
 	_staff._dwell_left = 0.0
 	_staff._motor.clear_target()
-	_staff.set_physics_process(true)
+	_staff.stuck_fallback_count = 0
+	var notes := {}
+	var arrivals := {}
 	var states_ok := true
-	for i in 60:
+	Engine.time_scale = 4.0
+	_staff.set_physics_process(true)
+	var t := 0.0
+	while t < 40.0:
 		await get_tree().physics_frame
+		t += get_physics_process_delta_time()
 		if _staff.state == StaffActor.State.REST:
 			states_ok = false
+		if _staff.is_heading_to_focus():
+			notes[_staff.focus_route_note] = true
+			if _staff._dwell_left > 0.0:
+				arrivals[_staff._patrol_point_id] = true
 	_staff.set_physics_process(false)
-	_check(states_ok and _staff.is_heading_to_focus(), "实际运行：职员不歇岗，正前往焦点（目标 %s）" % _staff._patrol_point_id)
+	Engine.time_scale = 1.0
+	for a in animals:
+		a.add_to_group("animals")
+	print("  focus trips: %s · arrivals %s · pos %s" % [notes.keys(), arrivals.keys(), _staff.global_position])
+	_check(states_ok, "实际运行 40s：警戒 5 职员不歇岗")
+	_check(arrivals.size() >= 2, "实际走到焦点（%d 个：%s）" % [arrivals.size(), arrivals.keys()])
+	_check(_staff.stuck_fallback_count == 0, "正常情况下不触发撞墙兜底（%d 次）" % _staff.stuck_fallback_count)
+	_check(_staff.nav_debug_text().contains("撞墙兜底:否"), "F3 显示兜底状态：%s" % _staff.nav_debug_text())
 	Alert.level = 0
 
 

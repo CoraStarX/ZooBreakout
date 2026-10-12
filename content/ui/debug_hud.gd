@@ -105,10 +105,10 @@ func _refresh() -> void:
 	if world and world.has_method("get_staff"):
 		var st: StaffActor = world.call("get_staff")
 		if st:
-			staff_line = "职员AI: %s  awareness:%.0f  Alert(跑团):%d  debug:%s" % [
-				st.state_name(), st.awareness, Alert.level, "ON" if Game.staff_ai_debug else "off"
+			staff_line = "职员AI: %s  awareness:%.0f  Alert(跑团):%d  debug:%s\n  %s" % [
+				st.state_name(), st.awareness, Alert.level, "ON" if Game.staff_ai_debug else "off", st.nav_debug_text()
 			]
-	var debug_hint := " · Debug:R跳过解救 T推时段" if Game.debug_enabled else ""
+	var debug_hint := " · Debug:R跳过解救 N推时段" if Game.debug_enabled else ""
 	var rest_text := "歇岗:未知"
 	var intel_line := "情报: —"
 	if world and world.get("session") is RunSession:
