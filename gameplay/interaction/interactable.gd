@@ -273,6 +273,9 @@ func try_use(user: AnimalActor) -> void:
 			Bus.interact_feedback.emit("%s 施工 %d/%d 完成" % [display_name, tier_done, tiers])
 			_busy = false
 			return
+		if not stash.is_empty():
+			Bus.interact_feedback.emit("%s 完工：剩余存料已用尽（%s）" % [display_name, _stash_text()])
+			stash.clear()
 	await _complete(soft, user)
 	_busy = false
 

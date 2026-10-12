@@ -30,6 +30,8 @@ var _rest_l: Label
 var _obj_l: Label
 var _who_l: Label
 var _item_rows: Dictionary = {}
+## What X does right now (store at route point / drop on ground).
+var _drop_l: Label
 var _alert_pips: Array[ColorRect] = []
 var _intel_l: Label
 var _dig_bar: ProgressBar
@@ -146,6 +148,10 @@ func _build() -> void:
 		row.add_child(l)
 		inv.add_child(row)
 		_item_rows[id] = {"row": row, "label": l}
+	_drop_l = UIKit.label("", 14, UIKit.ACCENT)
+	_drop_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_drop_l.custom_minimum_size = Vector2(230, 0)
+	rv.add_child(_drop_l)
 	rv.add_child(UIKit.label("警戒", 13, UIKit.TEXT_DIM))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
@@ -205,7 +211,7 @@ func _build() -> void:
 	hv.add_child(_hint_l)
 
 	## --- key legend (bottom right) ---
-	_keys_l = UIKit.label("WASD 移动 · E 交互 · Tab 换控 · F/H 跟随/待命 · Esc 暂停", 13, UIKit.TEXT_DIM)
+	_keys_l = UIKit.label("WASD 移动 · E 交互 · X 放下/存料 · Tab 换控 · F/H 跟随/待命 · Esc 暂停", 13, UIKit.TEXT_DIM)
 	_keys_l.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_keys_l.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_keys_l.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -282,6 +288,8 @@ func _refresh() -> void:
 			(entry["row"] as Control).visible = n > 0 or KitIds.is_material(id)
 			(entry["label"] as Label).text = "%s %d" % [KitIds.display_name(id), n]
 			(entry["label"] as Label).modulate = Color.WHITE if n > 0 else Color(1, 1, 1, 0.4)
+		_drop_l.text = me.drop_preview() if me.is_controlled else ""
+		_drop_l.visible = _drop_l.text != ""
 	for i in _alert_pips.size():
 		_alert_pips[i].color = Color(0.9, 0.25, 0.2) if i < Alert.level else Color(0.3, 0.3, 0.3)
 

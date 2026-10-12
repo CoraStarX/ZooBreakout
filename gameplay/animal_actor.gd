@@ -669,17 +669,35 @@ func try_drop() -> bool:
 			point.display_name, moved, inventory.size(), inventory_capacity()
 		])
 		return true
-	var idx := inventory.size() - 1
-	for i in inventory.size():
-		if KitIds.is_heavy(inventory[i]):
-			idx = i
-			break
+	var idx := _drop_index()
 	var id: StringName = inventory[idx]
 	inventory.remove_at(idx)
 	var parent_n := get_parent() if get_parent() else get_tree().current_scene
 	GroundItem.spawn(parent_n, id, global_position + _facing * 0.6 + Vector3(0, 0.02, 0))
 	Bus.interact_feedback.emit("放下 %s（E 可捡回）" % KitIds.display_name(id))
 	return true
+
+
+## What X would do right now (HUD shows it before the press). Empty when nothing to drop.
+func drop_preview() -> String:
+	if is_confined or inventory.is_empty():
+		return ""
+	var point := _nearby_stash_point()
+	if point:
+		var names := PackedStringArray()
+		for id in inventory:
+			if point.accepts_stash(id):
+				names.append(KitIds.display_name(id))
+		return "X 存入「%s」：%s" % [point.display_name, "、".join(names)]
+	return "X 丢在地上：%s" % KitIds.display_name(inventory[_drop_index()])
+
+
+## Heavy item first, otherwise the last one picked up.
+func _drop_index() -> int:
+	for i in inventory.size():
+		if KitIds.is_heavy(inventory[i]):
+			return i
+	return inventory.size() - 1
 
 
 func _nearby_stash_point() -> Interactable:
