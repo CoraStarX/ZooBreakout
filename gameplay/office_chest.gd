@@ -1,17 +1,22 @@
 class_name OfficeChest
-extends Area3D
-## Content/GamePlay glue: steal confiscated items back from the office.
+extends Interactable
+## Steal confiscated items back from the office. Same rules as every Interactable:
+## Soft with a lockpick or climb; otherwise Hard (RouteWorkParams time/noise multipliers, leaves a trace),
+## the noise only reaches staff through their own hearing, and any capture goes through the staff chase.
 
-## Verbs that open the chest quietly (Soft); without one it is a loud Hard attempt.
-@export var soft_caps: Array[CapabilityIds.Id] = [CapabilityIds.Id.DEXTERITY, CapabilityIds.Id.CLIMB]
 
-var _busy: bool = false
+func _init() -> void:
+	display_name = "办公室储物柜（取回没收物品）"
+	required = CapabilityIds.Id.DEXTERITY
+	also_accepts = [CapabilityIds.Id.CLIMB]
+	one_shot = false
+	opens_path = false
+	requires_night = false
+	## The chest sits inside the solid 3×3 office block: you work it from the wall, ~2 m from its centre.
+	use_range = 2.4
+
 
 func _ready() -> void:
-	collision_layer = 8
-	collision_mask = 0
-	monitoring = true
-	monitorable = true
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = 1.2
@@ -29,49 +34,33 @@ func _ready() -> void:
 	mat.emission_energy_multiplier = 0.4
 	mi.material_override = mat
 	add_child(mi)
-
-
-func _is_soft(user: AnimalActor) -> bool:
-	for c in soft_caps:
-		if user.has_capability(c):
-			return true
-	return false
+	super._ready()
 
 
 func try_use(user: AnimalActor) -> void:
-	if _busy:
+	if user == null or _busy:
 		return
-	_busy = true
-	await _loot(user)
-	_busy = false
-
-
-func _loot(user: AnimalActor) -> void:
 	if not OfficeStorage.has_items():
 		Bus.interact_feedback.emit("办公室储物柜是空的")
 		return
-	var soft := _is_soft(user)
-	var wait := 0.5 if soft else 1.8
-	if soft:
-		Bus.interact_feedback.emit("潜入办公室取回物品（稳）…")
-	else:
-		Bus.interact_feedback.emit("硬闯办公室柜子（吵）…")
-	await get_tree().create_timer(wait).timeout
-	if not is_instance_valid(user) or user.is_confined:
+	if user.inventory_free_slots() <= 0:
+		Bus.interact_feedback.emit("背包满了 — 先放下东西再来取")
 		return
-	if not soft:
-		if Clock.phase == Clock.Phase.NIGHT_QUIET:
-			Bus.interact_feedback.emit("噪音很大，但夜巡已歇岗…")
-		else:
-			Bus.noise_made.emit(user.global_position, 1.0, &"interact_hard")
-			var staffs := get_tree().get_nodes_in_group("staff")
-			for s in staffs:
-				if s is Node3D and user.global_position.distance_to((s as Node3D).global_position) <= Alert.hearing_radius():
-					Bus.interact_feedback.emit("硬闯噪音惊动了工作人员！")
-					user.capture_return_home("硬闯办公室")
-					return
-	if user.is_confined:
-		return
-	var got := OfficeStorage.take_all()
+	super.try_use(user)
+
+
+func cost_preview(user: AnimalActor) -> String:
+	if not OfficeStorage.has_items():
+		return "E %s：空的" % display_name
+	return super.cost_preview(user)
+
+
+func _complete(soft: bool, user: AnimalActor) -> void:
+	var got := OfficeStorage.take(user.inventory_free_slots())
 	user.give_items(got)
-	Bus.interact_feedback.emit("夺回：%s" % ", ".join(PackedStringArray(got)))
+	used.emit(true, soft)
+	var names := PackedStringArray()
+	for id in got:
+		names.append(KitIds.display_name(id))
+	var left := "（柜里还剩 %d 件，背包满了下次再来）" % OfficeStorage.items.size() if OfficeStorage.has_items() else ""
+	Bus.interact_feedback.emit("夺回：%s%s" % ["、".join(names), left])

@@ -3,7 +3,7 @@ extends Area3D
 
 const _KitIds := preload("res://content/kit_ids.gd")
 
-@export var kit_id: StringName = &"dig_kit"
+@export var kit_id: StringName = _KitIds.ROUTE
 @export var display_name: String = ""
 
 var _taken: bool = false
@@ -65,7 +65,9 @@ func _ready() -> void:
 	add_child(_beacon)
 	_label = ProximityLabel.new()
 	_label.name = "WorldLabel"
-	_label.set_info("★ %s\n[E 拾取] 夜间带到外墙，顶 %d 档施工" % [display_name, GameConst.KIT_TIERS])
+	_label.set_info("★ %s（挖洞/攀爬通用）\n[E 拾取] 夜间带到任一外墙施工点，顶 %d 档" % [
+		display_name, GameConst.KIT_TIERS
+	])
 	_label.position = Vector3(0, 1.55, 0)
 	_label.modulate = Color(1.0, 0.95, 0.4)
 	add_child(_label)
@@ -79,13 +81,7 @@ func _process(delta: float) -> void:
 
 
 func _crate_color() -> Color:
-	match kit_id:
-		&"dig_kit":
-			return Color(0.85, 0.55, 0.2)
-		&"climb_kit":
-			return Color(0.35, 0.75, 0.4)
-		_:
-			return Color(0.9, 0.75, 0.25)
+	return Color(0.9, 0.65, 0.25)
 
 
 func try_use(user: AnimalActor) -> void:
@@ -104,7 +100,8 @@ func try_use(user: AnimalActor) -> void:
 	set_process(false)
 	if _label:
 		_label.visible = false
-	var hint := "西外墙「外墙挖洞」" if kit_id == &"dig_kit" else "南外墙「外墙攀爬出园」"
-	Bus.interact_feedback.emit("拾取：%s — 夜间带到%s 施工，可顶 %d 档（被抓会被没收）" % [
-		_KitIds.display_name(kit_id), hint, GameConst.KIT_TIERS
-	])
+	Bus.interact_feedback.emit(
+		"拾取：%s — 西外墙挖洞或南外墙攀爬都能用（只有 1 个，选一条线），顶 %d 档；被抓没收后可去办公室柜子取回" % [
+			_KitIds.display_name(kit_id), GameConst.KIT_TIERS
+		]
+	)

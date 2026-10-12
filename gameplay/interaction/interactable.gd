@@ -295,12 +295,7 @@ func try_use(user: AnimalActor) -> void:
 			_refund_tier(user, pay)
 		return
 	if not soft:
-		var noise_amt := hard_noise * rw.hard_noise_mult
-		if _emit_noise(noise_amt, user):
-			if paid_upfront:
-				_refund_tier(user, pay)
-			_busy = false
-			return
+		_emit_noise(hard_noise * rw.hard_noise_mult, user)
 		## Traces only — never Alert.bump here. Staff discovery settles once.
 		for _i in TRACES_PER_HARD:
 			TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
@@ -336,6 +331,9 @@ func _channel(user: AnimalActor, wait: float) -> bool:
 			return false
 		if tiers > 1 and Alert.is_full_search():
 			_cancel_use("警戒升至 %d，全园搜查 — %s 施工被迫中止" % [Alert.level, display_name])
+			return false
+		if tiers > 1 and not Clock.allows_escape_actions():
+			_cancel_use("天亮了 — %s 这一档没做完，施工中断" % display_name)
 			return false
 		elapsed += get_process_delta_time()
 		if _progress_label:
@@ -466,13 +464,9 @@ func _refund_tier(user: AnimalActor, pay: StringName) -> void:
 
 
 func _kit_label(id: StringName) -> String:
-	match id:
-		&"dig_kit":
-			return "挖掘套件"
-		&"climb_kit":
-			return "攀爬套件"
-		_:
-			return String(id) if id != &"" else "（无专用套件）"
+	if id == &"":
+		return "（无专用套件）"
+	return KitIds.display_name(id)
 
 
 func _cancel_use(reason: String) -> void:
@@ -483,36 +477,29 @@ func _cancel_use(reason: String) -> void:
 	Bus.interact_feedback.emit(reason)
 
 
-func _emit_noise(amount: float, user: AnimalActor) -> bool:
-	if amount < Alert.noise_threshold():
-		return false
+## Hard noise goes out on the bus only; each staff member decides by its own hearing (and a very close one
+## turns straight to suspicion → telegraph → chase). Never captures here, never bumps Alert.
+func _emit_noise(amount: float, user: AnimalActor) -> void:
 	if Clock.phase == Clock.Phase.NIGHT_QUIET:
 		Bus.interact_feedback.emit("噪音很大，但夜巡已歇岗…")
-		return false
-	## 統一走 Bus.noise_made；職員自行按聽距判定（不直接點名呼叫）。
+		return
 	## Route work is its own kind so staff can scale how far it carries (Alert 3+).
 	var kind := &"construction" if tiers > 1 else &"interact_hard"
 	var frame := Engine.get_process_frames()
 	Bus.noise_made.emit(user.global_position, clampf(amount, 0.1, 1.5), kind)
-	var instant := false
 	var heard := false
+	var close := false
 	for s in get_tree().get_nodes_in_group("staff"):
-		if s is StaffActor and (s as StaffActor).last_heard_frame == frame:
+		var st := s as StaffActor
+		if st and st.last_heard_frame == frame:
 			heard = true
-		if s is Node3D:
-			var d := user.global_position.distance_to((s as Node3D).global_position)
-			## Only instant-catch when staff is already on top of the noise.
-			if d <= GameConst.HARD_INSTANT_CATCH_RANGE:
-				instant = true
-	if instant:
-		Bus.interact_feedback.emit("硬闯噪音就在职员耳边，当场被抓！")
-		user.capture_return_home("硬闯噪音")
-		return true
-	if heard:
+			close = close or st.heard_close_frame == frame
+	if close:
+		Bus.interact_feedback.emit("就在职员身边弄出巨响 — 职员转身了，快跑！")
+	elif heard:
 		Bus.interact_feedback.emit("噪音惊动了职员，正在赶来查看 — 快离开！")
 	else:
 		Bus.interact_feedback.emit("动静很大，但附近没有职员听见（痕迹仍会留下）")
-	return false
 
 
 func _complete(soft: bool, user: AnimalActor) -> void:

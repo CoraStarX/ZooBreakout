@@ -1,10 +1,10 @@
 class_name StaffCart
 extends Area3D
 ## Tool cart trailing the patrolling staff. Sneak up from behind (while they dwell at a stop)
-## and lift metal. Restocks at dawn; packed away at night.
+## and lift metal. Once per run (no dawn restock); packed away at night.
 
 var staff: StaffActor
-var loot_left: int = GameConst.CART_LOOT_PER_DAY
+var loot_left: int = GameConst.CART_LOOT_PER_RUN
 
 var _busy: bool = false
 var _label: ProximityLabel
@@ -43,10 +43,6 @@ func _ready() -> void:
 	_progress.modulate = Color(0.8, 1.0, 0.8)
 	_progress.visible = false
 	add_child(_progress)
-	Bus.day_changed.connect(func(_d: int) -> void:
-		loot_left = GameConst.CART_LOOT_PER_DAY
-		_refresh()
-	)
 	_refresh()
 
 
@@ -56,7 +52,7 @@ func _refresh() -> void:
 		_label.set_info("职员工具车\n[%s ×%d · 趁职员停步，从背后偷 · E]" % [KitIds.display_name(KitIds.METAL), loot_left])
 	else:
 		_label.modulate = Color(0.55, 0.55, 0.55)
-		_label.set_info("职员工具车\n[已偷空 · 明早补货]")
+		_label.set_info("职员工具车\n[已偷空]")
 
 
 func _physics_process(delta: float) -> void:
@@ -76,7 +72,7 @@ func try_use(user: AnimalActor) -> void:
 		Bus.interact_feedback.emit("夜里工具车已收走")
 		return
 	if loot_left <= 0:
-		Bus.interact_feedback.emit("工具车已经被你搜空了 — 明早补货")
+		Bus.interact_feedback.emit("工具车已经被你搜空了（整局只有这些）")
 		return
 	if user.inventory_free_slots() <= 0:
 		Bus.interact_feedback.emit("背包满了 — 偷不到金属")

@@ -6,8 +6,8 @@
 script = ExtResource("1")
 route_tiers = 3
 kit_tiers = 2
-tier_soft_sec = 6.0
-tier_hard_sec = 14.0
+tier_soft_sec = 15.0
+tier_hard_sec = 35.0
 hard_time_mult = 3.0
 hard_noise_mult = 2.0
 hard_trace_mult = 2.0

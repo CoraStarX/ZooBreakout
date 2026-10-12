@@ -211,7 +211,7 @@ func _check_capture_loop() -> void:
 	Alert.level = 0
 	var actor := _party.controlled()
 	if actor.inventory.is_empty():
-		actor.inventory.append(&"dig_kit")
+		actor.inventory.append(KitIds.ROUTE)
 	CaptureFlow.apply_capture(actor)
 	await get_tree().process_frame
 	if not actor.is_confined:
@@ -241,7 +241,7 @@ func _check_capture_loop() -> void:
 
 func _check_office_chest() -> void:
 	if not OfficeStorage.has_items():
-		OfficeStorage.deposit([&"dig_kit"])
+		OfficeStorage.deposit([KitIds.ROUTE])
 	var chest := _find_chest()
 	if chest == null:
 		_find("P0", "办公室金柜缺失")
@@ -256,7 +256,7 @@ func _check_office_chest() -> void:
 		await get_tree().process_frame
 	actor = _party.controlled()
 	actor.set_confined(false)
-	actor.global_position = chest.global_position + Vector3(0.5, 0, 0.5)
+	actor.global_position = chest.global_position + Vector3(2.0, 0.05, 0) ## at the office wall
 	var before := actor.inventory.size()
 	chest.try_use(actor)
 	await get_tree().create_timer(0.9).timeout

@@ -115,8 +115,6 @@ func _hearing_tiers(raccoon: AnimalActor) -> void:
 	Alert.level = 2
 	Bus.noise_made.emit(origin, 1.0, &"footstep")
 	_check(foot_1 == StaffActor.State.WORK and _staff.state == StaffActor.State.SUSPICIOUS, "警戒 2 脚步声起疑距离也变远")
-	_check(is_equal_approx(Alert.hearing_radius(), (GameConst.BASE_HEARING_RADIUS + 2.0 * GameConst.HEARING_PER_ALERT) * 1.25),
-		"警戒 2 hearing_radius 含×1.25")
 	_check(_msgs.any(func(m: String) -> bool: return m.begins_with("警戒 2：")), "升到警戒 2 有后果提示")
 	_reset_staff()
 	Alert.level = 0
@@ -144,8 +142,11 @@ func _head_icons() -> void:
 func _construction_noise(raccoon: AnimalActor, monkey: AnimalActor) -> void:
 	Clock.set_phase(Clock.Phase.OPEN)
 	await _gather(raccoon, "游客遗落的绳")
-	await _gather(raccoon, "垃圾桶（铁罐）")
+	await _rummage_until_found(raccoon, "垃圾桶（铁罐）")
 	await _gather(raccoon, "职员工具间")
+	## The one kit pays this climb's first tiers, so a metal is left for the dig check at Alert 5.
+	await _stand(raccoon, _geo.route_kit_pickup.global_position + Vector3(0.5, 0.05, 0))
+	_geo.route_kit_pickup.call("try_use", raccoon)
 	_party.switch_next()
 	await get_tree().process_frame
 	await _gather(monkey, "晾衣架")
@@ -164,6 +165,7 @@ func _construction_noise(raccoon: AnimalActor, monkey: AnimalActor) -> void:
 	var r2 := _staff._params.hear_noise_range * loud * GameConst.alert_params().hearing_mult_at_alert_2
 	var post: Vector3 = _staff.patrol_network.find(&"wide_n").position
 	var dist := raccoon.global_position.distance_to(post)
+	_reset_staff() ## the trash rummage just now was loud; start this check from a calm staff
 	_staff.global_position = post
 	Alert.level = 2
 	Game.work_time_scale = 0.05
@@ -439,6 +441,15 @@ func _stand(a: AnimalActor, pos: Vector3) -> void:
 	a.velocity = Vector3.ZERO
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+
+
+## Trash bin is repeatable and may come up empty; pity guarantees a find within gather_repeat_pity + 1 tries.
+func _rummage_until_found(a: AnimalActor, point_name: String) -> void:
+	var have := a.inventory.size()
+	for _i in GameConst.action_cost().gather_repeat_pity + 1:
+		await _gather(a, point_name)
+		if a.inventory.size() > have:
+			return
 
 
 func _idle(it: Interactable) -> void:

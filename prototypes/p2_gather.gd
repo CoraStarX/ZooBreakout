@@ -1,5 +1,5 @@
 extends Node
-## 昼夜 M3：白天原料点（三种原料、动词门槛、补货、风险分布）。
+## 昼夜 M3：白天原料点（三种原料、动词门槛、整局一次 / 可重复翻找）。预算断言在 p2_full_loop。
 ## godot --headless --path . res://prototypes/p2_gather.tscn
 
 const Gather := preload("res://content/levels/zoo_p0_gather.gd")
@@ -30,38 +30,49 @@ func _ready() -> void:
 
 	_check(_geo.gather_points.size() == Gather.POINTS.size(), "关卡生成 %d 个搜集点" % _geo.gather_points.size())
 	_check_points_not_in_walls()
-	_check_day_budget()
 
-	var rich := _find_point(CapabilityIds.Id.DEXTERITY, 2)   ## 饲料柜 (raccoon has DEXTERITY)
-	var climb := _find_point(CapabilityIds.Id.CLIMB, 2)      ## 高处树杈 (raccoon lacks CLIMB)
-	_check(rich != null and climb != null, "找到动词点")
+	var rich := _find_point("饲料柜")      ## raccoon has DEXTERITY
+	var climb := _find_point("高处树杈")   ## raccoon lacks CLIMB
+	var trash := _find_point("垃圾桶（铁罐）")
+	_check(rich != null and climb != null and trash != null, "找到动词点与垃圾桶")
+	for g in _geo.gather_points:
+		var want := GatherPoint.RefreshMode.REPEATABLE if g == trash else GatherPoint.RefreshMode.ONCE
+		_check(g.refresh_mode == want, "%s 刷新模式 %s" % [g.display_name, GatherPoint.RefreshMode.keys()[g.refresh_mode]])
+	_check(_find_point("职员工具间").yield_rich == 1, "职员工具间金属 ×1")
 
 	## Rich: raccoon has verb → full haul.
 	await _use(actor, rich)
 	_check(actor.item_count(KitIds.WOOD) == 2, "有动词拿满 2 木料（实际 %d）" % actor.item_count(KitIds.WOOD))
-	_check(not rich.stocked, "搜空后标记空")
+	_check(not rich.stocked and rich._label.text.contains("已搜空"), "搜空后标记「已搜空」：%s" % rich._label.text)
 	var before := actor.item_count(KitIds.WOOD)
 	await _use(actor, rich)
 	_check(actor.item_count(KitIds.WOOD) == before, "已搜空不能重复拿")
 
-	## Poor: no verb → smaller haul, slower (measure frames of busy).
+	## Poor: no verb → takes one, slower; the rest stays at the point.
 	var t0 := Time.get_ticks_msec()
 	await _use(actor, climb)
 	var poor_ms := Time.get_ticks_msec() - t0
 	_check(actor.item_count(KitIds.WOOD) == before + 1, "无动词只拿 1 木料（实际 %d）" % (actor.item_count(KitIds.WOOD) - before))
 	_check(poor_ms >= int(GameConst.GATHER_POOR_SEC * 1000.0 * 0.8), "无动词更慢 %dms" % poor_ms)
+	_check(climb.stocked and climb.stock == 1, "没拿走的 1 件留在原处（剩 %d）" % climb.stock)
 
-	## Restock at dawn.
+	## Dawn: once points never restock; what was left stays.
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	Clock.advance()
-	_check(rich.stocked and climb.stocked, "天亮补货")
+	_check(not rich.stocked, "天亮不补货（整局一次）")
+	_check(climb.stock == 1, "剩下的仍在（剩 %d）" % climb.stock)
 
 	## Night blocks gathering.
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 	var n0 := actor.item_count(KitIds.WOOD)
-	await _use(actor, rich)
-	_check(actor.item_count(KitIds.WOOD) == n0 and rich.stocked, "夜间不能搜集")
+	await _use(actor, climb)
+	_check(actor.item_count(KitIds.WOOD) == n0 and climb.stock == 1, "夜间不能搜集")
 	Clock.set_phase(Clock.Phase.OPEN)
+	await _use(actor, climb)
+	_check(actor.item_count(KitIds.WOOD) == n0 + 1 and not climb.stocked, "白天再扒拉一次拿走剩下的，点位搜空")
+
+	## Repeatable trash bin: loud every time, may be empty, pity bounds bad luck, one find per day.
+	await _check_trash(actor, trash)
 
 	## Day: route points refuse construction (night only), parts untouched.
 	actor.inventory.clear()
@@ -82,20 +93,54 @@ func _ready() -> void:
 	get_tree().quit(0 if _fail_n == 0 else 1)
 
 
-func _find_point(cap: CapabilityIds.Id, rich: int) -> GatherPoint:
+func _find_point(point_name: String) -> GatherPoint:
 	for g in _geo.gather_points:
-		if g.required == cap and g.yield_rich == rich:
+		if g.display_name == point_name:
 			return g
 	return null
 
 
-func _use(actor: AnimalActor, g: GatherPoint) -> void:
+func _check_trash(actor: AnimalActor, trash: GatherPoint) -> void:
+	var cost := GameConst.action_cost()
+	## The rummage is loud on purpose; keep the patrol away so this checks only the point's rules.
+	var staff: StaffActor = _world.call("get_staff")
+	staff.set_physics_process(false)
+	staff.global_position = Vector3(40, 0.05, 40)
+	actor.inventory.clear()
+	var noises: Array = []
+	var on_noise := func(_p: Vector3, amt: float, kind: StringName) -> void:
+		if kind == &"gather":
+			noises.append(amt)
+	Bus.noise_made.connect(on_noise)
+	for seed_try in 3:
+		trash.rng.seed = 7 + seed_try
+		var tries := 0
+		while trash.stocked and tries < cost.gather_repeat_pity + 2:
+			await _use(actor, trash, cost.gather_repeat_sec + 2.0)
+			tries += 1
+		_check(actor.item_count(KitIds.METAL) == seed_try + 1, "第 %d 天翻到金属（翻了 %d 次）" % [seed_try + 1, tries])
+		_check(tries <= cost.gather_repeat_pity + 1, "连续空手 %d 次后必有：%d 次内翻到" % [cost.gather_repeat_pity, tries])
+		_check(noises.size() >= tries, "每次翻找都有噪音（%d 次）" % noises.size())
+		var have := actor.item_count(KitIds.METAL)
+		await _use(actor, trash, cost.gather_repeat_sec + 2.0)
+		_check(actor.item_count(KitIds.METAL) == have and trash._label.text.contains("明早"), "当天上限 %d：%s" % [
+			cost.gather_repeat_daily_cap, trash._label.text
+		])
+		noises.clear()
+		Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+		Clock.advance()
+		Clock.set_phase(Clock.Phase.OPEN)
+		_check(trash.stocked, "第 %d 天天亮可再翻" % (seed_try + 2))
+	Bus.noise_made.disconnect(on_noise)
+
+
+func _use(actor: AnimalActor, g: GatherPoint, limit: float = 6.0) -> void:
 	actor.is_confined = false
 	actor.global_position = g.global_position + Vector3(0.6, 0.05, 0)
 	actor.velocity = Vector3.ZERO
 	g.try_use(actor)
 	var t := 0.0
-	while g._busy and t < 6.0:
+	while g._busy and t < limit:
 		await get_tree().process_frame
 		t += get_process_delta_time()
 	await get_tree().process_frame
@@ -123,31 +168,6 @@ func _check_points_not_in_walls() -> void:
 		if not space.intersect_shape(q, 1).is_empty():
 			bad.append(g.display_name)
 	_check(bad.is_empty(), "搜集点不嵌墙 %s" % ",".join(bad))
-
-
-func _check_day_budget() -> void:
-	## Per starter verb set: what one day's safe points (no staff-adjacent point) can supply.
-	var routes := {
-		"挖洞(木+金属)": [KitIds.WOOD, KitIds.METAL],
-		"攀爬(绳+金属)": [KitIds.ROPE, KitIds.METAL],
-	}
-	for verbs in [[1], [2]]:
-		var supply := {}
-		var risky_metal := 0
-		for d in Gather.POINTS:
-			var amount: int = d["rich"] if (d["cap"] == 0 or verbs.has(d["cap"])) else d["poor"]
-			if d["rich"] >= 3:
-				risky_metal += amount
-				continue ## the staff-side stash is the risky one
-			supply[d["mat"]] = int(supply.get(d["mat"], 0)) + amount
-		## Metal from safe points alone must NOT cover a whole route (forces risk: shed or cart).
-		var safe_metal := int(supply.get(&"metal", 0))
-		_check(safe_metal < GameConst.ROUTE_TIERS, "动词%s 安全点金属 %d < 一条路线需 %d（必须冒险/偷）" % [verbs, safe_metal, GameConst.ROUTE_TIERS])
-		_check(safe_metal + risky_metal + GameConst.CART_LOOT_PER_DAY >= GameConst.ROUTE_TIERS, "动词%s 含冒险点+工具车金属够一条路线" % [verbs])
-		## Every recipe material has a safe source.
-		for name in routes:
-			for m in routes[name]:
-				_check(m == &"metal" or int(supply.get(m, 0)) >= 1, "动词%s %s 的 %s 有安全来源" % [verbs, name, KitIds.display_name(m)])
 
 
 func _check(ok: bool, msg: String) -> void:

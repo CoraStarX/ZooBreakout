@@ -101,6 +101,8 @@ var _debug_draw: StaffDebugDraw
 var _head_icon: Label3D
 ## Process frame of the last non-footstep noise this staff heard (callers check "did anyone hear it").
 var last_heard_frame: int = -1
+## Frame of the last Hard noise within `close_noise_chase_range` (turned straight to suspicion).
+var heard_close_frame: int = -1
 const STUCK_CHECK_SEC := 1.5
 const STUCK_MIN_MOVE := 0.3
 var _stuck_t: float = 0.0
@@ -367,7 +369,7 @@ func _physics_process(delta: float) -> void:
 	awareness = StaffAwarenessMath.tick(awareness, delta, snap.visibility_mult * gain, _params, spike * gain)
 	_tick_state(delta, snap)
 	move_and_slide()
-	if _dwell_left <= 0.0 and velocity.length() > 0.1:
+	if (state != State.WORK or _dwell_left <= 0.0) and velocity.length() > 0.1:
 		_facing = Vector3(velocity.x, 0.0, velocity.z).normalized()
 	_update_vision_mesh()
 
@@ -750,6 +752,14 @@ func _on_bus_noise(position: Vector3, loudness: float, kind: StringName) -> void
 	## 噪音本身永不 Alert.bump — 只改變職員行為。
 	if kind != &"footstep":
 		last_heard_frame = Engine.get_process_frames()
+	if (kind == &"interact_hard" or kind == &"construction") and dist <= _params.close_noise_chase_range:
+		heard_close_frame = last_heard_frame
+		_last_known = position
+		_last_known_valid = true
+		awareness = _params.awareness_max
+		if state == State.WORK or state == State.RETURN or state == State.INVESTIGATE or state == State.SEARCH:
+			state = State.SUSPICIOUS
+		return
 	if kind == &"footstep":
 		awareness = minf(
 			_params.awareness_max,

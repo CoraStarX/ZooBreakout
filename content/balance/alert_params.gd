@@ -5,8 +5,6 @@ extends Resource
 
 
 @export var max_alert_level: int = 5
-@export var base_hearing_radius: float = 3.2
-@export var hearing_per_alert: float = 1.2
 ## Staff hearing range scale (footsteps + noises) from Alert >= 2.
 @export var hearing_mult_at_alert_2: float = 1.25
 ## How far staff hear construction noise, scale from Alert >= 3.

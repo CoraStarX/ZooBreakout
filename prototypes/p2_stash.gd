@@ -40,40 +40,43 @@ func _ready() -> void:
 			monkey = a
 
 	## --- Drop: heavy kit goes first, speed/climb come back, E picks it up again ---
-	await _stand(raccoon, _geo.dig_kit_pickup.global_position + Vector3(0.5, 0.05, 0))
-	_geo.dig_kit_pickup.call("try_use", raccoon)
-	await _gather(raccoon, "垃圾桶（铁罐）")
-	_check(raccoon.is_carrying_heavy() and raccoon.has_item(KitIds.METAL), "背着挖掘套件 + 金属")
+	await _stand(raccoon, _geo.route_kit_pickup.global_position + Vector3(0.5, 0.05, 0))
+	_geo.route_kit_pickup.call("try_use", raccoon)
+	await _gather(raccoon, "职员工具间")
+	_check(raccoon.is_carrying_heavy() and raccoon.has_item(KitIds.METAL), "背着施工套件 + 金属")
 	await _stand(raccoon, Vector3(-3.0, 0.05, 3.0))
 	raccoon.try_drop()
 	await get_tree().process_frame
 	var ground := get_tree().get_nodes_in_group(GroundItem.GROUP)
-	_check(ground.size() == 1 and (ground[0] as GroundItem).item_id == KitIds.DIG, "X 先放下重物（挖掘套件）到地上")
+	_check(ground.size() == 1 and (ground[0] as GroundItem).item_id == KitIds.ROUTE, "X 先放下重物（施工套件）到地上")
 	_check(not raccoon.is_carrying_heavy() and is_equal_approx(raccoon.current_move_speed(), raccoon.def.move_speed), "放下后移速恢复")
 	await get_tree().physics_frame
 	(ground[0] as GroundItem).try_use(raccoon)
 	await get_tree().process_frame
-	_check(raccoon.has_item(KitIds.DIG) and get_tree().get_nodes_in_group(GroundItem.GROUP).is_empty(), "E 捡回套件，地上清空")
+	_check(raccoon.has_item(KitIds.ROUTE) and get_tree().get_nodes_in_group(GroundItem.GROUP).is_empty(), "E 捡回套件，地上清空")
 	raccoon.try_drop()
 	await get_tree().process_frame
 	_check(get_tree().get_nodes_in_group(GroundItem.GROUP).size() == 1, "再次放下套件（留在地上过夜）")
 
-	## Monkey: drop the climb kit to climb again.
+	## Monkey: the one generic kit — pick up what the raccoon left, drop it to climb again.
 	_party.switch_next()
 	await get_tree().process_frame
 	_check(_party.controlled() == monkey, "换控到猴")
-	await _stand(monkey, _geo.climb_kit_pickup.global_position + Vector3(0.5, 0.05, 0))
-	_geo.climb_kit_pickup.call("try_use", monkey)
-	_check(not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "猴背攀爬套件不能攀爬")
+	var left_kit := get_tree().get_nodes_in_group(GroundItem.GROUP)[0] as GroundItem
+	await _stand(monkey, left_kit.global_position + Vector3(0.3, 0.05, 0))
+	left_kit.try_use(monkey)
+	await get_tree().process_frame
+	_check(monkey.has_item(KitIds.ROUTE), "猴捡起浣熊放下的同一个套件（挖洞/攀爬通用）")
+	_check(not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "猴背套件不能攀爬")
 	monkey.try_drop()
 	await get_tree().process_frame
 	_check(monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "猴放下套件后可攀爬")
 	await get_tree().physics_frame
 	for g in get_tree().get_nodes_in_group(GroundItem.GROUP):
-		if (g as GroundItem).item_id == KitIds.CLIMB:
+		if (g as GroundItem).item_id == KitIds.ROUTE:
 			(g as GroundItem).try_use(monkey)
 	await get_tree().process_frame
-	_check(monkey.has_item(KitIds.CLIMB), "猴捡回攀爬套件")
+	_check(monkey.has_item(KitIds.ROUTE), "猴捡回套件")
 
 	## --- Stash: raccoon (4 slots) hauls rope + metal to the climb point for the monkey ---
 	_party.switch_next()
@@ -102,7 +105,7 @@ func _ready() -> void:
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	Clock.advance()
 	_check(climb.stash.size() == 2, "被抓、天亮后存料仍在")
-	_check(get_tree().get_nodes_in_group(GroundItem.GROUP).size() == 1, "地上的挖掘套件仍在")
+	_check(monkey.has_item(KitIds.ROUTE), "猴没被抓，套件还在猴身上")
 
 	## --- Night: monkey builds from the stash; cancel refunds back into the stash ---
 	while _party.controlled() != monkey:
@@ -111,7 +114,7 @@ func _ready() -> void:
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	await _stand(monkey, Vector3(2.0, 0.05, 6.0))
 	monkey.try_drop()
-	_check(not monkey.has_item(KitIds.CLIMB) and get_tree().get_nodes_in_group(GroundItem.GROUP).size() == 2, "离点位远：攀爬套件放到地上")
+	_check(not monkey.has_item(KitIds.ROUTE) and get_tree().get_nodes_in_group(GroundItem.GROUP).size() == 1, "离点位远：套件放到地上")
 	await _stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	Game.work_time_scale = 0.2
 	var msgs: Array[String] = []
@@ -131,17 +134,22 @@ func _ready() -> void:
 	_check(climb.tier_done == 1 and climb.stash.is_empty(), "猴空手用存料完成第 1 档")
 	_check(get_tree().get_nodes_in_group("traces").is_empty(), "Soft（无痕迹）")
 
-	## --- Next day: stash kit + an extra rope; the kit pays the rest, the rope is left over ---
+	## --- Next day: stash rope ×2 (monkey climbs the drying rack) + the kit; the kit pays the rest, ropes are left over ---
 	Clock.advance()
 	Clock.set_phase(Clock.Phase.OPEN)
-	for g in get_tree().get_nodes_in_group(GroundItem.GROUP):
-		if (g as GroundItem).item_id == KitIds.CLIMB:
-			await _stand(monkey, (g as GroundItem).global_position + Vector3(0.3, 0.05, 0))
-			(g as GroundItem).try_use(monkey)
-	await _gather(monkey, "游客遗落的绳")
+	await _gather(monkey, "晾衣架")
+	_check(monkey.item_count(KitIds.ROPE) == 2, "猴攀爬拿满晾衣架绳索 ×2")
 	await _stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	monkey.try_drop()
-	_check(climb.stash.has(KitIds.CLIMB) and climb.stash.has(KitIds.ROPE), "套件也可存进施工点：%s" % [climb.stash])
+	monkey.try_drop()
+	_check(climb.stash.count(KitIds.ROPE) == 2, "绳索存进攀爬点：%s" % [climb.stash])
+	for g in get_tree().get_nodes_in_group(GroundItem.GROUP):
+		if (g as GroundItem).item_id == KitIds.ROUTE:
+			await _stand(monkey, (g as GroundItem).global_position + Vector3(0.3, 0.05, 0))
+			(g as GroundItem).try_use(monkey)
+	await _stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
+	monkey.try_drop()
+	_check(climb.stash.has(KitIds.ROUTE), "套件也可存进施工点：%s" % [climb.stash])
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	msgs.clear()
 	Bus.interact_feedback.connect(on_msg)
@@ -149,7 +157,7 @@ func _ready() -> void:
 	Bus.interact_feedback.disconnect(on_msg)
 	_check(climb._done and climb.stash.is_empty(), "存的套件付完剩下两档，路线完工")
 	var left_msg := msgs.filter(func(m: String) -> bool: return m.contains("剩余存料已用尽"))
-	_check(left_msg.size() == 1 and String(left_msg[0]).contains("绳索×1"), "完工提示剩余存料：%s" % [left_msg])
+	_check(left_msg.size() == 1 and String(left_msg[0]).contains("绳索×2"), "完工提示剩余存料：%s" % [left_msg])
 
 	print("")
 	print("=== P2 STASH SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])

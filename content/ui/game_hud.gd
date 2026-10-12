@@ -17,10 +17,9 @@ const ITEM_COLORS := {
 	&"wood": Color(0.78, 0.55, 0.3),
 	&"rope": Color(0.8, 0.75, 0.5),
 	&"metal": Color(0.7, 0.78, 0.9),
-	&"dig_kit": Color(0.9, 0.6, 0.25),
-	&"climb_kit": Color(0.4, 0.8, 0.45),
+	&"route_kit": Color(0.9, 0.65, 0.25),
 }
-const ITEM_ORDER: Array[StringName] = [&"wood", &"rope", &"metal", &"dig_kit", &"climb_kit"]
+const ITEM_ORDER: Array[StringName] = [&"wood", &"rope", &"metal", &"route_kit"]
 
 var _day_l: Label
 var _phase_l: Label

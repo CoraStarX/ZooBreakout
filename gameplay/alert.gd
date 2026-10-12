@@ -23,14 +23,6 @@ func decay_one() -> void:
 		level -= 1
 
 
-func hearing_radius() -> float:
-	return (GameConst.BASE_HEARING_RADIUS + float(level) * GameConst.HEARING_PER_ALERT) * hearing_mult()
-
-
-func noise_threshold() -> float:
-	return maxf(0.35, 1.0 - float(level) * 0.12)
-
-
 func hearing_mult() -> float:
 	return GameConst.alert_params().hearing_mult_at_alert_2 if level >= 2 else 1.0
 

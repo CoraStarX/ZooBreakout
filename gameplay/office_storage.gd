@@ -15,8 +15,13 @@ func deposit(item_ids: Array[StringName]) -> void:
 
 
 func take_all() -> Array[StringName]:
-	var out := items.duplicate()
-	items.clear()
+	return take(items.size())
+
+
+## Oldest first; whatever is not taken stays in the office.
+func take(count: int) -> Array[StringName]:
+	var out: Array[StringName] = items.slice(0, maxi(count, 0))
+	items = items.slice(out.size())
 	items_changed.emit()
 	Bus.office_items_changed.emit(items.duplicate())
 	return out

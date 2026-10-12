@@ -154,7 +154,11 @@ func _gather_b(raccoon: AnimalActor) -> void:
 	var saved := [cost.gather_risky_noise, cost.gather_risky_trace]
 	cost.gather_risky_noise = 1.0
 	cost.gather_risky_trace = 1.0
-	gp.restock()
+	gp.risky = false
+	for g in _geo.gather_points:
+		if g.display_name == "游客遗落的绳":
+			gp = g
+	gp.risky = true
 	await _gather(raccoon, gp)
 	var gather_noise := _noises.filter(func(n: Array) -> bool: return n[2] == &"gather")
 	var traces := get_tree().get_nodes_in_group("traces")

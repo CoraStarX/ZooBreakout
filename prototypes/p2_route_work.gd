@@ -56,12 +56,9 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_check(dig.tier_done == 0 and not dig._busy, "没材料不能开工")
 
-	## Wrong kit is not accepted.
-	raccoon.give_items([KitIds.CLIMB])
-	dig.try_use(raccoon)
-	await get_tree().process_frame
-	_check(dig.tier_done == 0, "错套件不能用")
-	raccoon.inventory.clear()
+	## One generic kit for both lines.
+	_check(dig.route_kit_id == KitIds.ROUTE and geo.climb_interactable.route_kit_id == KitIds.ROUTE,
+		"挖洞线与攀爬线用同一种通用套件")
 
 	## Missing one ingredient → refused.
 	raccoon.inventory.clear()
@@ -104,12 +101,12 @@ func _ready() -> void:
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 
 	## Kit pays tier 2 (still Hard mid-tier for the monkey).
-	monkey.give_items([KitIds.DIG])
+	monkey.give_items([KitIds.ROUTE])
 	_stand(monkey, dig)
 	monkey._hold_position = monkey.global_position
 	dig.try_use(monkey)
 	await _idle(dig)
-	_check(dig.tier_done == 2 and not monkey.has_item(KitIds.DIG), "套件付第 2 档并被消耗")
+	_check(dig.tier_done == 2 and not monkey.has_item(KitIds.ROUTE), "套件付第 2 档并被消耗")
 
 	## Last tier: kit credit alone does not let the monkey force it.
 	dig.try_use(monkey)
@@ -125,7 +122,7 @@ func _ready() -> void:
 
 	## Soft is faster (monkey climbs).
 	var climb := geo.climb_interactable
-	monkey.give_items([KitIds.CLIMB])
+	monkey.give_items([KitIds.ROUTE])
 	_stand(monkey, climb)
 	monkey._hold_position = monkey.global_position
 	t0 = Time.get_ticks_msec()
@@ -149,7 +146,7 @@ func _stand(a: AnimalActor, it: Interactable) -> void:
 func _idle(it: Interactable) -> void:
 	await get_tree().process_frame
 	var t := 0.0
-	while it._busy and t < 10.0:
+	while it._busy and t < 30.0:
 		await get_tree().process_frame
 		t += get_process_delta_time()
 	await get_tree().process_frame

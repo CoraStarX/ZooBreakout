@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1")
-id = &"climb_kit"
+id = &"route_kit"
 heavy = true

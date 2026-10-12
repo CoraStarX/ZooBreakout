@@ -11,7 +11,7 @@ if [ ${#SUITES[@]} -eq 0 ]; then
   SUITES=(p0_regression p0_walkthrough p0_enclosure_check p0_climb_fly_repro
           p1_win_routes
           p2_outer_walls p2_run_reset p2_day_cycle p2_gather p2_capture p2_intel p2_route_work p2_cart p2_hygiene p2_ui p2_full_loop
-          p2_staff_awareness p2_staff_patrol p2_follow_trail p2_action_cost p2_rescue_rendezvous p2_route_clear p2_stash p2_alert_tiers p2_noise_tools)
+          p2_staff_awareness p2_staff_patrol p2_follow_trail p2_action_cost p2_rescue_rendezvous p2_route_clear p2_stash p2_alert_tiers p2_noise_tools p2_confiscate)
 fi
 LOG_DIR="${TMPDIR:-/tmp}/zoo_breakout_tests"
 mkdir -p "$LOG_DIR"

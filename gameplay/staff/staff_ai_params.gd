@@ -8,6 +8,8 @@ extends Resource
 @export var hear_walk_range: float = 2.15
 ## Bus noise hearing range at loudness 1 (Alert multipliers stack on this).
 @export var hear_noise_range: float = 13.0
+## A Hard interaction / construction noise this close: awareness jumps to the chase band (still telegraphs first).
+@export var close_noise_chase_range: float = 1.6
 @export var catch_range: float = 1.35
 
 @export_group("Awareness (0~100)")

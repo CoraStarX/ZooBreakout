@@ -19,7 +19,7 @@ func _ready() -> void:
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
 	Clock.auto_advance = false
 	Alert.level = 3
-	OfficeStorage.deposit([&"dig_kit"])
+	OfficeStorage.deposit([KitIds.ROUTE])
 	RunLifecycle.reset()
 	_check(Clock.phase == Clock.Phase.OPEN, "新局时段 = Open")
 	_check(Clock.auto_advance, "新局 auto_advance 恢复")

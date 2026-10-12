@@ -26,8 +26,8 @@
 
 - 提交 `8627119`：Params + 转发，Open **75**（可回退至此再改 `.tres`）
 - 提交（Open 180）：仅改 `day_cycle_params` 默认 / `.tres`
-- **已转发**（唯一数据源 = `.tres`）：`OPEN/CLOSE/NIGHT_*`、`DEADLINE_DAY`、`MAX_ALERT_LEVEL`、`BASE_HEARING_RADIUS`、`HEARING_PER_ALERT`、`SOFT/HARD_INTERACT_SEC`、`GATHER_*`、`SHOUT_*`、`ROUTE_TIERS`、`KIT_TIERS`、`TIER_SOFT/HARD_SEC`
-- **仍待删的 GameConst 本地 const**（刀 2+ 再迁或保留）：`HARD_INSTANT_CATCH_RANGE`、`GRAVITY`、`DETENTION_SEC`、`REINFORCE_*`、`OBSERVE_*`、`CART_*`、`STAFF_DWELL_SEC`、`FOOTSTEP_*`、`RUN_SPEED_FOR_FOOTSTEP_NOISE`、`STAFF_VISION/SPEED_PER_DAY`、`STAFF_SCALE_MAX_DAYS`
+- **已转发**（唯一数据源 = `.tres`）：`OPEN/CLOSE/NIGHT_*`、`DEADLINE_DAY`、`MAX_ALERT_LEVEL`、`SOFT/HARD_INTERACT_SEC`、`GATHER_*`、`SHOUT_*`、`ROUTE_TIERS`、`KIT_TIERS`、`TIER_SOFT/HARD_SEC`
+- **仍待删的 GameConst 本地 const**（刀 2+ 再迁或保留）：`GRAVITY`、`DETENTION_SEC`、`REINFORCE_*`、`OBSERVE_*`、`CART_*`、`STAFF_DWELL_SEC`、`FOOTSTEP_*`、`RUN_SPEED_FOR_FOOTSTEP_NOISE`、`STAFF_VISION/SPEED_PER_DAY`、`STAFF_SCALE_MAX_DAYS`
 - Alert 后果倍率在 `AlertParams`，刀 3 已接线（见刀 3 进度笔记）
 | **2（A）** | 夜间施工 Soft/Hard；`allow_hard`；痕迹（单次结算）；背包容量（浣熊 4 / 猴 2）+ 重物（移速 −40%、禁攀爬）；`p2_action_cost` | Soft/Hard/背包体感 | ✅ |
 
@@ -93,7 +93,7 @@
 - 只做一条线、走不冒险的路（金属 2）时：用套件第 1 天就够；不用套件需要 2 天（金属 2/天）。
 | **3（C）** | Alert 后果表；头上 ?/!；Alert4 预警文案；Alert5 中止施工原因；`p2_alert_tiers` | 升档可读性 | ✅ |
 | **4** | 叫嚷每日 4；投掷 T（冷却 8s、无消耗石子）；Gather B 接口预留 | 声东击西 | ✅ |
-| **5** | `p2_full_loop` 预算化（正解 3–5 天；材料不够双线；无料拒最后一档）；**职员实际巡逻看到地上物品而收缴的整合测试**；材料总量机制（方案 A，**待决定后才实作**，见下方待决）；对齐清单中标「需要」的交互点；全量 `run_tests.sh` | 闭环 |
+| **5** | `p2_full_loop` 预算化（正解 3–5 天；材料不够双线；无料拒最后一档）；**职员实际巡逻看到地上物品而收缴的整合测试**；材料总量机制（A1 + 组合 Y + 垃圾桶保底）；对齐清单中标「需要」的交互点；全量 `run_tests.sh` | 闭环 | ✅（(a)(b) 两项待决，见刀 5 进度笔记） |
 
 ### 刀 3 进度笔记
 
@@ -132,14 +132,82 @@
 - 实测：挖洞点站位可直达；攀爬点站位（展区内侧）不可达 → 改去最近可达巡逻点。`p2_alert_tiers` 实跑 40s 断言兜底 0 次（共 54 项）
 - `full_search_focus_heat` 加注解（为何 10000）
 
+### 刀 5 进度笔记
+
+**材料：A1（整局一次）+ 组合 Y（金属 3、全图 1 个通用套件）+ 垃圾桶保底**
+
+- `GatherPoint.refresh_mode`：`ONCE`（整局一次，不补货）/ `DAILY_POOL`（R6，只留字段：`pool_positions` 候选位置池、`pool_daily_count` 每天刷出数、`pool_pity_days` 连续 N 天没刷出则必刷、`pool_dry_days` 计数；载入时警告并按 ONCE 处理）/ `REPEATABLE`。关卡数据键 `"refresh"`、`"pool"`、`"pool_daily"`、`"pool_pity"`（`zoo_p0_gather.gd`）
+- 本轮：垃圾桶 = `repeatable`，其余点位全部 `once`
+- 才能错配按剩余库存扣：有才能全拿；没有只拿 `poor`（1），剩下的留在点位。标签「剩 ×N」，搜空显示「已搜空」（去掉「明早补货」）
+- 职员工具间金属 3 → **1**；工具车 `CART_LOOT_PER_DAY` → `CART_LOOT_PER_RUN`=1（整局，不补）
+- 垃圾桶保底（`ActionCostTable.gather_repeat_*`）：每次翻找 3s、噪音 0.9（kind `gather`，不升警戒）、空手机率 50%、连续空手 2 次后下一次必有、每天最多 1 次收获（空手不计）、整局上限 `gather_repeat_run_cap`=0（不设）
+- 通用套件 `KitIds.ROUTE`「施工套件」：挖洞点、攀爬点 `route_kit_id` 都是它，由玩家决定给哪条线；全图 1 个（浣熊展区），仍顶 2 档、仍是重物。原 `dig_kit` / `climb_kit` 删除（原本是**绑定路线**的两个套件）
+- 载入检查 `MaterialBudget.validate()`（`ZooWorld._validate_cages` 内，和笼门依赖检查同处）：每条线在「全图一次性供给 + 垃圾桶到期限为止的保底」下必须可完成，否则 `push_error`。`p2_full_loop` 用同一份 `MaterialBudget` 数字断言
+
+#### 材料预算（刀 5 实作后，现图）
+
+| 供给 | 木 | 绳 | 金属 | 套件 |
+|------|------|------|------|------|
+| 一次性（整局） | 5（饲料柜 2、树杈 2、杂物堆 1） | 3（晾衣架 2、遗落的绳 1） | 2（工具间 1、工具车 1） | 1 |
+| 垃圾桶保底 | — | — | 每天 ≤1；到第 5 天累计 ≤5 | — |
+
+| 需求（3 档） | 木 | 绳 | 金属 | 只靠一次性供给 | 加垃圾桶保底 |
+|------|------|------|------|------|------|
+| 单线（用套件） | 1 或 0 | 0 或 1 | 1 | ✔（金属余 1） | ✔ |
+| 单线（不用套件） | 3 或 0 | 0 或 3 | 3 | ✘（金属 2） | ✔（翻到 1 次即可，第 1 天可得） |
+| 双线（套件给其中一条） | 1/3 | 3/1 | **4** | **✘** | **✔（翻到 2 次＝第 2 天起）** ← 待决 |
+| 双线（都不用套件） | 3 | 3 | 6 | ✘ | ✔（翻到 4 次＝第 4 天起） |
+
+**冲突（待决）**：「单线不用套件要有保底」与「双线不可行」在金属上互斥——不用套件的单线需金属 3，用套件的双线需金属 4，保底只要能多给 ≥2 件，双线就成立。可选方向（未实作）：
+1. `gather_repeat_run_cap`=1：双线 ✘；但不用套件的单线仍是零容错（回到原问题）
+2. 把双线卡在木/绳而非金属：木 5→2、绳 3→2 → 不用套件的单线也做不成（需 3），**套件成为必需**；双线需木 3 或绳 3 → ✘；金属保底可以不设整局上限。套件被没收可去办公室取回，不会永久失去
+3. 接受保底让双线在第 2 天后可行，改由时间（期限、施工秒数）挡双线
+
+#### 被收缴物品的去向与取回（A1 下不等于永久损失）
+
+| 情况 | 去向 | 取回 |
+|------|------|------|
+| 被抓（背包全部，含套件） | `OfficeStorage`（`CaptureFlow.apply_capture`） | 办公室储物柜 E：巧手/攀爬＝Soft（无声、无痕迹），其他动物＝强行（时×3、噪×2、留痕迹） |
+| 警戒 ≥3，地上物品被职员看到（真实巡逻） | `OfficeStorage`（`StaffActor._try_confiscate_ground_items`） | 同上 |
+| 存进施工点的料 | 不会被收缴 | — |
+
+柜子一次只取背包装得下的（`OfficeStorage.take(n)`，先进先出），剩下的留在柜里，下次再取，不会消失。仍会真正消耗原料的只有「加固笼门：开门多耗 1 件原料」（`REINFORCE_EXTRA_MATERIALS`，设计如此）。
+
+#### 施工秒数（RouteWorkParams）
+
+- 改为：擅长者（有该点才能＝Soft）每档 **15s**；非擅长者（强行＝Hard）基础 **35s**，Hard 时间倍率 ×3 照旧 → 实际每档 **105s**
+- 原值 6 / 14（Hard 实际 14×3＝42s）：自初始导入 `89650ca`（2026-10-09）就在 `GameConst`，刀 1 `8627119` 原样搬进 `RouteWorkParams`。repo 与文档里查不到 15/35 的出处，也没有偏离的记录；唯一相关的是 `docs/qa_reports/latest_report.md`「挖掘线必 Hard（42s）…Soft 攀爬线 18s 是否过于轻松」
+- 天亮会中断进行中的施工档并退料（之前进度条可以跨进白天继续）
+- **后果**：一夜最长 84s（警戒 3：夜巡 52 + 歇岗 32；警戒 4：60 + 24），**Hard 105s 永远做不完一档**，等于施工不能强行（猴做挖洞线、浣熊做攀爬线都不可能）。待决
+
+#### 正解天数估算（`p2_full_loop._day_estimate`，全部读 Resource / 现图位置）
+
+正解＝擅长者 Soft + 套件，浣熊做挖洞线。保守假设：
+- 白天：笼内 → 套件 → 杂物堆（木）→ 工具间（金属）→ 存到挖洞点；直线距离 ×1.4 绕路，拿到套件后按重物移速（×0.6）；加搜集/开锁秒数 → **≈21s / Open 180s → 第 1 天搬完**
+- 夜间可施工窗口：Soft 无声；只有当施工点在期限当天也不在任一巡逻点视野内时，才算入夜巡时段。挖洞点离最近巡逻点（垃圾桶旁）9.5m，第 5 天视野 9.0m → 夜巡可用，窗口 = 28 + 32 = **60s**（攀爬点离最近巡逻点 15.4m，同样可用）
+- 走到施工点 ≈2.7s；Soft 每档 15s → **每夜 3 档 → 1 夜完工 → 第 1 天出园**
+
+**正解 1 天，低于 3 天（待决，未加任何限制）**。具体瓶颈：
+1. 全部原料第 1 天白天约 21s 就能搬完（Open 180s）
+2. 两个施工点都在巡逻视野外，Soft 又无声，整夜 60s 都能安全施工
+3. 一条线 3 档 × 15s = 45s，加走位仍 < 60s
+4. 若假设「只在歇岗 32s 施工」：(32 − 2.7) / 15 = 1.95 → 每夜 1 档 → 3 夜 → 第 3 天，刚好落在目标；但两个施工点都不在巡逻视野内、Soft 又无声，玩家没有理由等歇岗，这个假设对现图过度保守
+5. 双动物可同时在两点施工（H 让另一只就位），不影响单线天数
+
+要在「整夜可用」时也达到 3 夜，Soft 每档须 > (60 − 2.7) / 2 ≈ 28.7s；或让夜巡能看到/听到施工点，使歇岗成为实际的施工窗口。
+
 ## R6 前置清单
 
 | 优先 | 项 | 说明 |
 |------|----|------|
 | **高** | 挖洞线不需换控 | 浣熊可独自完成挖洞线全部交互（开笼、救猴、搜集、3 档 Soft），猴只需跟随（`p2_route_clear` 挖洞局即此路径）。**R6 验收：两条路线都至少需要一次换控才能完成。** |
-| 高 | 材料总量无法限制为「只够一条线」 | 见下方待决 |
+| ~~高~~ | ~~材料总量无法限制为「只够一条线」~~ | 刀 5：A1 + 组合 Y 已实作；保底与双线的冲突待决（见刀 5 进度笔记） |
+| 高 | 遗落物改每日随机池 | 游客遗落的绳等改 `daily_pool`：每天从候选位置池刷 N 个；**随机必须有界、有保底（连续 N 天没刷出则必刷）、可由侦察预告** |
+| 高 | 垃圾桶可重复低产出 | 刀 5 已做（唯一保底来源）；R6 再定整局上限与噪音/空手率 |
+| 中 | 员工携带物与路线连动 | 工具车/员工身上的物品随员工路线出现在不同位置；同样有界、有保底、可侦察预告 |
+| 中 | 采集点延后开放（情报解锁） | 部分点位要先拿到情报（或某天之后）才开放；是时间闸门候选之一 |
 
-### 待决：材料总量（R6 前正式决定）
+### 材料总量：决定前的分析（已由刀 5 进度笔记取代，保留备查）
 
 现状：搜集点与工具车每天天亮补货，跨天累计无上限，「材料只够一条线」无法成立。倾向方案：**搜集点不补货，或设全图固定总量上限**。
 
@@ -210,16 +278,16 @@ A2 与 A1 合计相同（上限设成同样的数），差别是：A2 下错配�
 
 | 交互点 | 现况（旧） | 偏离新规则之处 | 刀 5 对齐 |
 |------|------|------|------|
-| **办公室储物柜** `OfficeChest` | 自带 `soft_caps`（巧手/攀爬）；Hard 固定 1.8s；发 `interact_hard` 噪音后**再用 `Alert.hearing_radius()`（3.2+1.2×警戒）直接判距离当场抓** | 不走 `accepted_caps`/`allow_hard`；不用 Hard 倍率；无痕迹；抓捕绕过职员听觉/telegraph；无离开范围取消；不看职员是否歇岗/守门 | **需要**：改为 Interactable 同规则（或直接用 Interactable），Hard 留痕迹、噪音只给职员听，删 `hearing_radius` 抓捕 |
-| 施工点 / 笼门强行的**当场抓** | `Interactable._emit_noise`：职员在 `HARD_INSTANT_CATCH_RANGE` 1.6m 内即 `capture_return_home` | 绕过 telegraph（≥0.55s 预警）；不看职员朝向、是否歇岗/守门；常数仍在 `GameConst` 本地 | **需要**：改成「近距离噪音 → 职员直接进 CHASE 并走 telegraph」，或至少排除歇岗/守门，常数入 Params |
-| 强行噪音门槛 | `Alert.noise_threshold()`（1.0 − 0.12×警戒）：响度低于门槛就**完全不发噪音** | 与「职员按听距判定」双重过滤；警戒越高门槛越低＝另一套隐性听觉加成 | **需要**：移除，听距倍率已由 `Alert.hearing_mult` 负责 |
-| `Alert.hearing_radius()` | 只剩办公室柜在用 | 旧听距模型 | 随办公室柜对齐后删除 |
-| `AnimalActor.capture_return_home` 后备分支 | 无 CaptureFlow 时直接 `Alert.bump` | 实际不会走到（CaptureFlow 是 autoload） | 建议：删后备分支，只留 CaptureFlow |
-| 职员工具车 `StaffCart` | 偷 1.6s；只在职员 `is_hostile()` 时失败；无噪音、无痕迹；每天补 1 | 无 Soft/Hard、无痕迹（成功或失败都不留证据） | 视需要：失败时发噪音或留痕迹；补货随材料方案改 |
-| 搜集点 `GatherPoint`（A 类） | 有才能＝满额快、没有＝1 个且慢；无噪音/痕迹 | 用「满额/少量」而非 Soft/Hard 术语；属既定设计 | 不需要（B 类接口已备；补货随材料方案改） |
+| **办公室储物柜** `OfficeChest` | 自带 `soft_caps`（巧手/攀爬）；Hard 固定 1.8s；发 `interact_hard` 噪音后**再用 `Alert.hearing_radius()`（3.2+1.2×警戒）直接判距离当场抓** | 不走 `accepted_caps`/`allow_hard`；不用 Hard 倍率；无痕迹；抓捕绕过职员听觉/telegraph；无离开范围取消；不看职员是否歇岗/守门 | ✅ 刀 5：`OfficeChest extends Interactable`（巧手 + `also_accepts` 攀爬；Hard 走倍率、留痕迹、噪音只走 `Bus.noise_made`；离开范围取消；只取背包装得下的）。顺带修：柜子在 3×3 实心办公室块正中，`use_range`=2.4（从墙边操作） |
+| 施工点 / 笼门强行的**当场抓** | `Interactable._emit_noise`：职员在 `HARD_INSTANT_CATCH_RANGE` 1.6m 内即 `capture_return_home` | 绕过 telegraph（≥0.55s 预警）；不看职员朝向、是否歇岗/守门；常数仍在 `GameConst` 本地 | ✅ 刀 5：删除当场抓与 `HARD_INSTANT_CATCH_RANGE`；职员在 `StaffAiParams.close_noise_chase_range`（1.6m）内听到强行/施工噪音 → awareness 直接到追捕带 → 起疑 + 预警 ≥0.55s → 看到才追捕（歇岗/守门不听）。顺带修：职员离开巡逻后仍停在 dwell 时朝向不更新（视野锥卡住） |
+| 强行噪音门槛 | `Alert.noise_threshold()`（1.0 − 0.12×警戒）：响度低于门槛就**完全不发噪音** | 与「职员按听距判定」双重过滤；警戒越高门槛越低＝另一套隐性听觉加成 | ✅ 刀 5：已移除 |
+| `Alert.hearing_radius()` | 只剩办公室柜在用 | 旧听距模型 | ✅ 刀 5：已删除（连同 `AlertParams.base_hearing_radius` / `hearing_per_alert`） |
+| `AnimalActor.capture_return_home` 后备分支 | 无 CaptureFlow 时直接 `Alert.bump` | 实际不会走到（CaptureFlow 是 autoload） | ✅ 刀 5：已删 |
+| 职员工具车 `StaffCart` | 偷 1.6s；只在职员 `is_hostile()` 时失败；无噪音、无痕迹；每天补 1 | 无 Soft/Hard、无痕迹（成功或失败都不留证据） | 补货已改整局 1（刀 5）；失败时的噪音/痕迹未做 |
+| 搜集点 `GatherPoint`（A 类） | 有才能＝满额快、没有＝1 个且慢；无噪音/痕迹 | 用「满额/少量」而非 Soft/Hard 术语；属既定设计 | 不需要（刀 5：刷新模式 + 按剩余库存扣） |
 | 观察点 `ObservePoint` | 职员敌对即失败；无噪音 | 无 | 不需要 |
 | 套件拾取 / 地上物品 | 直接拿 | 无 | 不需要 |
-| 笼门 / 路线施工点 `Interactable` | 新规则 | — | 已对齐（只剩上面「当场抓」与噪音门槛两项） |
+| 笼门 / 路线施工点 `Interactable` | 新规则 | — | ✅ 已对齐 |
 
 ## 已锁定数值 / 规则（摘）
 
@@ -232,7 +300,9 @@ A2 与 A1 合计相同（上限设成同样的数），差别是：A2 下错配�
 - 痕迹：跨天保留至被发现；天亮衰减 **50%**（比例入 Params）  
 - 无员工在场时，任何噪音**不得**使 Alert 上升（`p2_action_cost` / `p2_alert_tiers` 断言）  
 - 背包：**浣熊容量 4 / 猴子 2**；重物（仅套件，`ItemDef.heavy`）：移速 −40%、禁用攀爬  
-- 测试：`p2_full_loop` 改预算断言（3–5 天正解线；材料不够双线；无料拒最后一档）
+- 测试：`p2_full_loop` 改预算断言（3–5 天正解线；材料不够双线；无料拒最后一档）——刀 5 已接；(a) 与「加保底后的 (b)」以 `PENDING` 列出，不计失败
+- 材料：A1（整局一次）+ 金属 3 + 1 个通用套件；垃圾桶可重复翻找为唯一保底（刀 5）
+- 施工：擅长者 15s / 档、非擅长者 35s × Hard ×3（刀 5，后果待决）
 
 ## 不做
 

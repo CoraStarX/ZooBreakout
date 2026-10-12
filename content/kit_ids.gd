@@ -1,9 +1,9 @@
 class_name KitIds
 extends RefCounted
-## Items: named route kits + raw materials. Not a deep crafting tree.
+## Items: one generic route kit + raw materials. Not a deep crafting tree.
 
-const DIG := &"dig_kit"
-const CLIMB := &"climb_kit"
+## 通用施工套件：挖洞线与攀爬线都能用，由玩家决定给哪条线（全图 1 个，顶 KIT_TIERS 档）。
+const ROUTE := &"route_kit"
 ## 原料：不同区域/动词/风险产出不同原料；路线每档要求两种搭配。
 const ROPE := &"rope"
 const WOOD := &"wood"
@@ -29,10 +29,8 @@ static func is_heavy(id: StringName) -> bool:
 
 static func display_name(id: StringName) -> String:
 	match id:
-		DIG:
-			return "挖掘套件"
-		CLIMB:
-			return "攀爬套件"
+		ROUTE:
+			return "施工套件"
 		ROPE:
 			return "绳索"
 		WOOD:

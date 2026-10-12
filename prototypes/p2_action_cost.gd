@@ -49,7 +49,7 @@ func _ready() -> void:
 		monkey.give_items([id])
 		_check(is_equal_approx(monkey.current_move_speed(), monkey.def.move_speed)
 			and monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "带%s：移速与攀爬不受影响" % KitIds.display_name(id))
-	for id in [KitIds.DIG, KitIds.CLIMB]:
+	for id in [KitIds.ROUTE, KitIds.ROUTE]:
 		_check(KitIds.is_heavy(id), "%s 标记为重物" % KitIds.display_name(id))
 		monkey.inventory.clear()
 		monkey.give_items([id])

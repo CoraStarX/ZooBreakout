@@ -174,9 +174,9 @@ func _reg_hard_investigate() -> void:
 	_log.clear()
 	var alert_before := Alert.level
 	# Simulate noise emit path directly for distance fairness
-	var caught := dig._emit_noise(1.0, actor)
+	dig._emit_noise(1.0, actor)
 	await get_tree().process_frame
-	if caught:
+	if actor.is_confined:
 		_fail("P0-平衡/硬闯", "远端硬闯噪音仍当场抓捕")
 	else:
 		var investigate_msg := false

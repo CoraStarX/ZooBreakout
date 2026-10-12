@@ -72,8 +72,8 @@ func _solo_refused_run() -> void:
 	Bus.interact_feedback.connect(on_msg)
 	var raccoon := _party.controlled()
 	var dig := _geo.dig_interactable
-	await _pick_kit(raccoon, _geo.dig_kit_pickup)
-	await _gather(raccoon, "垃圾桶（铁罐）")
+	await _pick_kit(raccoon, _geo.route_kit_pickup)
+	await _gather(raccoon, "职员工具间")
 	await _gather(raccoon, "南侧杂物堆")
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
@@ -102,11 +102,11 @@ func _dig_run() -> void:
 	var dig := _geo.dig_interactable
 	_check(not dig.accepted_caps().has(CapabilityIds.Id.DIG), "挖洞线不要求挖掘（要求：%s）" % dig.requirement_text())
 	_check(dig._qualifies(raccoon, true), "浣熊可 Soft 施工挖洞线")
-	await _pick_kit(raccoon, _geo.dig_kit_pickup)
-	await _gather(raccoon, "垃圾桶（铁罐）")
+	await _pick_kit(raccoon, _geo.route_kit_pickup)
+	await _gather(raccoon, "职员工具间")
 	await _gather(raccoon, "南侧杂物堆")
-	_check(raccoon.has_item(KitIds.DIG) and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 1,
-		"白天备齐：挖掘套件 + 金属 + 木料 %s" % [raccoon.inventory])
+	_check(raccoon.has_item(KitIds.ROUTE) and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 1,
+		"白天备齐：施工套件 + 金属 + 木料 %s" % [raccoon.inventory])
 
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
@@ -127,7 +127,7 @@ func _climb_run() -> void:
 	var climb := _geo.climb_interactable
 	_check(monkey.def.id == &"monkey" and monkey.def.resource_path == "res://content/animals/monkey.tres", "切换操控猴（正式 AnimalDef）")
 	await _gather(monkey, "游客遗落的绳")
-	await _gather(monkey, "垃圾桶（铁罐）")
+	await _rummage_until_found(monkey, "垃圾桶（铁罐）")
 	_check(monkey.item_count(KitIds.ROPE) == 1 and monkey.item_count(KitIds.METAL) == 1, "白天备齐：绳索 + 金属 %s" % [monkey.inventory])
 	_check(not monkey.is_carrying_heavy() and monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "原料不是重物：仍可攀爬")
 
@@ -135,8 +135,8 @@ func _climb_run() -> void:
 	_stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	await RouteHelper.finish(get_tree(), climb, monkey, false)
 	_check(climb.tier_done == 1, "绳索+金属完成第 1 档")
-	await _pick_kit(monkey, _geo.climb_kit_pickup)
-	_check(monkey.is_carrying_heavy() and not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "背着攀爬套件 = 重物")
+	await _pick_kit(monkey, _geo.route_kit_pickup)
+	_check(monkey.is_carrying_heavy() and not monkey.effective_has_capability(CapabilityIds.Id.CLIMB), "背着施工套件 = 重物")
 	_stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	await RouteHelper.finish(get_tree(), climb, monkey, false)
 	_check(climb._done and _session.route_climb_ready, "猴完成攀爬线 %d/%d" % [climb.tier_done, climb.tiers])
@@ -197,6 +197,15 @@ func _gather(a: AnimalActor, point_name: String) -> void:
 			t += get_process_delta_time()
 		return
 	_check(false, "找不到搜集点 %s" % point_name)
+
+
+## Trash bin may come up empty; pity guarantees a find within gather_repeat_pity + 1 tries.
+func _rummage_until_found(a: AnimalActor, point_name: String) -> void:
+	var have := a.inventory.size()
+	for _i in GameConst.action_cost().gather_repeat_pity + 1:
+		await _gather(a, point_name)
+		if a.inventory.size() > have:
+			return
 
 
 func _stand(a: AnimalActor, pos: Vector3) -> void:

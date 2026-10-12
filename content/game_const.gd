@@ -43,14 +43,6 @@ static var MAX_ALERT_LEVEL: int:
 	get:
 		return alert_params().max_alert_level
 
-static var BASE_HEARING_RADIUS: float:
-	get:
-		return alert_params().base_hearing_radius
-
-static var HEARING_PER_ALERT: float:
-	get:
-		return alert_params().hearing_per_alert
-
 static var NIGHT_PATROL_BASE_SEC: float:
 	get:
 		return day_cycle().night_patrol_base_sec
@@ -85,14 +77,14 @@ static var HARD_INTERACT_SEC: float:
 		return action_cost().hard_interact_sec
 
 ## Still local until Capture / sense params land (not in knife-1 Resources).
-const HARD_INSTANT_CATCH_RANGE := 1.6
 const GRAVITY := 22.0
 const DETENTION_SEC := 15.0
 const REINFORCE_EXTRA_MATERIALS := 1
 const REINFORCE_TIME_MULT := 2.0
 const OBSERVE_SEC := 4.0
 const OBSERVE_VIEW_RANGE := 13.0
-const CART_LOOT_PER_DAY := 1
+## 工具车金属整局只有这么多（不每天补货）。
+const CART_LOOT_PER_RUN := 1
 const STEAL_SEC := 1.6
 const CART_TRAIL_DIST := 1.4
 const STAFF_DWELL_SEC := 4.0

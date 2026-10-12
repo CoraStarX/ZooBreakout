@@ -717,16 +717,7 @@ func display_name() -> String:
 
 
 func capture_return_home(reason: String = "") -> void:
-	## Prefer CaptureFlow when available (confiscate + confine to exhibit).
-	if CaptureFlow:
-		CaptureFlow.apply_capture(self, reason)
-		return
-	global_position = home_position
-	velocity = Vector3.ZERO
-	set_confined(true)
-	Alert.bump(1)
-	Bus.captured.emit(self)
-	Bus.interact_feedback.emit("%s 被抓送回！警戒 %d" % [display_name(), Alert.level])
+	CaptureFlow.apply_capture(self, reason)
 
 
 ## X: next to a route point → store every usable item there; elsewhere → drop one item (heavy first).

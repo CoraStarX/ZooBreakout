@@ -131,7 +131,7 @@ func current_objective() -> String:
 	if me and not session.is_finished() and session.exhibit_escaped and not Clock.allows_escape_actions():
 		return "%s｜背包：木%d 绳%d 金属%d%s" % [
 			session.current_objective(), me.item_count(KitIds.WOOD), me.item_count(KitIds.ROPE), me.item_count(KitIds.METAL),
-			"、挖掘套件" if me.has_item(KitIds.DIG) else ("、攀爬套件" if me.has_item(KitIds.CLIMB) else ""),
+			"、施工套件" if me.has_item(KitIds.ROUTE) else "",
 		]
 	return session.current_objective()
 
@@ -270,6 +270,17 @@ func _validate_cages(starter_id: StringName) -> void:
 		defs[id] = Spawns.def_for(id)
 	for e in CageDependencyCheck.validate(cage_doors, defs, starter_id):
 		push_error("关卡配置错误：%s" % e)
+	if _geometry:
+		for e in MaterialBudget.validate(material_lines(), material_supply(), GameConst.DEADLINE_DAY):
+			push_error("关卡配置错误：%s" % e)
+
+
+func material_lines() -> Array:
+	return [MaterialBudget.line_from(_geometry.dig_interactable), MaterialBudget.line_from(_geometry.climb_interactable)]
+
+
+func material_supply() -> Dictionary:
+	return MaterialBudget.supply_from(_geometry.gather_points, GameConst.CART_LOOT_PER_RUN, 1 if _geometry.route_kit_pickup else 0)
 
 
 func _wire_cage_door(door: Interactable, animal_id: StringName) -> void:

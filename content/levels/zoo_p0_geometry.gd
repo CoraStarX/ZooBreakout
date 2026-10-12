@@ -11,14 +11,18 @@ var danger_zone: Area3D
 const Intel := preload("res://content/levels/zoo_p0_intel.gd")
 const Gather := preload("res://content/levels/zoo_p0_gather.gd")
 const KitPickupScript := preload("res://content/interactables/kit_pickup.gd")
+const REFRESH_MODES := {
+	"once": GatherPoint.RefreshMode.ONCE,
+	"daily_pool": GatherPoint.RefreshMode.DAILY_POOL,
+	"repeatable": GatherPoint.RefreshMode.REPEATABLE,
+}
 
 var gather_points: Array[GatherPoint] = []
 var observe_points: Array[ObservePoint] = []
 var staff_cart: StaffCart
 var dig_interactable: Interactable
 var climb_interactable: Interactable
-var dig_kit_pickup: Area3D
-var climb_kit_pickup: Area3D
+var route_kit_pickup: Area3D
 var west_outer_gate: StaticBody3D
 var south_outer_gate: StaticBody3D
 var exit_west: Area3D
@@ -71,7 +75,7 @@ func _build_level() -> void:
 		0.0, true, false, Interactable.BreachStyle.DIG_HOLE, Vector3(1.4, 0, 0)
 	)
 	dig_interactable.also_accepts = [CapabilityIds.Id.DEXTERITY]
-	dig_interactable.route_kit_id = KitIds.DIG
+	dig_interactable.route_kit_id = KitIds.ROUTE
 	dig_interactable.tiers = GameConst.ROUTE_TIERS
 	dig_interactable.tier_cost = [KitIds.WOOD, KitIds.METAL]
 	dig_interactable._refresh_label()
@@ -80,7 +84,7 @@ func _build_level() -> void:
 		Vector3(-4.5, 0.5, -11.1), "外墙攀爬出园", CapabilityIds.Id.CLIMB, south_outer_gate,
 		0.0, true, false, Interactable.BreachStyle.CLIMB_LEDGE, Vector3(0, 0, 1.0)
 	)
-	climb_interactable.route_kit_id = KitIds.CLIMB
+	climb_interactable.route_kit_id = KitIds.ROUTE
 	climb_interactable.tiers = GameConst.ROUTE_TIERS
 	climb_interactable.tier_cost = [KitIds.ROPE, KitIds.METAL]
 	climb_interactable._refresh_label()
@@ -119,17 +123,12 @@ func _build_level() -> void:
 
 
 func _build_kit_pickups() -> void:
-	## Inside starting exhibits so Open-hour gather works before night breakouts.
-	dig_kit_pickup = KitPickupScript.new() as Area3D
-	dig_kit_pickup.name = "DigKitPickup"
-	dig_kit_pickup.set("kit_id", &"dig_kit")
-	dig_kit_pickup.position = Vector3(-5.5, 0.05, -7.2) # raccoon yard
-	add_child(dig_kit_pickup)
-	climb_kit_pickup = KitPickupScript.new() as Area3D
-	climb_kit_pickup.name = "ClimbKitPickup"
-	climb_kit_pickup.set("kit_id", &"climb_kit")
-	climb_kit_pickup.position = Vector3(6.0, 0.05, -3.5) # monkey enclosure
-	add_child(climb_kit_pickup)
+	## 全图只有 1 个通用套件（挖洞/攀爬都能用）；放在起始展区，开园时段即可拿到。
+	route_kit_pickup = KitPickupScript.new() as Area3D
+	route_kit_pickup.name = "RouteKitPickup"
+	route_kit_pickup.set("kit_id", KitIds.ROUTE)
+	route_kit_pickup.position = Vector3(-5.5, 0.05, -7.2) # raccoon yard
+	add_child(route_kit_pickup)
 
 
 func _build_gather_points() -> void:
@@ -143,6 +142,10 @@ func _build_gather_points() -> void:
 		gp.yield_poor = d["poor"]
 		gp.hint = d["hint"]
 		gp.risky = bool(d.get("risky", false))
+		gp.refresh_mode = REFRESH_MODES.get(String(d.get("refresh", "once")), GatherPoint.RefreshMode.ONCE)
+		gp.pool_positions.assign(d.get("pool", []))
+		gp.pool_daily_count = int(d.get("pool_daily", 0))
+		gp.pool_pity_days = int(d.get("pool_pity", 0))
 		gp.position = d["pos"]
 		add_child(gp)
 		gather_points.append(gp)
