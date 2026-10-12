@@ -1,48 +1,139 @@
 class_name GameConst
 extends RefCounted
+## Compatibility facade over balance Resources. Prefer editing `.tres` under `content/balance/`.
+## Call sites may keep `GameConst.X`; values resolve from Params / ActionCostTable at runtime.
 
-const MAX_ALERT_LEVEL := 5
-const BASE_HEARING_RADIUS := 3.2
-const HEARING_PER_ALERT := 1.2
-## Night quiet window base length (seconds of night phase before rest). Alert pushes rest later.
-const NIGHT_PATROL_BASE_SEC := 28.0
-const NIGHT_PATROL_PER_ALERT_SEC := 8.0
-const NIGHT_QUIET_SEC := 32.0
-## Open long enough to gather + watch ~2 patrol loops.
-const OPEN_PHASE_SEC := 75.0
-const CLOSE_PHASE_SEC := 15.0
-## 封园检修：第 DEADLINE_DAY 天结束仍未出园 → 失败。
-const DEADLINE_DAY := 5
+const _DAY_PATH := "res://content/balance/day_cycle_params.tres"
+const _ROUTE_PATH := "res://content/balance/route_work_params.tres"
+const _ALERT_PATH := "res://content/balance/alert_params.tres"
+const _COST_PATH := "res://content/balance/action_cost_table.tres"
 
-## Soft vs Hard interact timing (seconds).
-const SOFT_INTERACT_SEC := 0.45
-const HARD_INTERACT_SEC := 2.0
-## Hard noise only auto-captures within this distance; else investigate.
+static var _day: DayCycleParams
+static var _route: RouteWorkParams
+static var _alert: AlertParams
+static var _cost: ActionCostTable
+
+
+static func day_cycle() -> DayCycleParams:
+	if _day == null:
+		_day = load(_DAY_PATH) as DayCycleParams
+	return _day
+
+
+static func route_work() -> RouteWorkParams:
+	if _route == null:
+		_route = load(_ROUTE_PATH) as RouteWorkParams
+	return _route
+
+
+static func alert_params() -> AlertParams:
+	if _alert == null:
+		_alert = load(_ALERT_PATH) as AlertParams
+	return _alert
+
+
+static func action_cost() -> ActionCostTable:
+	if _cost == null:
+		_cost = load(_COST_PATH) as ActionCostTable
+	return _cost
+
+
+## --- DayCycleParams ---
+static var MAX_ALERT_LEVEL: int:
+	get:
+		return alert_params().max_alert_level
+
+static var BASE_HEARING_RADIUS: float:
+	get:
+		return alert_params().base_hearing_radius
+
+static var HEARING_PER_ALERT: float:
+	get:
+		return alert_params().hearing_per_alert
+
+static var NIGHT_PATROL_BASE_SEC: float:
+	get:
+		return day_cycle().night_patrol_base_sec
+
+static var NIGHT_PATROL_PER_ALERT_SEC: float:
+	get:
+		return day_cycle().night_patrol_per_alert_sec
+
+static var NIGHT_QUIET_SEC: float:
+	get:
+		return day_cycle().night_quiet_sec
+
+static var OPEN_PHASE_SEC: float:
+	get:
+		return day_cycle().open_phase_sec
+
+static var CLOSE_PHASE_SEC: float:
+	get:
+		return day_cycle().close_phase_sec
+
+static var DEADLINE_DAY: int:
+	get:
+		return day_cycle().deadline_day
+
+## --- ActionCostTable / interact ---
+static var SOFT_INTERACT_SEC: float:
+	get:
+		return action_cost().soft_interact_sec
+
+static var HARD_INTERACT_SEC: float:
+	get:
+		return action_cost().hard_interact_sec
+
+## Still local until Capture / sense params land (not in knife-1 Resources).
 const HARD_INSTANT_CATCH_RANGE := 1.6
-## Character gravity (m/s²). Keeps climb/ledges from becoming flight.
 const GRAVITY := 22.0
-## 被抓：短押秒数（笼内可搜集），期间职员守在笼门前；笼门当天加固。
 const DETENTION_SEC := 15.0
-## 加固笼门：开锁额外消耗的原料数（任意种）；没有则耗时 ×REINFORCE_TIME_MULT。
 const REINFORCE_EXTRA_MATERIALS := 1
 const REINFORCE_TIME_MULT := 2.0
-## 情报观察：累计看到职员的秒数；可观察的最大距离。
 const OBSERVE_SEC := 4.0
 const OBSERVE_VIEW_RANGE := 13.0
-## 职员工具车：每天可偷金属的件数；偷取读条秒数；车跟在职员身后的距离；巡逻点停留秒数。
 const CART_LOOT_PER_DAY := 1
 const STEAL_SEC := 1.6
 const CART_TRAIL_DIST := 1.4
-const STAFF_DWELL_SEC := 3.0
-## 白天搜集：有动词 / 无动词的读条秒数。
-const GATHER_SEC := 0.7
-const GATHER_POOR_SEC := 2.0
-## 每过一天职员更警觉：视野(米)与速度的每日增量（上限 STAFF_SCALE_MAX_DAYS 天）。
+const STAFF_DWELL_SEC := 4.0
+
+static var SHOUT_COOLDOWN_SEC: float:
+	get:
+		return action_cost().shout_cooldown_sec
+
+static var SHOUT_LOUDNESS: float:
+	get:
+		return action_cost().shout_loudness
+
+const FOOTSTEP_NOISE_LOUDNESS := 0.22
+const FOOTSTEP_NOISE_INTERVAL_SEC := 0.55
+const RUN_SPEED_FOR_FOOTSTEP_NOISE := 2.4
+
+static var GATHER_SEC: float:
+	get:
+		return action_cost().gather_sec
+
+static var GATHER_POOR_SEC: float:
+	get:
+		return action_cost().gather_poor_sec
+
 const STAFF_VISION_PER_DAY := 0.5
 const STAFF_SPEED_PER_DAY := 0.12
 const STAFF_SCALE_MAX_DAYS := 4
-## 夜间施工：路线档数；每档按路线配方耗原料，或用套件（套件顶 KIT_TIERS 档）；每档读条秒数（Soft/Hard）。
-const ROUTE_TIERS := 3
-const KIT_TIERS := 2
-const TIER_SOFT_SEC := 6.0
-const TIER_HARD_SEC := 14.0
+
+## --- RouteWorkParams ---
+static var ROUTE_TIERS: int:
+	get:
+		return route_work().route_tiers
+
+static var KIT_TIERS: int:
+	get:
+		return route_work().kit_tiers
+
+static var TIER_SOFT_SEC: float:
+	get:
+		return route_work().tier_soft_sec
+
+static var TIER_HARD_SEC: float:
+	get:
+		return route_work().tier_hard_sec

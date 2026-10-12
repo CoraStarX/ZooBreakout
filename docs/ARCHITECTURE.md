@@ -54,8 +54,10 @@ docs/
 | Party | `gameplay/party_controller.gd` |
 | Capture / Office | `gameplay/capture_flow.gd`, `gameplay/office_storage.gd` |
 | Run session | `gameplay/run_session.gd`（场景级，非 Autoload） |
-| Interactions | `gameplay/interaction/interactable.gd` |
-| AnimalDef / Caps | `content/animal_def.gd`, `content/capability_ids.gd` |
+| Interactions | `gameplay/interaction/interactable.gd`（含 `allow_hard`） |
+| Action cost / balance | `content/balance/*_params.gd|.tres`, `action_cost_table.gd|.tres`（见 [COST_REFACTOR.md](COST_REFACTOR.md)） |
+| Traces | `gameplay/trace/`（发现→Alert，单次结算） |
+| AnimalDef / Caps | `content/animal_def.gd`, `content/capability_ids.gd`（含 THROW） |
 | Follow camera | `core/camera/follow_camera.gd` |
 | Level geometry | `scenes/world/zoo_p0_geometry.tscn` + `content/levels/zoo_p0_geometry.gd` |
 | Level root | `content/levels/zoo_world.gd` + `scenes/world/zoo_p0.tscn` |

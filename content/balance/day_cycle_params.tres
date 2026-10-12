@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DayCycleParams" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/balance/day_cycle_params.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+open_phase_sec = 75.0
+close_phase_sec = 15.0
+night_patrol_base_sec = 28.0
+night_patrol_per_alert_sec = 8.0
+night_quiet_sec = 32.0
+deadline_day = 5
+shout_daily_limit = 4
