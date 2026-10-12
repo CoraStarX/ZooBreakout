@@ -19,13 +19,15 @@ func _ready() -> void:
 	await _dig_run()
 	await _boot()
 	await _climb_run()
+	await _boot(false)
+	await _solo_refused_run()
 	print("")
 	print("=== P2 ROUTE CLEAR SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])
 	get_tree().quit(0 if _fail_n == 0 else 1)
 
 
-## Fresh official start, then raccoon opens its own cage and the monkey's.
-func _boot() -> void:
+## Fresh official start, then raccoon opens its own cage (and the monkey's when rescue_monkey).
+func _boot(rescue_monkey: bool = true) -> void:
 	if _world:
 		_world.queue_free()
 		await get_tree().process_frame
@@ -49,11 +51,49 @@ func _boot() -> void:
 	_stand(raccoon, own.global_position + Vector3(0, 0, -0.9))
 	own.try_use(raccoon)
 	await _idle(own)
+	if not rescue_monkey:
+		_check(own._done and _party.party().size() == 1, "浣熊出笼（不救猴）")
+		return
+	await _rescue_monkey(raccoon)
+	_check(own._done and _party.party().size() == 2, "浣熊出笼并救出猴")
+
+
+func _rescue_monkey(raccoon: AnimalActor) -> void:
 	var mdoor: Interactable = _world.get("cage_doors")[&"monkey"]
 	_stand(raccoon, mdoor.global_position + Vector3(-1.1, 0, 0))
 	mdoor.try_use(raccoon)
 	await _idle(mdoor)
-	_check(own._done and mdoor._done and _party.party().size() == 2, "浣熊出笼并救出猴")
+
+
+## Raccoon digs out alone: the exit must refuse until the monkey is rescued and present.
+func _solo_refused_run() -> void:
+	var msgs: Array[String] = []
+	var on_msg := func(m: String) -> void: msgs.append(m)
+	Bus.interact_feedback.connect(on_msg)
+	var raccoon := _party.controlled()
+	var dig := _geo.dig_interactable
+	await _pick_kit(raccoon, _geo.dig_kit_pickup)
+	await _gather(raccoon, "垃圾桶（铁罐）")
+	await _gather(raccoon, "南侧杂物堆")
+	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
+	await RouteHelper.finish(get_tree(), dig, raccoon, false)
+	_check(_session.route_dig_ready, "浣熊独自打通挖洞线")
+	_stand(raccoon, _geo.exit_west.global_position + Vector3(0, -0.9, 0))
+	for _i in 10:
+		await get_tree().physics_frame
+	_world.call("check_exit_win", RunSession.ExitRoute.DIG)
+	await get_tree().process_frame
+	var refusals := msgs.filter(func(m: String) -> bool: return m.contains("还关在笼里"))
+	_check(_session.outcome == RunSession.Outcome.NONE, "未救猴：浣熊进出口不结算（outcome=%s）" % _session.outcome)
+	_check(refusals.size() == 1 and String(refusals[0]).contains("猴"), "拒绝提示点名猴且不刷屏（%d 条）：%s" % [refusals.size(), refusals[0] if not refusals.is_empty() else "—"])
+	Bus.interact_feedback.disconnect(on_msg)
+	## Go back and rescue for real, then both leave.
+	Clock.set_phase(Clock.Phase.OPEN)
+	await _rescue_monkey(raccoon)
+	_check(_party.party().size() == 2, "回头救出猴")
+	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	await _exit_all(_geo.exit_west, RunSession.ExitRoute.DIG)
 
 
 ## Dig line: raccoon lockpicks every tier (Soft). Kit pays two tiers, wood+metal the last.

@@ -14,6 +14,8 @@ var cage_doors: Dictionary = {}
 var _geometry: ZooP0Geometry
 var _result_ui: CanvasLayer
 var _input_locked: bool = false
+## Last exit refusal shown (avoid re-emitting every physics frame).
+var _exit_block_msg: String = ""
 var _env: Environment
 var _lighting_tween: Tween
 
@@ -365,20 +367,34 @@ func _check_exit_win(route: RunSession.ExitRoute) -> void:
 	if members.is_empty():
 		return
 	var free: Array[AnimalActor] = []
-	var confined_n := 0
+	var confined: PackedStringArray = []
 	for a in members:
 		if a.is_confined:
-			confined_n += 1
+			confined.append(a.display_name())
 		else:
 			free.append(a)
 	if free.is_empty():
 		return
 	for a in free:
 		if not _is_in_exit_zone(a, zone):
+			_exit_block_msg = ""
 			return
+	## Win needs every companion rescued and present — nobody escapes alone.
+	var block := ""
+	var caged: PackedStringArray = []
+	for id in party.pending_rescue_ids():
+		var d := Spawns.def_for(id)
+		caged.append(d.display_name if d else String(id))
+	if not caged.is_empty():
+		block = "还不能出园：%s 还关在笼里 — 先把所有同伴救出来" % "、".join(caged)
+	elif not confined.is_empty():
+		block = "还不能出园：%s 被关押中 — 等它出来一起走" % "、".join(confined)
+	if block != "":
+		if block != _exit_block_msg:
+			_exit_block_msg = block
+			Bus.interact_feedback.emit(block)
+		return
 	var reason := "挖掘线出园" if route == RunSession.ExitRoute.DIG else "攀爬线出园"
-	if confined_n > 0:
-		Bus.interact_feedback.emit("禁闭同伴未同行（%d）— 其余队员已出园" % confined_n)
 	session.try_win(reason)
 
 

@@ -40,6 +40,12 @@ func _ready() -> void:
 	door.try_use(actor)
 	await _idle(door)
 	_check(door._done and _session.exhibit_escaped, "白天溜出笼门")
+	var mdoor: Interactable = _world.get("cage_doors")[&"monkey"]
+	actor.global_position = mdoor.global_position + Vector3(-1.1, 0, 0)
+	mdoor.try_use(actor)
+	await _idle(mdoor)
+	var party: PartyController = _world.get("party")
+	_check(party.party().size() == 2, "白天开锁救出猴")
 
 	await _gather_day(actor)
 	## 背包上限：不拿套件、只走安全点，一天凑不齐整条线的原料。
@@ -81,9 +87,12 @@ func _ready() -> void:
 
 	## --- Exit ---
 	var zone: Area3D = _geo.exit_west
-	actor.global_position = zone.global_position + Vector3(0, -0.9, 0)
+	for a in party.party():
+		a.global_position = zone.global_position + Vector3(0, -0.9, 0)
+		a.velocity = Vector3.ZERO
+	await get_tree().physics_frame
 	_world.call("check_exit_win", RunSession.ExitRoute.DIG)
-	_check(_session.outcome == RunSession.Outcome.WON, "进入出口 → 通关（%s）" % _session.outcome_reason)
+	_check(_session.outcome == RunSession.Outcome.WON, "双动物进入出口 → 通关（%s）" % _session.outcome_reason)
 
 	print("")
 	print("=== P2 FULL LOOP SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])

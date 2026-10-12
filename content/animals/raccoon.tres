@@ -6,7 +6,7 @@
 script = ExtResource("1")
 id = &"raccoon"
 display_name = "浣熊"
-capabilities = Array[int]([1])
+capabilities = Array[int]([1, 5])
 body_color = Color(0.72, 0.55, 0.38, 1)
 move_speed = 5.0
 inventory_capacity = 4

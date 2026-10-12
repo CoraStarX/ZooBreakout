@@ -74,6 +74,13 @@ func _ready() -> void:
 	var defs := {&"raccoon": load(RACCOON_PATH), &"monkey": load(MONKEY_PATH)}
 	var ok_errors := CageDependencyCheck.validate(world.get("cage_doors"), defs, &"raccoon")
 	_check(ok_errors.is_empty(), "正式关卡无笼门循环依赖 %s" % ",".join(ok_errors))
+	var rdef := defs[&"raccoon"] as AnimalDef
+	_check(rdef.has_capability(CapabilityIds.Id.DEXTERITY) and rdef.has_capability(CapabilityIds.Id.SQUEEZE), "浣熊 = 巧手 + 钻缝")
+	var squeeze_doors := 0
+	for id in world.get("cage_doors"):
+		if (world.get("cage_doors")[id] as Interactable).accepted_caps().has(CapabilityIds.Id.SQUEEZE):
+			squeeze_doors += 1
+	_check(squeeze_doors == 0, "没有笼门认钻缝（钻缝不改变谁能开笼）")
 
 	var bad_raccoon := Interactable.new()
 	bad_raccoon.required = CapabilityIds.Id.DEXTERITY

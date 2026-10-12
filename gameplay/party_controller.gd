@@ -47,6 +47,14 @@ func rescue(animal_id: StringName, warp_near_leader: bool = true) -> bool:
 	return true
 
 
+## Animals still caged (not yet in the party).
+func pending_rescue_ids() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for id in _pending_rescues:
+		out.append(id)
+	return out
+
+
 func controlled() -> AnimalActor:
 	if _animals.is_empty():
 		return null
