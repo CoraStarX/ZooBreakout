@@ -93,8 +93,9 @@ func _ready() -> void:
 	climb.try_use(raccoon)
 	await _idle(climb)
 	var hard_ms := Time.get_ticks_msec() - t0
-	var expect_ms := int(GameConst.TIER_HARD_SEC * GameConst.route_work().hard_time_mult * Game.work_time_scale * 1000.0 * 0.75)
+	var expect_ms := int(Interactable.tier_seconds(false) * Game.work_time_scale * 1000.0 * 0.75)
 	_check(climb.tier_done == 1, "Hard 完成第 1 档")
+	_check(raccoon.material_count() == 2, "Hard 档不扣料")
 	_check(hard_ms >= expect_ms, "Hard 含时×3（%dms ≥ %dms）" % [hard_ms, expect_ms])
 	_check(Alert.level == alert_before, "Hard 噪音/完工不直接升 Alert（%d）" % Alert.level)
 	var traces := get_tree().get_nodes_in_group("traces")

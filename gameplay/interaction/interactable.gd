@@ -41,6 +41,15 @@ var reinforced: bool = false
 ## World-space offset from the interact point for staff door-guard stance (no species branching).
 @export var guard_offset: Vector3 = Vector3(0, 0, 1.2)
 var tier_done: int = 0
+## Current tier's progress 0..1. Kept across nights; see `_construct` for what an interruption costs.
+var tier_progress: float = 0.0
+## How the current tier was paid (&"" = not yet; Hard work is free, so a Hard-only tier stays unpaid).
+var _tier_pay: StringName = &""
+## Progress when tonight's work on this tier started (a capture rolls back to it).
+var _night_start_progress: float = 0.0
+var _night_mark_day: int = -1
+## The unfinished tier already left its overnight trace (one per tier).
+var _overnight_trace_left: bool = false
 ## Free tiers left from a consumed kit.
 var _kit_credit: int = 0
 ## Recipe materials / this route's kit left here by any animal. Construction pays from here first.
@@ -84,6 +93,7 @@ func _ready() -> void:
 		if reinforced:
 			reinforced = false
 			_refresh_label()
+		_leave_overnight_trace()
 	)
 
 
@@ -175,8 +185,15 @@ func cost_preview(user: AnimalActor) -> String:
 	if tiers > 1 and Alert.is_full_search():
 		return "E %s：全园搜查中，施工全部中止" % display_name
 	var step := "第 %d/%d 档" % [tier_done + 1, tiers] if tiers > 1 else ""
+	if tiers > 1 and tier_progress > 0.0:
+		step += "（已完成 %d%%）" % int(tier_progress * 100.0)
 	var pay_text := ""
-	if tiers > 1:
+	var soft_here := _qualifies(user, true)
+	if tiers > 1 and not soft_here and _hard_allowed_now():
+		pay_text = "不扣料"
+	elif tiers > 1 and _tier_pay != &"":
+		pay_text = "本档已付"
+	elif tiers > 1:
 		match _plan_payment(user):
 			&"credit":
 				pay_text = "套件余档（免费）"
@@ -207,12 +224,14 @@ func _refresh_label() -> void:
 	var line := display_name
 	if required != CapabilityIds.Id.NONE:
 		if _hard_allowed_now():
-			line = "%s\n[%s · Soft / 可强行(慢吵·留痕迹×%d)]" % [display_name, cap, TRACES_PER_HARD]
+			line = "%s\n[%s · Soft / 可强行(慢吵·留痕迹×%d%s)]" % [
+				display_name, cap, TRACES_PER_HARD, "·不扣料" if tiers > 1 else ""
+			]
 		else:
 			line = "%s\n[%s · 须 Soft · 禁止强行]" % [display_name, cap]
 	if tiers > 1 and not _done:
-		line += "\n[施工 %d/%d · 夜间 · 每档 %s 或 %s]" % [
-			tier_done, tiers, _cost_text(), _kit_label(route_kit_id)
+		line += "\n[施工 %d/%d · 本档 %d%% · 夜间 · 每档 %s 或 %s]" % [
+			tier_done, tiers, int(tier_progress * 100.0), _cost_text(), _kit_label(route_kit_id)
 		]
 		if _kit_credit > 0:
 			line += "\n[套件余 %d 档免费]" % _kit_credit
@@ -227,19 +246,9 @@ func _refresh_label() -> void:
 func try_use(user: AnimalActor) -> void:
 	if _done or _busy:
 		return
-	if tiers > 1 and Alert.is_full_search():
-		Bus.interact_feedback.emit("%s：全园搜查中（警戒 %d）— 外墙施工全部中止，等警戒降下来" % [display_name, Alert.level])
-		return
-	## Tiered work: plan payment first (a carried kit is spent up-front, so it does not block climb Soft).
-	var pay := &""
 	if tiers > 1:
-		pay = _plan_payment(user)
-		if pay == &"":
-			Bus.interact_feedback.emit("材料不足：每档需 %s 或 %s（缺：%s）" % [
-				_cost_text(), _kit_label(route_kit_id), _missing_text(user)
-			])
-			return
-	## After hypothetical pay, climb Soft must not be blocked by a kit that is about to be spent.
+		_construct(user)
+		return
 	var soft := _qualifies(user, true)
 	## One-shot gates: heavy cargo blocks climb right now. Construction pays up-front below.
 	if soft and tiers <= 1 and not _qualifies(user, false):
@@ -254,26 +263,12 @@ func try_use(user: AnimalActor) -> void:
 		var day_cage_outing := breach_style == BreachStyle.DESTROY and Clock.is_visitor_hours()
 		if day_cage_outing:
 			Bus.interact_feedback.emit("参观时段溜出展区 — 去搜集原料/侦察；外墙施工须等夜间")
-		elif tiers > 1:
-			Bus.interact_feedback.emit("现在是%s — 外墙施工要等夜间。白天先搜集原料/套件、侦察职员" % Clock.phase_name())
-			return
 		else:
 			Bus.interact_feedback.emit("现在是%s — 越狱破障请等到夜间（笼门可在参观时段溜出搜集）" % Clock.phase_name())
 			return
 	_busy = true
-	## Pay construction costs up-front so Soft climb is not blocked mid-channel; refund on cancel.
-	var paid_upfront := false
-	if tiers > 1:
-		_pay_tier(user, pay)
-		paid_upfront = true
 	var rw := GameConst.route_work()
-	var wait := soft_seconds if soft else hard_seconds
-	if tiers > 1:
-		wait = (GameConst.TIER_SOFT_SEC if soft else GameConst.TIER_HARD_SEC) * Game.work_time_scale
-		if not soft:
-			wait *= rw.hard_time_mult
-	elif not soft:
-		wait *= rw.hard_time_mult
+	var wait := soft_seconds if soft else hard_seconds * rw.hard_time_mult
 	var pay_part := false
 	if reinforced:
 		pay_part = user.material_count() >= GameConst.REINFORCE_EXTRA_MATERIALS
@@ -283,37 +278,160 @@ func try_use(user: AnimalActor) -> void:
 			wait *= GameConst.REINFORCE_TIME_MULT
 			Bus.interact_feedback.emit("笼门已加固且没有原料 — 耗时 ×%.0f" % GameConst.REINFORCE_TIME_MULT)
 	var label := _cap_text()
-	var step := "（第 %d/%d 档）" % [tier_done + 1, tiers] if tiers > 1 else ""
 	if soft:
-		Bus.interact_feedback.emit("使用%s：%s%s（稳）" % [label if required != CapabilityIds.Id.NONE else "通用", display_name, step])
+		Bus.interact_feedback.emit("使用%s：%s（稳）" % [label if required != CapabilityIds.Id.NONE else "通用", display_name])
 	else:
-		Bus.interact_feedback.emit("强行%s%s（无%s · 时×%.0f 噪×%.0f · 会留下痕迹×%d）…" % [
-			display_name, step, label, rw.hard_time_mult, rw.hard_noise_mult, TRACES_PER_HARD
+		Bus.interact_feedback.emit("强行%s（无%s · 时×%.0f 噪×%.0f · 会留下痕迹×%d）…" % [
+			display_name, label, rw.hard_time_mult, rw.hard_noise_mult, TRACES_PER_HARD
 		])
 	if not await _channel(user, wait):
-		if paid_upfront:
-			_refund_tier(user, pay)
 		return
 	if not soft:
-		_emit_noise(hard_noise * rw.hard_noise_mult, user)
-		## Traces only — never Alert.bump here. Staff discovery settles once.
-		for _i in TRACES_PER_HARD:
-			TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
+		_hard_aftermath(user)
 	if pay_part:
 		user.consume_any_material(GameConst.REINFORCE_EXTRA_MATERIALS)
-	if tiers > 1:
-		tier_done += 1
-		_refresh_label()
-		tier_completed.emit(tier_done, tiers)
-		if tier_done < tiers:
-			Bus.interact_feedback.emit("%s 施工 %d/%d 完成" % [display_name, tier_done, tiers])
-			_busy = false
-			return
-		if not stash.is_empty():
-			Bus.interact_feedback.emit("%s 完工：剩余存料已用尽（%s）" % [display_name, _stash_text()])
-			stash.clear()
 	await _complete(soft, user)
 	_busy = false
+
+
+## Seconds for one whole construction tier: specialist (Soft) base; Hard = the same base × hard_time_mult.
+static func tier_seconds(soft: bool) -> float:
+	var rw := GameConst.route_work()
+	return rw.tier_soft_sec * (1.0 if soft else rw.hard_time_mult)
+
+
+## Night construction. Progress persists: leaving range or dawn keeps progress and payment;
+## Alert 5 keeps progress but refunds the materials; a capture loses tonight's progress and the
+## materials go back into the stash. Soft work needs the tier paid; Hard work (non-final tiers) is free.
+func _construct(user: AnimalActor) -> void:
+	if Alert.is_full_search():
+		Bus.interact_feedback.emit("%s：全园搜查中（警戒 %d）— 外墙施工全部中止，等警戒降下来" % [display_name, Alert.level])
+		return
+	if requires_night and not Clock.allows_escape_actions():
+		Bus.interact_feedback.emit("现在是%s — 外墙施工要等夜间。白天先搜集原料/套件、侦察职员" % Clock.phase_name())
+		return
+	var soft := _qualifies(user, true)
+	if not soft and not _hard_allowed_now():
+		Bus.interact_feedback.emit("%s：最后一档须具备才能，禁止强行（需要 %s）" % [display_name, _cap_text()])
+		return
+	if soft and _tier_pay == &"":
+		var pay := _plan_payment(user)
+		if pay == &"":
+			Bus.interact_feedback.emit("材料不足：每档需 %s 或 %s（缺：%s）" % [
+				_cost_text(), _kit_label(route_kit_id), _missing_text(user)
+			])
+			return
+		_pay_tier(user, pay)
+		_tier_pay = pay
+	_busy = true
+	if _night_mark_day != Clock.day:
+		_night_mark_day = Clock.day
+		_night_start_progress = tier_progress
+	var rw := GameConst.route_work()
+	var step := "（第 %d/%d 档%s）" % [
+		tier_done + 1, tiers, "，接着 %d%% 做" % int(tier_progress * 100.0) if tier_progress > 0.0 else ""
+	]
+	if soft:
+		Bus.interact_feedback.emit("使用%s：%s%s（稳）" % [_cap_text(), display_name, step])
+	else:
+		Bus.interact_feedback.emit("强行%s%s（无%s · 时×%.0f 噪×%.0f · 会留下痕迹×%d · 不扣料）…" % [
+			display_name, step, _cap_text(), rw.hard_time_mult, rw.hard_noise_mult, TRACES_PER_HARD
+		])
+	var outcome := await _work_tier(user, tier_seconds(soft) * Game.work_time_scale)
+	match outcome:
+		&"done":
+			pass
+		&"search":
+			_refund_tier(user, _tier_pay, false)
+			_tier_pay = &""
+			_end_work("警戒升至 %d，全园搜查 — %s 施工被迫中止（进度 %d%% 保留，原料已退回）" % [
+				Alert.level, display_name, int(tier_progress * 100.0)
+			])
+			return
+		&"captured":
+			tier_progress = _night_start_progress
+			_refund_tier(user, _tier_pay, true)
+			_tier_pay = &""
+			_end_work("被抓 — %s 今晚新做的进度没了（剩 %d%%），原料退回存料" % [display_name, int(tier_progress * 100.0)])
+			return
+		&"dawn":
+			_end_work("天亮了 — %s 本档进度 %d%% 保留，明晚接着做" % [display_name, int(tier_progress * 100.0)])
+			return
+		_:
+			_end_work("离开范围 — %s 本档进度 %d%% 保留，回来接着做" % [display_name, int(tier_progress * 100.0)])
+			return
+	if not soft:
+		_hard_aftermath(user)
+	tier_done += 1
+	tier_progress = 0.0
+	_tier_pay = &""
+	_paid.clear()
+	_overnight_trace_left = false
+	_refresh_label()
+	tier_completed.emit(tier_done, tiers)
+	if tier_done < tiers:
+		Bus.interact_feedback.emit("%s 施工 %d/%d 完成" % [display_name, tier_done, tiers])
+		_busy = false
+		return
+	if not stash.is_empty():
+		Bus.interact_feedback.emit("%s 完工：剩余存料已用尽（%s）" % [display_name, _stash_text()])
+		stash.clear()
+	await _complete(soft, user)
+	_busy = false
+
+
+## Advances `tier_progress` at this session's rate; returns why it stopped.
+func _work_tier(user: AnimalActor, wait: float) -> StringName:
+	if _progress_label:
+		_progress_label.visible = true
+	while tier_progress < 1.0:
+		await get_tree().process_frame
+		if not is_instance_valid(user) or user.is_confined:
+			return &"captured"
+		if user.global_position.distance_to(global_position) > use_range:
+			return &"left"
+		if Alert.is_full_search():
+			return &"search"
+		if requires_night and not Clock.allows_escape_actions():
+			return &"dawn"
+		tier_progress = minf(1.0, tier_progress + get_process_delta_time() / maxf(wait, 0.001))
+		if _progress_label:
+			_progress_label.text = "第 %d/%d 档 %d%%" % [tier_done + 1, tiers, int(tier_progress * 100.0)]
+	if _progress_label:
+		_progress_label.visible = false
+		_progress_label.text = ""
+	return &"done"
+
+
+func _end_work(msg: String) -> void:
+	_busy = false
+	if _progress_label:
+		_progress_label.visible = false
+		_progress_label.text = ""
+	_refresh_label()
+	Bus.interact_feedback.emit(msg)
+
+
+func _hard_aftermath(user: AnimalActor) -> void:
+	var rw := GameConst.route_work()
+	_emit_noise(hard_noise * rw.hard_noise_mult, user)
+	## Traces only — never Alert.bump here. Staff discovery settles once.
+	for _i in TRACES_PER_HARD:
+		TraceService.spawn_at(get_tree(), global_position, rw.hard_trace_mult, &"construction")
+
+
+## A tier left half-done overnight marks the site once (staff can find it; settles once like any trace).
+func _leave_overnight_trace() -> void:
+	if tiers <= 1 or _done or tier_progress <= 0.0 or _overnight_trace_left:
+		return
+	_overnight_trace_left = true
+	TraceService.spawn_at(get_tree(), global_position, GameConst.route_work().overnight_trace_intensity, &"construction")
+	_refresh_label()
+
+
+## Where an animal stands to work this point (between the point and its staff stance; clear of the wall).
+func work_spot() -> Vector3:
+	return global_position + guard_offset * 0.45
 
 
 ## Progress channel shared by every interaction. Returns false if cancelled.
@@ -328,12 +446,6 @@ func _channel(user: AnimalActor, wait: float) -> bool:
 			return false
 		if user.global_position.distance_to(global_position) > use_range:
 			_cancel_use("离开范围，交互取消")
-			return false
-		if tiers > 1 and Alert.is_full_search():
-			_cancel_use("警戒升至 %d，全园搜查 — %s 施工被迫中止" % [Alert.level, display_name])
-			return false
-		if tiers > 1 and not Clock.allows_escape_actions():
-			_cancel_use("天亮了 — %s 这一档没做完，施工中断" % display_name)
 			return false
 		elapsed += get_process_delta_time()
 		if _progress_label:
@@ -446,7 +558,7 @@ func _pay_tier(user: AnimalActor, pay: StringName) -> void:
 	_refresh_label()
 
 
-func _refund_tier(user: AnimalActor, pay: StringName) -> void:
+func _refund_tier(user: AnimalActor, pay: StringName, to_stash: bool) -> void:
 	match pay:
 		&"credit":
 			_kit_credit += 1
@@ -454,13 +566,12 @@ func _refund_tier(user: AnimalActor, pay: StringName) -> void:
 			## Undo kit consume: clear the free credit it granted.
 			_kit_credit = 0
 	for p in _paid:
-		if p[1]:
+		if p[1] or to_stash or not is_instance_valid(user):
 			stash.append(p[0])
 		else:
 			user.give_items([p[0]])
 	_paid.clear()
 	_refresh_label()
-	Bus.interact_feedback.emit("施工取消，原料已退回原处")
 
 
 func _kit_label(id: StringName) -> String:

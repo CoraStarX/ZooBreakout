@@ -273,6 +273,8 @@ func _validate_cages(starter_id: StringName) -> void:
 	if _geometry:
 		for e in MaterialBudget.validate(material_lines(), material_supply(), GameConst.DEADLINE_DAY):
 			push_error("关卡配置错误：%s" % e)
+	for e in RouteWorkCheck.validate():
+		push_error("关卡配置错误：%s" % e)
 
 
 func material_lines() -> Array:

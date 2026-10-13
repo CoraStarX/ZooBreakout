@@ -125,7 +125,3 @@ static var KIT_TIERS: int:
 static var TIER_SOFT_SEC: float:
 	get:
 		return route_work().tier_soft_sec
-
-static var TIER_HARD_SEC: float:
-	get:
-		return route_work().tier_hard_sec

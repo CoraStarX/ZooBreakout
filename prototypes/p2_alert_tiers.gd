@@ -202,8 +202,11 @@ func _construction_noise(raccoon: AnimalActor, monkey: AnimalActor) -> void:
 ## Alert 3+: a staff member who sees a dropped item takes it to the office; route-point stash stays.
 func _ground_confiscation(raccoon: AnimalActor) -> void:
 	Clock.set_phase(Clock.Phase.OPEN)
-	await _gather(raccoon, "饲料柜")
 	var dig := _geo.dig_interactable
+	## Hard tiers were free, so the bag is still full (rope, metal, kit): stash what the dig line takes first.
+	await _stand(raccoon, dig.global_position + Vector3(1.0, 0.05, 0))
+	raccoon.try_drop()
+	await _gather(raccoon, "饲料柜")
 	await _stand(raccoon, dig.global_position + Vector3(1.0, 0.05, 0))
 	raccoon.try_drop()
 	var stash_before := dig.stash.duplicate()
@@ -211,7 +214,7 @@ func _ground_confiscation(raccoon: AnimalActor) -> void:
 	_face(raccoon, dig.global_position)
 	var soft_preview := raccoon.interact_preview()
 	_check(soft_preview.contains("Soft") and soft_preview.contains("不留痕迹"), "钻缝 Soft 预览：%s" % soft_preview)
-	await _gather(raccoon, "南侧杂物堆")
+	_check(raccoon.has_item(KitIds.ROPE), "强行档不扣料：浣熊身上还有绳索可丢 %s" % [raccoon.inventory])
 	var drop_at := Vector3(2.0, 0.05, 6.0)
 	await _stand(raccoon, drop_at)
 	var before := raccoon.inventory.size()
@@ -307,6 +310,7 @@ func _alert_5(raccoon: AnimalActor) -> void:
 	_check(mid_busy and mid_total < inv.size() + stash.size(), "警戒 4 开工（已扣料）")
 	_check(dig.tier_done == 0 and raccoon.inventory.size() == inv.size() and dig.stash.size() == stash.size(),
 		"升到警戒 5：施工中止、原料退回原处（背包 %s 存料 %s）" % [raccoon.inventory, dig.stash])
+	_check(dig.tier_progress > 0.0 and dig.tier_progress < 1.0, "警戒 5 中止：已完成比例保留（%d%%），退回的是材料不是进度" % int(dig.tier_progress * 100.0))
 	_check(_msgs.any(func(m: String) -> bool: return m.contains("全园搜查") and m.contains("中止")), "中止原因明确：%s" % [_msgs])
 	await get_tree().create_timer(0.3).timeout
 	var warn: Label = _world.get_node("GameHUD").get("_alert_warn_l")

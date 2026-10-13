@@ -82,8 +82,8 @@ func _ready() -> void:
 	_party.switch_next()
 	await get_tree().process_frame
 	await _gather(raccoon, "游客遗落的绳")
-	await _gather(raccoon, "南侧杂物堆")
-	_check(raccoon.item_count(KitIds.ROPE) == 1 and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 1,
+	await _gather(raccoon, "饲料柜")
+	_check(raccoon.item_count(KitIds.ROPE) == 1 and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 2,
 		"浣熊背绳 + 金属 + 木料 %s" % [raccoon.inventory])
 	var climb := _geo.climb_interactable
 	## Edge of the point: preview must already say what X will do, and match the action.
@@ -97,7 +97,7 @@ func _ready() -> void:
 		"施工点旁提示「存入」且只列配方用得到的：%s" % near_hint)
 	raccoon.try_drop()
 	_check(climb.stash.count(KitIds.ROPE) == 1 and climb.stash.count(KitIds.METAL) == 1, "白天存料到攀爬点：%s" % [climb.stash])
-	_check(raccoon.item_count(KitIds.WOOD) == 1 and raccoon.inventory.size() == 1, "不在配方的木料留在背包")
+	_check(raccoon.item_count(KitIds.WOOD) == 2 and raccoon.inventory.size() == 2, "不在配方的木料留在背包")
 	_check(climb.tier_done == 0, "存料不是施工（白天可做）")
 
 	## Stash survives capture and dawn.
@@ -107,7 +107,7 @@ func _ready() -> void:
 	_check(climb.stash.size() == 2, "被抓、天亮后存料仍在")
 	_check(monkey.has_item(KitIds.ROUTE), "猴没被抓，套件还在猴身上")
 
-	## --- Night: monkey builds from the stash; cancel refunds back into the stash ---
+	## --- Night: monkey builds from the stash; leaving mid-tier keeps the paid tier and its progress ---
 	while _party.controlled() != monkey:
 		_party.switch_next()
 	await get_tree().process_frame
@@ -126,23 +126,24 @@ func _ready() -> void:
 	monkey.global_position += Vector3(6, 0, 0)
 	await _idle(climb)
 	Bus.interact_feedback.disconnect(on_msg)
-	_check(mid_stash == 0 and msgs.any(func(m: String) -> bool: return m.contains("退回原处")), "施工中扣了存料（中途存料 %d）后被取消" % mid_stash)
-	_check(climb.tier_done == 0 and climb.stash.size() == 2 and monkey.inventory.is_empty(), "施工中断：原料退回存料而不是猴背包")
+	_check(mid_stash == 0 and msgs.any(func(m: String) -> bool: return m.contains("进度") and m.contains("保留")),
+		"开工即从存料付本档（中途存料 %d），离开范围提示进度保留：%s" % [mid_stash, msgs.back() if not msgs.is_empty() else "—"])
+	_check(climb.tier_done == 0 and climb.tier_progress > 0.0 and climb.stash.is_empty() and monkey.inventory.is_empty(),
+		"离开：本档已付、进度 %d%% 留在施工点，不退料" % int(climb.tier_progress * 100.0))
 	await _stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	climb.try_use(monkey)
 	await _idle(climb)
 	_check(climb.tier_done == 1 and climb.stash.is_empty(), "猴空手用存料完成第 1 档")
 	_check(get_tree().get_nodes_in_group("traces").is_empty(), "Soft（无痕迹）")
 
-	## --- Next day: stash rope ×2 (monkey climbs the drying rack) + the kit; the kit pays the rest, ropes are left over ---
+	## --- Next day: stash rope ×1 (monkey climbs the drying rack) + the kit; the kit pays the rest, ropes are left over ---
 	Clock.advance()
 	Clock.set_phase(Clock.Phase.OPEN)
 	await _gather(monkey, "晾衣架")
-	_check(monkey.item_count(KitIds.ROPE) == 2, "猴攀爬拿满晾衣架绳索 ×2")
+	_check(monkey.item_count(KitIds.ROPE) == 1, "猴攀爬拿满晾衣架绳索 ×1")
 	await _stand(monkey, climb.global_position + Vector3(0, 0, 1.0))
 	monkey.try_drop()
-	monkey.try_drop()
-	_check(climb.stash.count(KitIds.ROPE) == 2, "绳索存进攀爬点：%s" % [climb.stash])
+	_check(climb.stash.count(KitIds.ROPE) == 1, "绳索存进攀爬点：%s" % [climb.stash])
 	for g in get_tree().get_nodes_in_group(GroundItem.GROUP):
 		if (g as GroundItem).item_id == KitIds.ROUTE:
 			await _stand(monkey, (g as GroundItem).global_position + Vector3(0.3, 0.05, 0))
@@ -157,7 +158,7 @@ func _ready() -> void:
 	Bus.interact_feedback.disconnect(on_msg)
 	_check(climb._done and climb.stash.is_empty(), "存的套件付完剩下两档，路线完工")
 	var left_msg := msgs.filter(func(m: String) -> bool: return m.contains("剩余存料已用尽"))
-	_check(left_msg.size() == 1 and String(left_msg[0]).contains("绳索×2"), "完工提示剩余存料：%s" % [left_msg])
+	_check(left_msg.size() == 1 and String(left_msg[0]).contains("绳索×1"), "完工提示剩余存料：%s" % [left_msg])
 
 	print("")
 	print("=== P2 STASH SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])
