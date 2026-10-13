@@ -31,45 +31,54 @@ func _ready() -> void:
 	_check(_geo.gather_points.size() == Gather.POINTS.size(), "关卡生成 %d 个搜集点" % _geo.gather_points.size())
 	_check_points_not_in_walls()
 
-	var rich := _find_point("饲料柜")      ## raccoon has DEXTERITY
-	var climb := _find_point("高处树杈")   ## raccoon lacks CLIMB
+	var cabinet := _find_point("饲料柜")   ## raccoon has DEXTERITY, the monkey does not
 	var trash := _find_point("垃圾桶（铁罐）")
-	_check(rich != null and climb != null and trash != null, "找到动词点与垃圾桶")
+	_check(cabinet != null and trash != null, "找到动词点与垃圾桶")
 	for g in _geo.gather_points:
 		var want := GatherPoint.RefreshMode.REPEATABLE if g == trash else GatherPoint.RefreshMode.ONCE
 		_check(g.refresh_mode == want, "%s 刷新模式 %s" % [g.display_name, GatherPoint.RefreshMode.keys()[g.refresh_mode]])
 	_check(_find_point("职员工具间").yield_rich == 1, "职员工具间金属 ×1")
-
-	## Rich: raccoon has verb → full haul.
-	await _use(actor, rich)
-	_check(actor.item_count(KitIds.WOOD) == 2, "有动词拿满 2 木料（实际 %d）" % actor.item_count(KitIds.WOOD))
-	_check(not rich.stocked and rich._label.text.contains("已搜空"), "搜空后标记「已搜空」：%s" % rich._label.text)
-	var before := actor.item_count(KitIds.WOOD)
-	await _use(actor, rich)
-	_check(actor.item_count(KitIds.WOOD) == before, "已搜空不能重复拿")
+	_party.rescue(&"monkey", false)
+	await get_tree().process_frame
+	var monkey: AnimalActor = null
+	for a in _party.party():
+		if a != actor:
+			monkey = a
+	monkey.order_hold()
 
 	## Poor: no verb → takes one, slower; the rest stays at the point.
 	var t0 := Time.get_ticks_msec()
-	await _use(actor, climb)
+	await _use(monkey, cabinet)
 	var poor_ms := Time.get_ticks_msec() - t0
-	_check(actor.item_count(KitIds.WOOD) == before + 1, "无动词只拿 1 木料（实际 %d）" % (actor.item_count(KitIds.WOOD) - before))
+	_check(monkey.item_count(KitIds.WOOD) == 1, "无动词只拿 1 木料（实际 %d）" % monkey.item_count(KitIds.WOOD))
 	_check(poor_ms >= int(GameConst.GATHER_POOR_SEC * 1000.0 * 0.8), "无动词更慢 %dms" % poor_ms)
-	_check(climb.stocked and climb.stock == 1, "没拿走的 1 件留在原处（剩 %d）" % climb.stock)
+	_check(cabinet.stocked and cabinet.stock == 1, "没拿走的 1 件留在原处（剩 %d）" % cabinet.stock)
 
 	## Dawn: once points never restock; what was left stays.
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	Clock.advance()
-	_check(not rich.stocked, "天亮不补货（整局一次）")
-	_check(climb.stock == 1, "剩下的仍在（剩 %d）" % climb.stock)
+	_check(cabinet.stock == 1, "天亮不补货，剩下的仍在（剩 %d）" % cabinet.stock)
 
 	## Night blocks gathering.
 	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
-	var n0 := actor.item_count(KitIds.WOOD)
-	await _use(actor, climb)
-	_check(actor.item_count(KitIds.WOOD) == n0 and climb.stock == 1, "夜间不能搜集")
+	await _use(actor, cabinet)
+	_check(actor.item_count(KitIds.WOOD) == 0 and cabinet.stock == 1, "夜间不能搜集")
 	Clock.set_phase(Clock.Phase.OPEN)
-	await _use(actor, climb)
-	_check(actor.item_count(KitIds.WOOD) == n0 + 1 and not climb.stocked, "白天再扒拉一次拿走剩下的，点位搜空")
+
+	## Rich: the raccoon has the verb, but only what is left can be taken; then the point is empty for good.
+	await _use(actor, cabinet)
+	_check(actor.item_count(KitIds.WOOD) == 1, "有动词也只能拿剩下的 1 木料（实际 %d）" % actor.item_count(KitIds.WOOD))
+	_check(not cabinet.stocked and cabinet._label.text.contains("已搜空"), "搜空后标记「已搜空」：%s" % cabinet._label.text)
+	await _use(actor, cabinet)
+	_check(actor.item_count(KitIds.WOOD) == 1, "已搜空不能重复拿")
+	var wood_total := 0
+	var rope_total := 0
+	for g in _geo.gather_points:
+		if g.material == KitIds.WOOD:
+			wood_total += g.once_supply()
+		elif g.material == KitIds.ROPE:
+			rope_total += g.once_supply()
+	_check(wood_total == 2 and rope_total == 2, "全图木料 %d、绳索 %d（各 2）" % [wood_total, rope_total])
 
 	## Repeatable trash bin: loud every time, may be empty, pity bounds bad luck, one find per day.
 	await _check_trash(actor, trash)
@@ -86,7 +95,7 @@ func _ready() -> void:
 	## Capture confiscates parts, chest returns them.
 	actor.give_items([KitIds.WOOD, KitIds.WOOD])
 	CaptureFlow.apply_capture(actor)
-	_check(actor.item_count(KitIds.WOOD) == 0 and OfficeStorage.items.count(KitIds.WOOD) == 4, "被抓木料进办公室")
+	_check(actor.item_count(KitIds.WOOD) == 0 and OfficeStorage.items.count(KitIds.WOOD) == 4, "被抓木料进办公室（背包 %s 办公室 %s）" % [actor.inventory, OfficeStorage.summary()])
 
 	print("")
 	print("=== P2 GATHER SUMMARY pass=%d fail=%d ===" % [_pass_n, _fail_n])
@@ -138,6 +147,7 @@ func _use(actor: AnimalActor, g: GatherPoint, limit: float = 6.0) -> void:
 	actor.is_confined = false
 	actor.global_position = g.global_position + Vector3(0.6, 0.05, 0)
 	actor.velocity = Vector3.ZERO
+	actor._hold_position = actor.global_position ## a held follower would walk back out of range
 	g.try_use(actor)
 	var t := 0.0
 	while g._busy and t < limit:

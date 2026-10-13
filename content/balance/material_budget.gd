@@ -3,6 +3,7 @@ extends RefCounted
 ## Material supply vs route demand (docs/COST_REFACTOR.md「材料预算」). Pure data in, numbers out.
 ## supply: {"once": {mat: n}, "kits": n, "repeat": [{"mat", "yield", "daily_cap", "run_cap"}]}
 ## line:   {"name", "tiers", "kit_tiers", "tier_cost": Array[StringName], "kit_id"}
+## Paths: Soft = every tier paid (kit or materials); Hard = non-final tiers forced for free, final tier Soft.
 
 
 static func line_from(i: Interactable) -> Dictionary:
@@ -32,12 +33,13 @@ static func supply_from(points: Array, cart_loot: int, kits: int) -> Dictionary:
 	return {"once": once, "kits": kits, "repeat": repeat}
 
 
-## Materials one line still needs; `use_kit` = the kit pays its `kit_tiers`.
-static func need(line: Dictionary, use_kit: bool) -> Dictionary:
-	var paid := int(line["tiers"]) - (int(line["kit_tiers"]) if use_kit else 0)
+## Materials one line needs. `use_kit` = the kit pays its `kit_tiers`; `hard` = non-final tiers are forced (free).
+static func need(line: Dictionary, use_kit: bool, hard: bool = false) -> Dictionary:
+	var tiers := int(line["tiers"])
+	var paid := 1 if hard else tiers - (int(line["kit_tiers"]) if use_kit else 0)
 	var out := {}
 	for m in line["tier_cost"]:
-		out[m] = int(out.get(m, 0)) + maxi(paid, 0)
+		out[m] = int(out.get(m, 0)) + clampi(paid, 0, tiers)
 	return out
 
 
@@ -67,15 +69,21 @@ static func total(supply: Dictionary, fallback_days: int) -> Dictionary:
 	return out
 
 
-static func line_feasible(line: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
-	var have := total(supply, fallback_days)
-	if int(supply["kits"]) > 0 and int(line["kit_tiers"]) > 0 and covers(need(line, true), have):
-		return true
-	return covers(need(line, false), have)
+static func feasible_with_kit(line: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
+	return int(supply["kits"]) > 0 and int(line["kit_tiers"]) > 0 \
+		and covers(need(line, true), total(supply, fallback_days))
 
 
-## Every way of handing out the kits (at most one per line) — true if some split builds both lines.
-static func both_feasible(a: Dictionary, b: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
+static func feasible_soft_no_kit(line: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
+	return covers(need(line, false), total(supply, fallback_days))
+
+
+static func feasible_hard(line: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
+	return covers(need(line, false, true), total(supply, fallback_days))
+
+
+## Both lines on the Soft path (no forcing), trying every way of handing out the kits (≤ 1 per line).
+static func both_soft_feasible(a: Dictionary, b: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
 	var have := total(supply, fallback_days)
 	var kits := int(supply["kits"])
 	for ka in [false, true]:
@@ -84,22 +92,35 @@ static func both_feasible(a: Dictionary, b: Dictionary, supply: Dictionary, fall
 				continue
 			if (ka and int(a["kit_tiers"]) == 0) or (kb and int(b["kit_tiers"]) == 0):
 				continue
-			var want := need(a, ka)
-			var wb := need(b, kb)
-			for m in wb:
-				want[m] = int(want.get(m, 0)) + int(wb[m])
-			if covers(want, have):
+			if covers(_sum(need(a, ka), need(b, kb)), have):
 				return true
 	return false
 
 
-## Load-time guard: each line must be buildable from the map's supply plus the fallback over the run.
+static func both_hard_feasible(a: Dictionary, b: Dictionary, supply: Dictionary, fallback_days: int) -> bool:
+	return covers(_sum(need(a, false, true), need(b, false, true)), total(supply, fallback_days))
+
+
+static func _sum(x: Dictionary, y: Dictionary) -> Dictionary:
+	var out := x.duplicate()
+	for m in y:
+		out[m] = int(out.get(m, 0)) + int(y[m])
+	return out
+
+
+## Load-time guard: (a) every line buildable with the kit AND without it via Hard; (b) Soft double over supply.
 static func validate(lines: Array, supply: Dictionary, fallback_days: int) -> PackedStringArray:
 	var errors := PackedStringArray()
 	var have := total(supply, fallback_days)
 	for line in lines:
-		if not line_feasible(line, supply, fallback_days):
-			errors.append("材料不足：%s 即使用上套件也凑不齐（需 %s，全图+保底 %d 天共 %s）" % [
-				line["name"], need(line, int(supply["kits"]) > 0), fallback_days, have
+		if not feasible_with_kit(line, supply, fallback_days):
+			errors.append("材料不足：%s 用套件也凑不齐（需 %s，全图+保底 %d 天共 %s）" % [
+				line["name"], need(line, true), fallback_days, have
 			])
+		if not feasible_hard(line, supply, fallback_days):
+			errors.append("材料不足：%s 不用套件走强行也凑不齐最后一档（需 %s，共 %s）" % [
+				line["name"], need(line, false, true), have
+			])
+	if lines.size() >= 2 and both_soft_feasible(lines[0], lines[1], supply, fallback_days):
+		errors.append("材料过多：Soft 路径下两条线都能做完（%s）" % have)
 	return errors

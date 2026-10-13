@@ -144,7 +144,7 @@ func _gather_b(raccoon: AnimalActor) -> void:
 	var cost := GameConst.action_cost()
 	var gp: GatherPoint = null
 	for g in _geo.gather_points:
-		if g.display_name == "南侧杂物堆":
+		if g.display_name == "饲料柜":
 			gp = g
 	gp.risky = true
 	_noises.clear()

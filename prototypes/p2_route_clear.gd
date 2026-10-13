@@ -19,6 +19,10 @@ func _ready() -> void:
 	await _dig_run()
 	await _boot()
 	await _climb_run()
+	await _boot()
+	await _kit_retrieved_run()
+	await _boot()
+	await _hard_no_kit_run()
 	await _boot(false)
 	await _solo_refused_run()
 	print("")
@@ -74,7 +78,7 @@ func _solo_refused_run() -> void:
 	var dig := _geo.dig_interactable
 	await _pick_kit(raccoon, _geo.route_kit_pickup)
 	await _gather(raccoon, "职员工具间")
-	await _gather(raccoon, "南侧杂物堆")
+	await _gather(raccoon, "饲料柜")
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
 	await RouteHelper.finish(get_tree(), dig, raccoon, false)
@@ -104,9 +108,9 @@ func _dig_run() -> void:
 	_check(dig._qualifies(raccoon, true), "浣熊可 Soft 施工挖洞线")
 	await _pick_kit(raccoon, _geo.route_kit_pickup)
 	await _gather(raccoon, "职员工具间")
-	await _gather(raccoon, "南侧杂物堆")
-	_check(raccoon.has_item(KitIds.ROUTE) and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 1,
-		"白天备齐：施工套件 + 金属 + 木料 %s" % [raccoon.inventory])
+	await _gather(raccoon, "饲料柜")
+	_check(raccoon.has_item(KitIds.ROUTE) and raccoon.item_count(KitIds.METAL) == 1 and raccoon.item_count(KitIds.WOOD) == 2,
+		"白天备齐：施工套件 + 金属 + 木料×2（饲料柜，全图仅此一处）%s" % [raccoon.inventory])
 
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
 	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
@@ -147,6 +151,63 @@ func _climb_run() -> void:
 	await _follower_walks_out(Vector3(-4.5, 0.05, -10.9), Vector3(-4.5, 0.05, -16.0),
 		func(p: Vector3) -> bool: return p.z < gate_z - 0.6)
 	await _exit_all(_geo.exit_south, RunSession.ExitRoute.CLIMB)
+
+
+## The kit is the Soft line's must-have: a capture sends it to the office (never destroyed), the raccoon
+## lockpicks the office chest (Soft, no trace) to get it back and still finishes the dig line.
+func _kit_retrieved_run() -> void:
+	var raccoon := _party.controlled()
+	var dig := _geo.dig_interactable
+	await _pick_kit(raccoon, _geo.route_kit_pickup)
+	await _gather(raccoon, "职员工具间")
+	await _gather(raccoon, "饲料柜")
+	Clock.set_phase(Clock.Phase.NIGHT_PATROL)
+	CaptureFlow.apply_capture(raccoon, "测试：背着套件被抓")
+	_check(not raccoon.has_item(KitIds.ROUTE) and OfficeStorage.items.has(KitIds.ROUTE),
+		"被抓：套件收进办公室暂存，没有销毁（%s）" % OfficeStorage.summary())
+	CaptureFlow.release(raccoon)
+	var chest := _geo.find_child("OfficeChest", true, false) as OfficeChest
+	_check(chest != null, "办公室储物柜存在")
+	_stand(raccoon, chest.global_position + Vector3(2.0, 0.05, 0))
+	await get_tree().physics_frame
+	chest.try_use(raccoon)
+	await _idle(chest)
+	_check(raccoon.has_item(KitIds.ROUTE) and raccoon.item_count(KitIds.WOOD) == 2 and raccoon.has_item(KitIds.METAL),
+		"巧手开柜取回套件和原料：%s" % [raccoon.inventory])
+	_check(get_tree().get_nodes_in_group("traces").is_empty(), "取回走 Soft：不留痕迹")
+	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
+	await RouteHelper.finish(get_tree(), dig, raccoon, false)
+	_check(dig._done and _session.route_dig_ready, "取回套件后完成挖洞线 %d/%d" % [dig.tier_done, dig.tiers])
+	await _exit_all(_geo.exit_west, RunSession.ExitRoute.DIG)
+
+
+## No kit at all: the monkey forces the first two dig tiers (free, slow, loud, traces), the raccoon's
+## lockpick does the last one with wood + metal. Still clears.
+func _hard_no_kit_run() -> void:
+	var raccoon := _party.controlled()
+	var monkey: AnimalActor = null
+	for a in _party.party():
+		if a != raccoon:
+			monkey = a
+	var dig := _geo.dig_interactable
+	await _gather(raccoon, "职员工具间")
+	await _gather(raccoon, "饲料柜")
+	_check(not raccoon.has_item(KitIds.ROUTE) and not monkey.has_item(KitIds.ROUTE), "不拿套件")
+	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
+	monkey.order_hold()
+	_stand(monkey, dig.global_position + Vector3(0.9, 0.05, 0.4))
+	monkey._hold_position = monkey.global_position
+	_check(not dig._qualifies(monkey, true), "猴对挖洞线没有钻缝/巧手 → 只能强行")
+	await RouteHelper.finish(get_tree(), dig, monkey, false)
+	_check(dig.tier_done == GameConst.ROUTE_TIERS - 1 and not dig._done, "猴强行做完前 %d 档（最后一档禁止强行）" % dig.tier_done)
+	_check(raccoon.item_count(KitIds.WOOD) == 2 and raccoon.item_count(KitIds.METAL) == 1, "强行档不扣料：浣熊的原料原封不动")
+	_check(get_tree().get_nodes_in_group("traces").size() >= 2, "强行留下施工痕迹（%d 处）" % get_tree().get_nodes_in_group("traces").size())
+	_stand(raccoon, dig.global_position + Vector3(0.9, 0.05, 0.4))
+	await RouteHelper.finish(get_tree(), dig, raccoon, false)
+	_check(dig._done and _session.route_dig_ready and raccoon.item_count(KitIds.WOOD) == 1 and raccoon.item_count(KitIds.METAL) == 0,
+		"浣熊 Soft 付木料+金属完成最后一档")
+	await _exit_all(_geo.exit_west, RunSession.ExitRoute.DIG)
 
 
 ## Leader waits past the exit; the follower starts inside the wall and must walk out through the gap itself.
