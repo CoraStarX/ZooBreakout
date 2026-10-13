@@ -1,7 +1,8 @@
 extends Node
 ## 昼夜循环端到端：正式开局 → 白天拿套件 → 夜间套件顶 2 档、最后一档缺料被拒 → 第 2 天补料 → 完工出园。
 ## 预算断言（docs/COST_REFACTOR.md「刀 5 正解天数估算」）全部从 Resource 数值计算，不写死秒数：
-## (a) 正解天数落在 3–5 天；(b) 全图原料无法同时完成两条线；(c) 无材料时最后一档被拒。
+## (a) 正解天数落在 3–5 天（巡逻周期 × 暴露 × 窗口秒数；Soft 与 Hard 两路径）；(b) Soft 路径下全图原料
+## 无法同时完成两条线（Hard 只付最后一档，两线皆可完成＝设计意图）；(c) 无材料时最后一档被拒。
 ## 不按 N / 不开 Debug；只有施工读条按 Game.work_time_scale 加速。
 ## godot --headless --path . res://prototypes/p2_full_loop.tscn
 
@@ -9,6 +10,8 @@ const TARGET_MIN_DAYS := 3
 const TARGET_MAX_DAYS := 5
 ## Straight-line distance × this = walking path (corridors, doors).
 const PATH_DETOUR := 1.4
+## Seconds a builder gives up per patrol window (stop before the stare comes back).
+const WINDOW_MARGIN := 1.0
 
 var _pass_n := 0
 var _fail_n := 0
@@ -83,9 +86,9 @@ func _ready() -> void:
 	_check(Clock.day == 2 and Clock.phase == Clock.Phase.OPEN, "进入第 2 天")
 	_check(staff.vision_range >= vision0 + GameConst.STAFF_VISION_PER_DAY - 0.001, "职员视野随天数增长 %.1fm" % staff.vision_range)
 	_check(dig.tier_done == GameConst.ROUTE_TIERS - 1, "施工进度保留")
-	await _gather(actor, "南侧杂物堆")
+	await _gather(actor, "饲料柜")
 	await _gather(actor, "职员工具间")
-	_check(actor.item_count(KitIds.WOOD) == 1 and actor.item_count(KitIds.METAL) == 1, "第 2 天补齐最后一档：%s" % [actor.inventory])
+	_check(actor.item_count(KitIds.WOOD) == 2 and actor.item_count(KitIds.METAL) == 1, "第 2 天补齐最后一档（饲料柜木料×2，全图仅此）：%s" % [actor.inventory])
 
 	## --- Night 2 ---
 	Clock.set_phase(Clock.Phase.NIGHT_QUIET)
@@ -110,6 +113,8 @@ func _ready() -> void:
 
 
 ## (b) Supply vs demand from the live level (same numbers as the load-time check).
+## (b) is about the Soft path (no forcing). On the Hard path non-final tiers cost nothing, so both lines are
+## buildable by design — the price is time, noise and traces (docs/DESIGN.md「强行 = 时间换材料」).
 func _material_budget() -> void:
 	var lines: Array = _world.call("material_lines")
 	var supply: Dictionary = _world.call("material_supply")
@@ -118,64 +123,69 @@ func _material_budget() -> void:
 		supply["once"], supply["kits"], days, MaterialBudget.fallback(supply, days)
 	])
 	for line in lines:
-		print("NOTE %s：用套件需 %s · 不用套件需 %s" % [line["name"], MaterialBudget.need(line, true), MaterialBudget.need(line, false)])
-		_check(MaterialBudget.line_feasible(line, supply, 0), "%s 只靠一次性原料（不翻垃圾桶）即可完成" % line["name"])
-		_check(MaterialBudget.line_feasible(line, supply, days), "%s 在全图+保底下可完成（载入检查同口径）" % line["name"])
-	_check(MaterialBudget.validate(lines, supply, days).is_empty(), "载入检查无错误")
-	_check(not MaterialBudget.both_feasible(lines[0], lines[1], supply, 0), "(b) 一次性原料总量无法同时完成两条线")
-	var fb_days := -1
+		print("NOTE %s：Soft+套件 %s · Soft 无套件 %s · Hard（只付最后一档）%s" % [
+			line["name"], MaterialBudget.need(line, true), MaterialBudget.need(line, false), MaterialBudget.need(line, false, true)
+		])
+		_check(MaterialBudget.feasible_with_kit(line, supply, 0), "%s Soft+套件 只靠一次性原料即可完成" % line["name"])
+		_check(MaterialBudget.feasible_hard(line, supply, 0), "%s 无套件走 Hard 也可完成（载入检查同口径）" % line["name"])
+	_check(MaterialBudget.validate(lines, supply, days).is_empty(), "载入检查无错误 %s" % [MaterialBudget.validate(lines, supply, days)])
+	var soft_double := false
 	for d in range(0, days + 1):
-		if MaterialBudget.both_feasible(lines[0], lines[1], supply, d):
-			fb_days = d
-			break
-	if fb_days < 0:
-		_check(true, "(b) 加上保底来源 %d 天仍无法同时完成两条线" % days)
-	else:
-		_pending.append("(b) 加上垃圾桶保底：翻 %d 天后金属够同时完成两条线（等待决定）" % fb_days)
+		soft_double = soft_double or MaterialBudget.both_soft_feasible(lines[0], lines[1], supply, d)
+	_check(not soft_double, "(b) Soft 路径：加上保底 %d 天也无法同时完成两条线（木/绳不够）" % days)
+	_check(MaterialBudget.both_hard_feasible(lines[0], lines[1], supply, 0),
+		"Hard 路径：两条线都只付最后一档，理论上都能完成（设计意图：代价是时间、噪音、痕迹）")
 
 
-## (a) Conservative days for the intended solution: specialist (Soft) + kit, raccoon digs.
+## (a) Days for the intended solution, from patrol cycle × exposure × seconds of work per window.
+## Soft path: kit + specialist; Hard path: no kit, forcing the first tiers (×hard_time_mult), Soft last tier.
 func _day_estimate(raccoon: AnimalActor) -> void:
-	var rw := GameConst.route_work()
 	var cost := GameConst.action_cost()
 	var dig := _geo.dig_interactable
+	var staff: StaffActor = _world.call("get_staff")
 	var speed := raccoon.def.move_speed
 	var heavy_speed := speed * cost.heavy_speed_mult
-	## Day: cage → kit → wood → metal → stash at the dig point (one trip; inventory fits kit + 2).
+	## Day: cage → kit → wood → metal → stash at the dig point (one trip; inventory fits kit + 3).
 	var home := raccoon.global_position
 	var kit_pos := _geo.route_kit_pickup.global_position
-	var wood_pos := _point("南侧杂物堆").global_position
+	var wood_pos := _point("饲料柜").global_position
 	var metal_pos := _point("职员工具间").global_position
 	var gather_sec := (home.distance_to(kit_pos) / speed
 		+ (kit_pos.distance_to(wood_pos) + wood_pos.distance_to(metal_pos) + metal_pos.distance_to(dig.global_position)) / heavy_speed
 	) * PATH_DETOUR + cost.gather_sec * 2.0 + cost.soft_interact_sec * 2.0
 	var gather_days := ceili(gather_sec / GameConst.OPEN_PHASE_SEC)
-	## Night: Soft is silent; patrol time is usable only if no patrol point can see the work spot by the deadline.
-	var max_vision := staff_vision_at(GameConst.DEADLINE_DAY)
-	var nearest := INF
-	var staff: StaffActor = _world.call("get_staff")
-	for p in staff.patrol_network.points:
-		nearest = minf(nearest, p.position.distance_to(dig.global_position))
-	var patrol_safe := nearest > max_vision
-	var window := GameConst.NIGHT_QUIET_SEC + (GameConst.NIGHT_PATROL_BASE_SEC if patrol_safe else 0.0)
+	var space := _world.get_world_3d().direct_space_state
+	var ex := RouteExposure.estimate(staff.patrol_network, dig.work_spot(), space, staff_vision_at(1),
+		staff.vision_angle_deg, staff.move_speed * StaffActor.NIGHT_PATROL_SPEED_MULT)
+	## Per night: the whole quiet window + the unseen share of the patrol, less one margin per window
+	## (stop before the stare starts) and the walk in.
+	var patrol := GameConst.NIGHT_PATROL_BASE_SEC
+	var windows := maxf(1.0, patrol / maxf(float(ex["cycle"]), 0.01))
 	var travel := home.distance_to(dig.global_position) / speed * PATH_DETOUR
-	var soft_tier := GameConst.TIER_SOFT_SEC
-	var tiers_per_night := floori((window - travel) / soft_tier)
-	var nights := ceili(float(GameConst.ROUTE_TIERS) / float(maxi(tiers_per_night, 1)))
-	var days := gather_days + nights - 1
-	print("NOTE 正解估算：白天搬运 %.0fs/%.0fs → %d 天 · 夜间可施工 %.0fs（巡逻点最近 %.1fm vs 视野 %.1fm → 巡逻时段%s）" % [
-		gather_sec, GameConst.OPEN_PHASE_SEC, gather_days, window, nearest, max_vision, "可用" if patrol_safe else "不可用"
+	var safe := GameConst.NIGHT_QUIET_SEC + patrol * (1.0 - float(ex["ratio"])) - windows * WINDOW_MARGIN - travel
+	print("NOTE 白天搬运 %.0fs/%.0fs → %d 天" % [gather_sec, GameConst.OPEN_PHASE_SEC, gather_days])
+	print("NOTE 挖洞点巡逻周期 %.1fs · 被盯 %.1fs（%s）· 暴露 %.0f%% · 每周期窗口 %.1fs" % [
+		ex["cycle"], ex["seen"], ",".join(ex["posts"]), float(ex["ratio"]) * 100.0, ex["window"]
 	])
-	print("NOTE 走到施工点 %.1fs · Soft 每档 %.0fs → 每夜 %d 档 · %d 档需 %d 夜 → 第 %d 天出园" % [
-		travel, soft_tier, tiers_per_night, GameConst.ROUTE_TIERS, nights, days
+	print("NOTE 每夜安全秒数 = 歇岗 %.0f + 夜巡 %.0f×(1−%.2f) − %.1f 窗×%.0fs 余量 − 走到 %.1fs = %.1fs" % [
+		GameConst.NIGHT_QUIET_SEC, patrol, ex["ratio"], windows, WINDOW_MARGIN, travel, safe
 	])
-	var hard_tier := GameConst.TIER_HARD_SEC * rw.hard_time_mult
-	print("NOTE Hard 每档 %.0fs vs 一夜 %.0fs" % [hard_tier, GameConst.NIGHT_PATROL_BASE_SEC + GameConst.NIGHT_QUIET_SEC])
-	if days >= TARGET_MIN_DAYS and days <= TARGET_MAX_DAYS:
-		_check(true, "(a) 正解 %d 天，落在 %d–%d 天" % [days, TARGET_MIN_DAYS, TARGET_MAX_DAYS])
+	var soft_work := GameConst.TIER_SOFT_SEC * float(GameConst.ROUTE_TIERS)
+	var hard_work := Interactable.tier_seconds(false) * float(GameConst.ROUTE_TIERS - 1) + GameConst.TIER_SOFT_SEC
+	var soft_nights := ceili(soft_work / maxf(safe, 0.01))
+	var hard_nights := ceili(hard_work / maxf(safe, 0.01))
+	var soft_days := gather_days + soft_nights - 1
+	var hard_days := gather_days + hard_nights - 1
+	print("NOTE Soft：%d 档×%.0fs = %.0fs → %d 夜 → 第 %d 天出园" % [GameConst.ROUTE_TIERS, GameConst.TIER_SOFT_SEC, soft_work, soft_nights, soft_days])
+	print("NOTE Hard：%d 档×%.0fs + 最后一档 %.0fs = %.0fs → %d 夜 → 第 %d 天出园（另有噪音与痕迹）" % [
+		GameConst.ROUTE_TIERS - 1, Interactable.tier_seconds(false), GameConst.TIER_SOFT_SEC, hard_work, hard_nights, hard_days
+	])
+	_check(hard_days <= GameConst.DEADLINE_DAY, "Hard 路径 %d 天，在期限 %d 天内" % [hard_days, GameConst.DEADLINE_DAY])
+	if soft_days >= TARGET_MIN_DAYS and soft_days <= TARGET_MAX_DAYS:
+		_check(true, "(a) Soft 正解 %d 天，落在 %d–%d 天" % [soft_days, TARGET_MIN_DAYS, TARGET_MAX_DAYS])
 	else:
-		_pending.append("(a) 正解估算 %d 天，不在 %d–%d 天（瓶颈见 NOTE；等待决定，不自行加限制）" % [
-			days, TARGET_MIN_DAYS, TARGET_MAX_DAYS
+		_pending.append("(a) Soft 正解估算 %d 天，不在 %d–%d 天（瓶颈：每夜安全 %.0fs = 歇岗 %.0fs 全程安全 + 夜巡未暴露 %.0fs，一线 Soft 总工时只有 %.0fs → %d 夜；等待决定，不自行加限制）" % [
+			soft_days, TARGET_MIN_DAYS, TARGET_MAX_DAYS, safe, GameConst.NIGHT_QUIET_SEC, patrol * (1.0 - float(ex["ratio"])), soft_work, soft_nights
 		])
 
 

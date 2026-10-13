@@ -127,6 +127,9 @@ func _refresh() -> void:
 			"✓" if s.route_climb_ready else "…",
 		]
 		prep_line = s.tiers_line()
+		var ex: RouteExposure = world.get("exposure")
+		if ex:
+			prep_line += "\n施工点(夜巡):\n  " + ex.debug_text()
 		if s.outcome == RunSession.Outcome.WON:
 			route_line += "  | 已逃脱"
 		elif s.outcome == RunSession.Outcome.LOST:

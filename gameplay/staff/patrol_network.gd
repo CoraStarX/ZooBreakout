@@ -105,7 +105,11 @@ func pick_next(
 		return null
 	var scores: Array = []
 	var candidates: Array[PatrolPointData] = []
-	var all: Array[PatrolPointData] = points + focus_points
+	var night := Clock.allows_escape_actions()
+	var all: Array[PatrolPointData] = focus_points.duplicate()
+	for p in points:
+		if p.on_shift(night):
+			all.append(p)
 	for p in all:
 		if p.id == current_id:
 			continue

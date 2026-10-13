@@ -9,6 +9,12 @@ var dwell_min: float = 3.0
 var dwell_max: float = 8.0
 var last_visited: float = -9999.0
 var heat: float = 0.0
+enum Shift { BOTH, DAY, NIGHT, ROUTE }
+## Which part of the day the staff may pick this point (night = escape phases). ROUTE = never picked,
+## only a hop for routing round walls.
+var shift: Shift = Shift.BOTH
+## Watch posts: face this way while dwelling (ZERO = keep the arrival heading).
+var face_dir: Vector3 = Vector3.ZERO
 
 
 func configure(
@@ -24,3 +30,9 @@ func configure(
 	dwell_min = p_dwell_min
 	dwell_max = p_dwell_max
 	return self
+
+
+func on_shift(night: bool) -> bool:
+	if shift == Shift.ROUTE:
+		return false
+	return shift == Shift.BOTH or (shift == Shift.NIGHT) == night

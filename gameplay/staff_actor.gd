@@ -63,6 +63,9 @@ var _investigate_timer: float = 0.0
 var _guard_pos: Vector3 = Vector3.ZERO
 var _guard_door: Interactable = null
 var _base_vision: float = 0.0
+const NIGHT_PATROL_SPEED_MULT := 1.06
+## Watch posts: stare one way for the whole dwell (no look-around sweep).
+var _dwell_hold_gaze: bool = false
 var _base_speed: float = 0.0
 var _dwell_left: float = 0.0
 var _route_node: Node3D
@@ -308,6 +311,16 @@ func is_hostile() -> bool:
 
 func facing_dir() -> Vector3:
 	return _facing
+
+
+## Same cone + line-of-sight test the sense scan uses, for a fixed spot (work-site exposure).
+func sees_point(pos: Vector3) -> bool:
+	if _params == null or state == State.REST or _recovery_left > 0.0:
+		return false
+	if not StaffSense.in_vision_cone(global_position, _facing, pos, _params.vision_range, _params.vision_angle_deg):
+		return false
+	var space := get_world_3d().direct_space_state if get_world_3d() else null
+	return StaffSense.has_line_of_sight(space, global_position, pos, [get_rid()])
 
 
 func _resume_after_duty() -> State:
@@ -845,7 +858,8 @@ func _patrol_network(delta: float) -> void:
 	if _dwell_left > 0.0:
 		_dwell_left -= delta
 		velocity = Vector3.ZERO
-		_tick_look_around(delta)
+		if not _dwell_hold_gaze:
+			_tick_look_around(delta)
 		if _dwell_left <= 0.0:
 			_finish_patrol_dwell()
 		return
@@ -854,7 +868,7 @@ func _patrol_network(delta: float) -> void:
 	_motor.speed = _patrol_move_speed()
 	velocity = _motor.tick_velocity(global_position)
 	if _motor.arrived(global_position):
-		if _focus_trip and not _focus_hop_final:
+		if not _focus_hop_final:
 			_route_focus_hop()
 			return
 		_arrive_network_point()
@@ -895,8 +909,7 @@ func _patrol_blocked(delta: float) -> bool:
 ## F3 line: full-search routing and whether the wall fallback is in effect.
 func nav_debug_text() -> String:
 	var parts := PackedStringArray()
-	if _focus_trip:
-		parts.append("搜查:%s" % focus_route_note)
+	parts.append("%s:%s" % ["搜查" if _focus_trip else "路线", focus_route_note])
 	parts.append("撞墙兜底:%s（累计 %d）" % ["是" if stuck_fallback_active else "否", stuck_fallback_count])
 	return "  ".join(parts)
 
@@ -918,9 +931,9 @@ func _pick_next_patrol_point(snap_pos: bool) -> void:
 	stuck_fallback_active = false
 	_motor.set_target(pick.position)
 	_focus_trip = patrol_network.is_focus_id(pick.id)
-	if _focus_trip:
-		_focus_goal = pick.position
-		_route_focus_hop()
+	## Every trip is routed (straight if clear, else along patrol points) so posts behind walls are reachable.
+	_focus_goal = pick.position
+	_route_focus_hop()
 	if snap_pos:
 		global_position = pick.position
 		_arrive_network_point()
@@ -930,17 +943,20 @@ func _arrive_network_point() -> void:
 	velocity = Vector3.ZERO
 	_stuck_t = 0.0
 	_stuck_from = global_position
-	var dwell_lo := _params.dwell_sec_min if _params else 3.0
-	var dwell_hi := _params.dwell_sec_max if _params else 8.0
+	var visited: PatrolPointData = patrol_network.find(_patrol_point_id) if patrol_network else null
+	var dwell_lo := visited.dwell_min if visited else (_params.dwell_sec_min if _params else 3.0)
+	var dwell_hi := visited.dwell_max if visited else (_params.dwell_sec_max if _params else 8.0)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	_dwell_left = StaffAwarenessMath.bounded_rand(rng, dwell_lo, dwell_hi)
 	_reset_look_around()
 	_dwell_face0 = _facing if _facing.length() > 0.1 else Vector3(0, 0, 1)
-	if patrol_network:
-		var visited := patrol_network.find(_patrol_point_id)
-		if visited:
-			visited.last_visited = _now_sec
+	_dwell_hold_gaze = visited != null and visited.face_dir.length() > 0.1
+	if _dwell_hold_gaze:
+		_dwell_face0 = visited.face_dir.normalized()
+		_facing = _dwell_face0
+	if visited:
+		visited.last_visited = _now_sec
 	_recent_point_ids.append(_patrol_point_id)
 	while _recent_point_ids.size() > 3:
 		_recent_point_ids.pop_front()
@@ -1095,7 +1111,7 @@ func _patrol_move_speed() -> float:
 	if Clock.phase == Clock.Phase.CLOSE:
 		s *= 1.12
 	elif Clock.phase == Clock.Phase.NIGHT_PATROL:
-		s *= 1.06
+		s *= NIGHT_PATROL_SPEED_MULT
 	return s
 
 

@@ -8,6 +8,12 @@ const LOOP_WIDE := &"loop_wide"
 const SPUR_SHED := &"spur_shed"
 const SPUR_PLAZA := &"spur_plaza"
 const START := LOOP_NE
+const SHIFTS := {
+	"both": PatrolPointData.Shift.BOTH,
+	"day": PatrolPointData.Shift.DAY,
+	"night": PatrolPointData.Shift.NIGHT,
+	"route": PatrolPointData.Shift.ROUTE,
+}
 
 
 ## DEPRECATED：固定路線冊。請改用 make_patrol_network()。
@@ -60,16 +66,20 @@ static func make_patrol_network() -> PatrolNetwork:
 		{"id": &"shed_east", "pos": Vector3(7.8, 0.05, 4.8), "imp": 1.3},
 		{"id": &"trash", "pos": Vector3(-2.5, 0.05, 5.2), "imp": 1.2},
 		{"id": &"visitor_rope", "pos": Vector3(0.5, 0.05, 3.5), "imp": 1.15},
+		## Night watch posts in the corridors round the raccoon yard (docs/COST_REFACTOR.md「施工点暴露」).
+		## One night staff alternates between the two (6.6 m apart): each stare is the other line's window.
+		{"id": &"west_lawn", "pos": Vector3(-9.0, 0.05, 3.5), "imp": 0.0, "shift": "route"},
+		{"id": &"dig_post", "pos": Vector3(-9.3, 0.05, -4.3), "imp": 1.3, "shift": "night",
+			"face": Vector3(-1.27, 0, 5.8), "dwell": Vector2(14.0, 16.0)},
+		{"id": &"climb_post", "pos": Vector3(-10.0, 0.05, -10.9), "imp": 1.3, "shift": "night",
+			"face": Vector3(1, 0, 0), "dwell": Vector2(16.5, 18.5)},
 	]
 	var params := StaffAiParams.new()
 	for s in specs:
-		var p := PatrolPointData.new().configure(
-			s["id"],
-			s["pos"],
-			float(s["imp"]),
-			params.dwell_sec_min,
-			params.dwell_sec_max
-		)
+		var dwell: Vector2 = s.get("dwell", Vector2(params.dwell_sec_min, params.dwell_sec_max))
+		var p := PatrolPointData.new().configure(s["id"], s["pos"], float(s["imp"]), dwell.x, dwell.y)
+		p.shift = SHIFTS[String(s.get("shift", "day"))]
+		p.face_dir = s.get("face", Vector3.ZERO)
 		net.add_point(p)
 	return net
 

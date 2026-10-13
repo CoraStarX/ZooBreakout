@@ -8,6 +8,9 @@ const BODY_RADIUS := 0.4
 const BODY_HEIGHT := 0.4
 ## Slightly thinner than the body so sliding along a wall face does not count as blocked.
 const SWEEP_MARGIN := 0.05
+## A node this close to `from` is where we already stand: route on from it instead of hopping to it again.
+const AT_NODE := 0.75
+const ORIGIN := -2
 
 
 ## True if the staff can walk straight from `from` to `to` (planar, walls on layer 1).
@@ -50,7 +53,10 @@ static func next_hop(
 		dist.append(INF)
 		first.append(-1)
 		done.append(false)
-		if clear_line(space, from, nodes[i], exclude):
+		if _flat(from).distance_to(_flat(nodes[i])) <= AT_NODE:
+			dist[i] = 0.0
+			first[i] = ORIGIN
+		elif clear_line(space, from, nodes[i], exclude):
 			dist[i] = _flat(from).distance_to(_flat(nodes[i]))
 			first[i] = i
 	while true:
@@ -67,7 +73,7 @@ static func next_hop(
 			var d := dist[u] + _flat(nodes[u]).distance_to(_flat(nodes[v]))
 			if d < dist[v] and clear_line(space, nodes[u], nodes[v], exclude):
 				dist[v] = d
-				first[v] = first[u]
+				first[v] = v if first[u] == ORIGIN else first[u]
 	## Best reachable node that sees the goal (shortest total trip).
 	var best := -1
 	var best_cost := INF
@@ -80,6 +86,8 @@ static func next_hop(
 				best_cost = c
 				best = i
 	if best >= 0:
+		if first[best] == ORIGIN: ## standing on the node that sees the goal: last stretch
+			return {"pos": goal, "final": true, "substitute": false, "ok": true}
 		return {"pos": nodes[first[best]], "final": false, "substitute": false, "ok": true}
 	## Goal unreachable: substitute the reachable node nearest to it.
 	var sub := -1
@@ -87,6 +95,8 @@ static func next_hop(
 		if dist[i] < INF and (sub < 0 or _flat(nodes[i]).distance_to(_flat(goal)) < _flat(nodes[sub]).distance_to(_flat(goal))):
 			sub = i
 	if sub >= 0:
+		if first[sub] == ORIGIN:
+			return {"pos": nodes[sub], "final": true, "substitute": true, "sub_pos": nodes[sub], "ok": true}
 		var hop := nodes[first[sub]]
 		return {"pos": hop, "final": first[sub] == sub, "substitute": true, "sub_pos": nodes[sub], "ok": true}
 	return {"pos": goal, "final": true, "substitute": false, "ok": false}

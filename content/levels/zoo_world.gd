@@ -9,6 +9,7 @@ const RUN_RESULT_SCENE := preload("res://scenes/ui/run_result.tscn")
 var session: RunSession
 var party: PartyController
 var staff: StaffActor
+var exposure: RouteExposure
 ## animal def id -> home cage Interactable (from geometry)
 var cage_doors: Dictionary = {}
 var _geometry: ZooP0Geometry
@@ -87,6 +88,12 @@ func _ready() -> void:
 		_wire_cage_door(cage_doors[animal_id] as Interactable, animal_id as StringName)
 	_wire_soft_escape_routes()
 	_wire_exit_routes()
+	exposure = RouteExposure.new()
+	exposure.name = "RouteExposure"
+	add_child(exposure)
+	for site in [_geometry.dig_interactable, _geometry.climb_interactable]:
+		if site:
+			exposure.add_site((site as Interactable).display_name, (site as Interactable).work_spot())
 	if _geometry.danger_approach:
 		_geometry.danger_approach.body_entered.connect(_on_danger_approach_entered)
 	if _geometry.danger_zone:
