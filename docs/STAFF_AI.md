@@ -76,7 +76,7 @@ awareness 带 + 流程 ──► 状态 ──► StaffMotor.move_to / 巡逻点
 
 1. 按 **F3** 打开开发面板  
 2. 勾选 **职员 AI Debug**  
-3. 可见：视锥（跟 `_facing`）、听觉圈、目标点、路径、头顶状态/awareness、各巡逻点 heat/age  
+3. 可见：视锥（跟 `_facing`）、听觉圈、目标点、路径、头顶状态/awareness、各巡逻点 heat/age、施工点夜巡视野暴露比例与窗口
 
 ## 门禁
 
@@ -93,6 +93,8 @@ awareness 带 + 流程 ──► 状态 ──► StaffMotor.move_to / 巡逻点
 - 噪音 kind：`footstep` / `shout` / `throw`（落点）/ `interact_hard` / `construction` / `gather`（B 类搜集点）。`last_heard_frame` 供施工点判断「是否真有人听到」。
 - **玩家可读**：员工头上 `HeadIcon`（起疑 `?` → 调查/搜索 `!` → 追捕 `!!`）；精确 `awareness` 仅 F3。门禁 `p2_alert_tiers`。
 - **投掷**：有 `THROW` 者（猴）键 T，冷却 8s，石子表现、无拾取系统；落地噪音 kind=`throw` 引开（`ThrownStone`，门禁 `p2_noise_tools`）。
+- **夜巡岗**：夜间只选 `Shift.NIGHT` 点（现 `dig_post` / `climb_post`），白天不选；`Shift.ROUTE` 只作绕墙跳点。岗上按 `face_dir` 盯死、不扫视。所有巡逻行程走 `StaffReach.next_hop`。暴露只计视野（目标 40–60%），门禁 `p2_exposure`。
+- **攀爬点 Alert 5 不可达**：搜查焦点到不了攀爬站位，改去最近可达巡逻点。补点使两线压力相近 → DESIGN backlog。
 
 ## 后续建议（本阶段刻意不做）
 
