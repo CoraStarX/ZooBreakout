@@ -10,6 +10,7 @@ enum Id {
 	RAM = 4, ## 冲撞
 	SQUEEZE = 5, ## 钻缝
 	THROW = 6, ## 投掷 — 丢石子到远处制造声响引开职员
+	TINY_GAP = 7, ## 極小通道；與舊SQUEEZE語意分開
 }
 
 
@@ -25,6 +26,8 @@ static func to_label(id: Id) -> String:
 			return "冲撞"
 		Id.SQUEEZE:
 			return "钻缝"
+		Id.TINY_GAP:
+			return "極小通道"
 		Id.THROW:
 			return "投掷"
 		_:

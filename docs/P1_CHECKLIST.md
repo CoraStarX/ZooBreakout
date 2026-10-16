@@ -1,5 +1,7 @@
 # Zoo Breakout — P1 清单
 
+> 適用範圍：舊雙動物關卡的設計／實作／回歸資料；保留作歷史參考，不自動授權恢復未完成工作。現行擬態階段見 [P2_CHECKLIST.md](P2_CHECKLIST.md)。
+
 > **P1 Done (2026-10-09)** — QA M0–M4 门禁全绿；套件面板 UI 仍 backlog。后续见 [P2_CHECKLIST.md](P2_CHECKLIST.md)。
 >
 > 垂直切片：通关闭环 + Prep Loop + 动词/双开局/出生点。

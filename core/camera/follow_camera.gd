@@ -9,6 +9,10 @@ extends Node3D
 @export var ortho_size: float = 14.0
 @export var follow_smooth: float = 10.0 ## higher = snappier
 @export var snap_on_switch: bool = true
+## 預設關閉，舊關卡仍看地面；新移動切片可跟隨平台／攀爬高度。
+@export var follow_target_height: bool = false
+## 可選的通用高度介面，Core 不認角色型別或移動狀態。
+@export var height_provider_method: StringName = &""
 
 @onready var _camera: Camera3D = $Camera3D
 
@@ -64,6 +68,11 @@ func _process(delta: float) -> void:
 func _target_look_pos() -> Vector3:
 	var p := _target.global_position
 	p.y = look_height
+	if follow_target_height:
+		var target_height := _target.global_position.y
+		if not height_provider_method.is_empty() and _target.has_method(height_provider_method):
+			target_height = float(_target.call(height_provider_method))
+		p.y += target_height
 	return p
 
 

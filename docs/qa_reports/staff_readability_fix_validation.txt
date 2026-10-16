@@ -1,0 +1,57 @@
+員工 B 最小修正驗證（2026-10-15）
+來源：自動回歸／實機重播，非手玩驗收
+
+✓ p0_regression              === REGRESSION SUMMARY pass=20 fail=0 ===
+✓ p0_walkthrough             === 跟班摘要 OK=14 FINDINGS=0 ===
+✓ p0_enclosure_check         
+✓ p0_climb_fly_repro         
+✓ p1_win_routes              === P1 WIN SUMMARY pass=6 fail=0 ===
+✓ p2_outer_walls             === P2 OUTER SUMMARY pass=6 fail=0 ===
+✓ p2_run_reset               === P2 RESET SUMMARY pass=8 fail=0 ===
+✓ p2_day_cycle               === P2 DAY SUMMARY pass=12 fail=0 ===
+✓ p2_gather                  === P2 GATHER SUMMARY pass=35 fail=0 ===
+✓ p2_capture                 === P2 CAPTURE SUMMARY pass=16 fail=0 ===
+✓ p2_intel                   === P2 INTEL SUMMARY pass=17 fail=0 ===
+✓ p2_route_work              === P2 ROUTE WORK SUMMARY pass=30 fail=0 ===
+✓ p2_cart                    === P2 CART SUMMARY pass=15 fail=0 ===
+✓ p2_hygiene                 === P2 HYGIENE SUMMARY pass=5 fail=0 ===
+✓ p2_ui                      === P2 UI SUMMARY pass=15 fail=0 ===
+✓ p2_full_loop               === P2 FULL LOOP SUMMARY pass=21 fail=0 pending=1 ===
+✓ p2_staff_awareness         === P2 STAFF AWARENESS SUMMARY pass=12 fail=0 ===
+✓ p2_staff_patrol            === P2 STAFF PATROL SUMMARY pass=12 fail=0 ===
+✓ p2_follow_trail            === P2 FOLLOW TRAIL SUMMARY pass=11 fail=0 ===
+✓ p2_action_cost             === P2 ACTION COST SUMMARY pass=38 fail=0 ===
+✓ p2_rescue_rendezvous       === P2 RESCUE RENDEZVOUS SUMMARY pass=17 fail=0 ===
+✓ p2_route_clear             === P2 ROUTE CLEAR SUMMARY pass=45 fail=0 ===
+✓ p2_stash                   === P2 STASH SUMMARY pass=29 fail=0 ===
+✓ p2_alert_tiers             === P2 ALERT TIERS SUMMARY pass=55 fail=0 ===
+✓ p2_noise_tools             === P2 NOISE TOOLS SUMMARY pass=28 fail=0 ===
+✓ p2_confiscate              === P2 CONFISCATE SUMMARY pass=18 fail=0 ===
+✓ p2_exposure                === P2 EXPOSURE SUMMARY pass=19 fail=0 ===
+✓ p2_guidance                === P2 GUIDANCE SUMMARY pass=48 fail=0 ===
+✓ p2_traversal               === P2 TRAVERSAL SUMMARY pass=149 fail=0 ===
+✓ p2_staff_readability       === P2 STAFF READABILITY SUMMARY pass=71 fail=0 ===
+
+ALL GREEN (30 suites) — logs: /var/folders/cz/pfk9vvyj6s1grb_gk5wckh500000gn/T//zoo_breakout_tests
+
+非 headless 專項：
+=== P2 STAFF READABILITY SUMMARY pass=71 fail=0 ===
+
+七秒實機重播：
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+Metal 4.0 - Forward+ - Using Device #0: Apple - Apple M2 Pro (Apple8)
+
+LANDING_SUPPORT { "projection": (-1.103727, 0.0, 3.029696), "reachable": true, "approach": (-1.103727, 0.0, 3.029696), "key": "", "ground_supported": true, "support_y": "0.0" }
+APPROACH_7_SECONDS unreachable=false memory_preserved=true actual=(3.530389, 0.0, 2.109892)
+
+凍結檔案：
+UNCHANGED gameplay/traversal/traversal_actor.gd
+UNCHANGED gameplay/traversal/traversal_math.gd
+UNCHANGED content/traversal/traversal_params.gd
+UNCHANGED content/traversal/traversal_params.tres
+UNCHANGED content/traversal/movement_lab_data.tres
+UNCHANGED core/camera/follow_camera.gd
+
+截圖：/tmp/staff_fix_approach_1280.png、/tmp/staff_fix_approach_1920.png；另檢查原生屋頂1920與攀爬1280。
+UserPrefs prefs.cfg 不存在，未留下引導偏好。
+既有舊關卡 full_loop pending=1 保留；可讀性手玩仍待使用者及陌生玩家驗收。

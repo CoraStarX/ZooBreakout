@@ -21,7 +21,7 @@
 | Interactions | `gameplay/interaction/` |
 | GameManager / Conditions | 场景级 `RunSession` + escape conditions |
 | Item / Kit | Prep 套件 Resource（P1+） |
-| Levels / Items / UI | `content/` + `scenes/` + `resources/` |
+| Levels / Items / UI | `content/` + `scenes/` |
 
 ## 目录
 
@@ -29,9 +29,8 @@
 core/                 # 基础设施脚本（可与 autoload 路径并存迁移）
 gameplay/             # 规则框架
 content/              # 常量、事件名、内容侧脚本
-resources/            # .tres 数据
 scenes/               # boot / actors / levels / ui / world
-prototypes/           # 抛弃式，禁止被 gameplay 引用
+prototypes/           # 验证场景与回归测试，禁止被 gameplay 引用
 docs/
 ```
 
@@ -105,3 +104,25 @@ docs/
 1. 新功能先定落层，再写 Resource/接口，再铺场景。  
 2. 里程碑结束：可玩 + 更新 `TECH.md` 一句状态。  
 3. 垂直切片：每加 P1 系统只抽相关层，不预建空 Manager。
+
+## 2026-10-14 移動切片 Architect 核准
+
+使用者已核准獨立移動試驗與鏡頭方案。`FollowCamera.follow_target_height` 預設 false；開啟時可讀通用 `height_provider_method`，由角色提供平台／攀爬高度，Core 不依賴角色型別。保持既有 45° 正交，不改全域狀態、Clock 或 Autoload。
+
+`gameplay/traversal/` 負責純移動規則與本地狀態；`content/traversal/` 負責參數、幾何資料、UIKit／ProximityLabel 呈現。未改寫 `AnimalActor` 或將原型升格；獨立切片通過後才規劃擬態整合。詳見 [MOVEMENT_SLICE.md](MOVEMENT_SLICE.md)。
+
+## 2026-10-15 移動 A 可用性接線
+
+TraversalActor 增本地 Airborne／Attaching 狀態與統一 Space，TraversalMetrics 為場景持有的 RefCounted。角色只發 local movement_event／stepped／landed，由 Content 接 F3 或佔位反饋；噪音沿用 Bus.noise_made。DebugHUD 在有 movement_metrics 時提供獨立移動面板，舊世界模式不變。沒有新增 Autoload、Clock.Phase 或 Shader；沿用既有鏡頭高度介面。
+
+## 員工可讀性 B（2026-10-15）
+
+使用者核准獨立沙盒：Content StaffReadabilityLab 只讀凍結移動狀態並解析灰盒資料／聲音事件位置；GamePlay 共享平面幾何、局部 ReadabilityStaff、場景級 Metrics 負責判定／編排。沿用 StaffAwarenessMath／StaffMotor，不改正式 StaffActor 或新增 Autoload／Clock 語意。增加雙目標材質淡出與UIKit回饋，不修改鏡頭數學或 Shader；獨立 StaffAiParams .tres 防止調參波及舊關卡。
+
+## 變形原型 A（2026-10-16）
+
+GamePlay/forms 的 FormDef／FormSetup／FormParams 為共享資料型別，FormRules 純函式驗證與拒絕，FormController 管場景級冷卻／完整膠囊預檢／合法退回。控制器按 CLIMB 能力選用凍結 TraversalActor 或限制跳躍的 GroundFormActor，不按物種 id 分支。Content/forms 持有 .tres、FormLab 呈現與噪音接線。只用既有鏡頭接口與 Bus，不增 Autoload／全域狀態／Shader。角色更換保留腳底、朝向與下落峰值，停用舊碰撞與輸入；特效獨立。C 前搖接口見 FORMS_SLICE.md，本階段不修改員工。
+
+### A有界推開接線
+
+FormController先以同份完整目標膠囊／walkable_support尋找擺放，再以本體cast_motion與同層支撐驗證路徑；FormRules提供有界方向／高度純判定，FormParams集中距離／步長／取樣參數。所有查詢先完成，再_replace_body與form_changed／transform_committed／Bus事件原子提交最終位置。沒有新增Autoload、移動狀態、全域資訊或NavMesh；凍結猴移動與員工程式不變。

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FormSetup" load_steps=5 format=3]
+[ext_resource type="Script" path="res://gameplay/forms/form_setup.gd" id="1"]
+[ext_resource type="Resource" path="res://content/forms/slime.tres" id="2"]
+[ext_resource type="Resource" path="res://content/forms/monkey.tres" id="3"]
+[ext_resource type="Script" path="res://gameplay/forms/form_def.gd" id="4"]
+[resource]
+script = ExtResource("1")
+forms = Array[ExtResource("4")]([ExtResource("2"),ExtResource("3")])
+base_form = ExtResource("2")
+starting_form = ExtResource("2")
+initial_unlocked_forms = Array[ExtResource("4")]([ExtResource("2"),ExtResource("3")])

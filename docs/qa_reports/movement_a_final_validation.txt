@@ -1,0 +1,111 @@
+移動 A 最後一輪驗證｜2026-10-15
+來源：自動回歸；不代表使用者五圈手玩已通過。
+
+
+全量門禁
+✓ p0_regression              === REGRESSION SUMMARY pass=20 fail=0 ===
+✓ p0_walkthrough             === 跟班摘要 OK=14 FINDINGS=0 ===
+✓ p0_enclosure_check         
+✓ p0_climb_fly_repro         
+✓ p1_win_routes              === P1 WIN SUMMARY pass=6 fail=0 ===
+✓ p2_outer_walls             === P2 OUTER SUMMARY pass=6 fail=0 ===
+✓ p2_run_reset               === P2 RESET SUMMARY pass=8 fail=0 ===
+✓ p2_day_cycle               === P2 DAY SUMMARY pass=12 fail=0 ===
+✓ p2_gather                  === P2 GATHER SUMMARY pass=35 fail=0 ===
+✓ p2_capture                 === P2 CAPTURE SUMMARY pass=16 fail=0 ===
+✓ p2_intel                   === P2 INTEL SUMMARY pass=17 fail=0 ===
+✓ p2_route_work              === P2 ROUTE WORK SUMMARY pass=30 fail=0 ===
+✓ p2_cart                    === P2 CART SUMMARY pass=15 fail=0 ===
+✓ p2_hygiene                 === P2 HYGIENE SUMMARY pass=5 fail=0 ===
+✓ p2_ui                      === P2 UI SUMMARY pass=15 fail=0 ===
+✓ p2_full_loop               === P2 FULL LOOP SUMMARY pass=21 fail=0 pending=1 ===
+✓ p2_staff_awareness         === P2 STAFF AWARENESS SUMMARY pass=12 fail=0 ===
+✓ p2_staff_patrol            === P2 STAFF PATROL SUMMARY pass=12 fail=0 ===
+✓ p2_follow_trail            === P2 FOLLOW TRAIL SUMMARY pass=11 fail=0 ===
+✓ p2_action_cost             === P2 ACTION COST SUMMARY pass=38 fail=0 ===
+✓ p2_rescue_rendezvous       === P2 RESCUE RENDEZVOUS SUMMARY pass=17 fail=0 ===
+✓ p2_route_clear             === P2 ROUTE CLEAR SUMMARY pass=45 fail=0 ===
+✓ p2_stash                   === P2 STASH SUMMARY pass=29 fail=0 ===
+✓ p2_alert_tiers             === P2 ALERT TIERS SUMMARY pass=55 fail=0 ===
+✓ p2_noise_tools             === P2 NOISE TOOLS SUMMARY pass=28 fail=0 ===
+✓ p2_confiscate              === P2 CONFISCATE SUMMARY pass=18 fail=0 ===
+✓ p2_exposure                === P2 EXPOSURE SUMMARY pass=19 fail=0 ===
+✓ p2_guidance                === P2 GUIDANCE SUMMARY pass=48 fail=0 ===
+✓ p2_traversal               === P2 TRAVERSAL SUMMARY pass=149 fail=0 ===
+
+ALL GREEN (29 suites) — logs: /var/folders/cz/pfk9vvyj6s1grb_gk5wckh500000gn/T//zoo_breakout_tests
+
+
+原生 InputMap 五圈與靜止日誌
+NATIVE_IDLE frames=240 separations=0 height=0.00333333015442..0.00333333015442
+PASS native idle no correction loop
+PASS input attach round 1
+PASS climb roof
+PASS cross gap
+PASS junction drop preview
+PASS junction Space drop
+PASS one drop per completed loop
+PASS input attach round 2
+PASS climb roof
+PASS cross gap
+PASS junction drop preview
+PASS junction Space drop
+PASS one drop per completed loop
+PASS input attach round 3
+PASS climb roof
+PASS cross gap
+PASS junction drop preview
+PASS junction Space drop
+PASS one drop per completed loop
+PASS input attach round 4
+PASS climb roof
+PASS cross gap
+PASS junction drop preview
+PASS junction Space drop
+PASS one drop per completed loop
+PASS input attach round 5
+PASS climb roof
+PASS cross gap
+PASS junction drop preview
+PASS junction Space drop
+PASS one drop per completed loop
+PASS five actual input drop loops zero errors
+PASS F3 opens statistics
+PASS copy final stats
+NATIVE_FINAL_SUMMARY failures=0
+
+原生 p2_traversal 完整套件摘要
+IDLE_CONTACT_REGRESSION frames=240 separations=0 end=(-3.0, 0.003333, 2.0)
+IDLE_SETTLED_HEIGHT range=0.00333333015442..0.00333333015442
+HISTORICAL_JUNCTION_BLOCK {"collider":"/root/TestTraversal/MovementLab/HistoricalRampRegression","from":"(3.518902, 3.000835, 0.204064)","safe_fraction":0.0390625,"segment":1,"stage":"sweep","to":"(2.670374, 3.120835, 1.052592)"}
+JUNCTION_REGRESSION (3.778283, 3.04402, 0.460391) { "points": [(3.778283, 3.04402, 0.460391), (2.929755, 3.16402, 1.308919), (2.929755, 0.04, 1.308919)], "reason": "", "probe": "(2.929755, 3.04402, 1.308919)", "landing": "(2.929755, 0.04, 1.308919)" }
+JUNCTION_REGRESSION (3.518902, 3.000835, 0.204064) { "points": [(3.518902, 3.000835, 0.204064), (2.670374, 3.120835, 1.052592), (2.670374, 0.04, 1.052592)], "reason": "", "probe": "(2.670374, 3.000835, 1.052592)", "landing": "(2.670374, 0.04, 1.052592)" }
+JUNCTION_REGRESSION (3.520364, 3.000835, 0.216667) { "points": [(3.520364, 3.000835, 0.216667), (2.671836, 3.120835, 1.065195), (2.671836, 0.04, 1.065195)], "reason": "", "probe": "(2.671836, 3.000835, 1.065195)", "landing": "(2.671836, 0.04, 1.065195)" }
+=== P2 TRAVERSAL SUMMARY pass=149 fail=0 ===
+
+F3 五圈摘要
+猴形態移動統計｜來源：原生真實 InputMap 五圈跳下回歸（非手玩）
+完成 5 圈｜進行中：未開始
+多餘輸入 0｜意外墜落 0｜跳躍中斷 0｜卡住恢復 0
+計數順序：多餘／墜落／中斷／恢復
+已完成累計：0／0／0／0
+進行中本圈：0／0／0／0
+圈外累計：0／0／0／0
+整次恢復檢查：通過
+斜坡：0 圈，尚未驗證
+跳下：5/5 圈｜中位數 4.92（2.03／1.12／1.77）秒｜樣本足夠
+下牆：0 圈，尚未驗證
+重複返回：0 圈，不計入返回方式驗收（同圈多次下行，不計單次耗時）
+混合：0 圈，不計入返回方式驗收（不與單一路線比較）
+重試：0 圈，不計入返回方式驗收（首次跨越前曾放手／下行）
+最近 5 個有效單次圈：輸入通過／失誤通過／恢復通過
+同路線末圈比首圈快：否
+末圈偏長路段：無（對照同路線歷次中位數）
+圈數／返回方式：總計（爬牆／跨間隙／返回）秒；多餘／墜落／中斷／恢復
+01 跳下：4.87（2.03／1.05／1.78）；0／0／0／0
+02 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+03 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+04 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+05 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+
+已知範圍：真實受阻角落仍拒絕；未增加落點取樣。既有 full_loop Soft 正解天數 pending=1，未改動。下一步僅使用者五圈手玩，輸入≤2、恢復0；失敗後改討論固定寬下行帶，停止原型迭代。

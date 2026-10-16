@@ -1,9 +1,8 @@
 class_name GameHUD
 extends CanvasLayer
-## In-game HUD: top bar (day / phase / clock), objective (left), status column (right),
+## In-game HUD: top bar (day / phase / clock / single objective), status column (right),
 ## message log + onboarding hint (bottom). Polls the level root at ~8 Hz — no per-frame text churn.
 
-const REFRESH_SEC := 0.12
 const LOG_LINES := 3
 const LOG_SEC := 6.0
 
@@ -20,6 +19,11 @@ const ITEM_COLORS := {
 	&"route_kit": Color(0.9, 0.65, 0.25),
 }
 const ITEM_ORDER: Array[StringName] = [&"wood", &"rope", &"metal", &"route_kit"]
+
+@export var guidance_params: GuidanceParams = preload("res://content/ui/guidance_params.tres")
+var _guidance_route: String = ""
+var _objective_details: Label
+var _details_button: Button
 
 var _day_l: Label
 var _phase_l: Label
@@ -62,7 +66,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_since += delta
-	if _since >= REFRESH_SEC:
+	if _since >= guidance_params.refresh_sec:
 		_since = 0.0
 		_refresh()
 	_trim_log()
@@ -101,7 +105,9 @@ func _build() -> void:
 	root.add_child(top)
 	var th := HBoxContainer.new()
 	th.add_theme_constant_override("separation", 14)
-	top.add_child(th)
+	var top_rows := VBoxContainer.new()
+	top.add_child(top_rows)
+	top_rows.add_child(th)
 	_day_l = UIKit.label("", 20, UIKit.ACCENT)
 	th.add_child(_day_l)
 	_phase_chip = UIKit.swatch(Color.WHITE, Vector2(14, 14))
@@ -113,18 +119,26 @@ func _build() -> void:
 	_rest_l = UIKit.label("", 16, UIKit.TEXT_DIM)
 	th.add_child(_rest_l)
 
-	## --- objective (left) ---
-	var left := UIKit.panel(Vector2(340, 0))
-	left.position = Vector2(12, 12)
-	root.add_child(left)
-	var lv := VBoxContainer.new()
-	lv.add_theme_constant_override("separation", 4)
-	left.add_child(lv)
-	lv.add_child(UIKit.label("目标", 14, UIKit.TEXT_DIM))
-	_obj_l = UIKit.label("", 17)
-	_obj_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_obj_l.custom_minimum_size = Vector2(320, 0)
-	lv.add_child(_obj_l)
+	## 頂部單行目標；詳情預設收合，保留世界畫面的空間。
+	var objective_row := HBoxContainer.new()
+	top_rows.add_child(objective_row)
+	_obj_l = UIKit.label("", guidance_params.objective_font_size, UIKit.ACCENT)
+	_obj_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	objective_row.add_child(_obj_l)
+	_details_button = Button.new()
+	_details_button.text = "詳情"
+	_details_button.toggle_mode = true
+	_details_button.button_pressed = guidance_params.details_initially_open
+	objective_row.add_child(_details_button)
+	_objective_details = UIKit.label("", 15, UIKit.TEXT_DIM)
+	_objective_details.custom_minimum_size.x = guidance_params.details_width
+	_objective_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_objective_details.visible = guidance_params.details_initially_open
+	top_rows.add_child(_objective_details)
+	_details_button.toggled.connect(func(open: bool) -> void:
+		_objective_details.visible = open
+		_details_button.text = "收合" if open else "詳情"
+	)
 
 	## --- status (right) ---
 	var right := UIKit.panel(Vector2(250, 0))
@@ -292,8 +306,12 @@ func _refresh() -> void:
 	elif session and session.has_intel(IntelIds.REST_TIME):
 		_rest_l.text = "歇岗中" if Clock.phase == Clock.Phase.NIGHT_QUIET else "距歇岗 %d 秒" % int(Clock.seconds_until_quiet())
 
-	if world and world.has_method("current_objective"):
-		_obj_l.text = str(world.call("current_objective"))
+	if world and world.has_method("guidance_snapshot"):
+		var snapshot: Dictionary = world.call("guidance_snapshot")
+		var objective := GuidanceModel.derive(snapshot, _guidance_route, guidance_params)
+		_guidance_route = String(objective.route)
+		_obj_l.text = String(objective.title)
+		_objective_details.text = String(objective.detail)
 
 	var me: AnimalActor = null
 	if world and world.has_method("controlled_animal"):

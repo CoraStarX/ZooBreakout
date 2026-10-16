@@ -52,7 +52,7 @@ func _ready() -> void:
 
 	## Hints fire once per id.
 	hints.trigger(&"night")
-	_check(hud._hint_panel.visible and hud._hint_l.text.contains("夜间"), "夜间提示出现")
+	_check(hud._hint_panel.visible and hud._hint_l.text.contains("夜間"), "夜间提示出现")
 	hud.hide_hint()
 	hints.trigger(&"night")
 	_check(not hud._hint_panel.visible, "同一提示只出现一次")

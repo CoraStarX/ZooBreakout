@@ -1,0 +1,90 @@
+猴形態移動統計｜來源：原生真實 InputMap 五圈跳下回歸（非手玩）
+完成 5 圈｜進行中：未開始
+多餘輸入 0｜意外墜落 0｜跳躍中斷 0｜卡住恢復 0
+計數順序：多餘／墜落／中斷／恢復
+已完成累計：0／0／0／0
+進行中本圈：0／0／0／0
+圈外累計：0／0／0／0
+整次恢復檢查：通過
+斜坡：0 圈，尚未驗證
+跳下：5/5 圈｜中位數 4.92（2.03／1.12／1.77）秒｜樣本足夠
+下牆：0 圈，尚未驗證
+重複返回：0 圈，不計入返回方式驗收（同圈多次下行，不計單次耗時）
+混合：0 圈，不計入返回方式驗收（不與單一路線比較）
+重試：0 圈，不計入返回方式驗收（首次跨越前曾放手／下行）
+最近 5 個有效單次圈：輸入通過／失誤通過／恢復通過
+同路線末圈比首圈快：否
+末圈偏長路段：無（對照同路線歷次中位數）
+圈數／返回方式：總計（爬牆／跨間隙／返回）秒；多餘／墜落／中斷／恢復
+01 跳下：4.87（2.03／1.05／1.78）；0／0／0／0
+02 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+03 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+04 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+05 跳下：4.92（2.03／1.12／1.77）；0／0／0／0
+#01 6.78s 跨間隙/GROUNDED space_pressed pos=(-0.825096, 3.002108, -1.978897) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.978897) 
+  前一秒輸入（變化點）：5.78:(0.0, -1.0)/CLIMBING Space=false E=false → 5.87:(0.0, -1.0)/MANTLING Space=false E=false → 6.25:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false
+#01 6.78s 跨間隙/GROUNDED action_locked pos=(-0.825096, 3.002108, -1.978897) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.978897) gap 行動=gap 鎖定落點=(3.65, 3.04, -1.978897)
+  前一秒輸入（變化點）：5.78:(0.0, -1.0)/CLIMBING Space=false E=false → 5.87:(0.0, -1.0)/MANTLING Space=false E=false → 6.25:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false
+#01 6.78s 跨間隙/JUMPING space_consumed pos=(-0.825096, 3.002108, -1.978897) target=none landing=(3.65, 3.04, -1.978897)  行動=gap 鎖定落點=(3.65, 3.04, -1.978897)
+  前一秒輸入（變化點）：5.78:(0.0, -1.0)/CLIMBING Space=false E=false → 5.87:(0.0, -1.0)/MANTLING Space=false E=false → 6.25:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false
+#01 7.70s 返回/GROUNDED space_pressed pos=(3.585182, 3.002179, 0.129437) target=none landing=(2.736654, 0.04, 0.977965) 
+  前一秒輸入（變化點）：6.70:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false → 6.80:(0.0, 0.0)/JUMPING Space=false E=false → 7.30:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 7.68:(-1.0, 0.0)/GROUNDED Space=false E=false → 7.70:(-1.0, 0.0)/GROUNDED Space=true E=false
+#01 7.70s 返回/GROUNDED action_locked pos=(3.585182, 3.002179, 0.129437) target=none landing=(2.736654, 0.04, 0.977965) drop 行動=drop 鎖定落點=(2.736654, 0.04, 0.977965)
+  前一秒輸入（變化點）：6.70:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false → 6.80:(0.0, 0.0)/JUMPING Space=false E=false → 7.30:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 7.68:(-1.0, 0.0)/GROUNDED Space=false E=false → 7.70:(-1.0, 0.0)/GROUNDED Space=true E=false
+#01 7.70s 返回/JUMPING space_consumed pos=(3.585182, 3.002179, 0.129437) target=none landing=(2.736654, 0.04, 0.977965)  行動=drop 鎖定落點=(2.736654, 0.04, 0.977965)
+  前一秒輸入（變化點）：6.70:(0.996287, 0.086099)/GROUNDED Space=false E=false → 6.77:(0.0, 0.0)/GROUNDED Space=false E=false → 6.78:(0.0, 0.0)/GROUNDED Space=true E=false → 6.80:(0.0, 0.0)/JUMPING Space=false E=false → 7.30:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 7.68:(-1.0, 0.0)/GROUNDED Space=false E=false → 7.70:(-1.0, 0.0)/GROUNDED Space=true E=false
+#02 12.07s 跨間隙/GROUNDED space_pressed pos=(-0.864778, 3.002108, -1.94423) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.94423) 
+  前一秒輸入（變化點）：11.08:(0.0, -1.0)/CLIMBING Space=false E=false → 11.17:(0.0, -1.0)/MANTLING Space=false E=false → 11.55:(0.99722, 0.07452)/GROUNDED Space=false E=false → 11.62:(0.99722, 0.074519)/GROUNDED Space=false E=false → 11.63:(0.99722, 0.07452)/GROUNDED Space=false E=false → 12.05:(0.0, 0.0)/GROUNDED Space=false E=false → 12.07:(0.0, 0.0)/GROUNDED Space=true E=false
+#02 12.07s 跨間隙/GROUNDED action_locked pos=(-0.864778, 3.002108, -1.94423) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.94423) gap 行動=gap 鎖定落點=(3.65, 3.04, -1.94423)
+  前一秒輸入（變化點）：11.08:(0.0, -1.0)/CLIMBING Space=false E=false → 11.17:(0.0, -1.0)/MANTLING Space=false E=false → 11.55:(0.99722, 0.07452)/GROUNDED Space=false E=false → 11.62:(0.99722, 0.074519)/GROUNDED Space=false E=false → 11.63:(0.99722, 0.07452)/GROUNDED Space=false E=false → 12.05:(0.0, 0.0)/GROUNDED Space=false E=false → 12.07:(0.0, 0.0)/GROUNDED Space=true E=false
+#02 12.07s 跨間隙/JUMPING space_consumed pos=(-0.864778, 3.002108, -1.94423) target=none landing=(3.65, 3.04, -1.94423)  行動=gap 鎖定落點=(3.65, 3.04, -1.94423)
+  前一秒輸入（變化點）：11.08:(0.0, -1.0)/CLIMBING Space=false E=false → 11.17:(0.0, -1.0)/MANTLING Space=false E=false → 11.55:(0.99722, 0.07452)/GROUNDED Space=false E=false → 11.62:(0.99722, 0.074519)/GROUNDED Space=false E=false → 11.63:(0.99722, 0.07452)/GROUNDED Space=false E=false → 12.05:(0.0, 0.0)/GROUNDED Space=false E=false → 12.07:(0.0, 0.0)/GROUNDED Space=true E=false
+#02 13.05s 返回/GROUNDED space_pressed pos=(3.585182, 3.002076, 0.072436) target=none landing=(2.736654, 0.04, 0.920965) 
+  前一秒輸入（變化點）：12.07:(0.0, 0.0)/GROUNDED Space=true E=false → 12.08:(0.0, 0.0)/JUMPING Space=false E=false → 12.67:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 13.03:(-1.0, 0.0)/GROUNDED Space=false E=false → 13.05:(-1.0, 0.0)/GROUNDED Space=true E=false
+#02 13.05s 返回/GROUNDED action_locked pos=(3.585182, 3.002076, 0.072436) target=none landing=(2.736654, 0.04, 0.920965) drop 行動=drop 鎖定落點=(2.736654, 0.04, 0.920965)
+  前一秒輸入（變化點）：12.07:(0.0, 0.0)/GROUNDED Space=true E=false → 12.08:(0.0, 0.0)/JUMPING Space=false E=false → 12.67:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 13.03:(-1.0, 0.0)/GROUNDED Space=false E=false → 13.05:(-1.0, 0.0)/GROUNDED Space=true E=false
+#02 13.05s 返回/JUMPING space_consumed pos=(3.585182, 3.002076, 0.072436) target=none landing=(2.736654, 0.04, 0.920965)  行動=drop 鎖定落點=(2.736654, 0.04, 0.920965)
+  前一秒輸入（變化點）：12.07:(0.0, 0.0)/GROUNDED Space=true E=false → 12.08:(0.0, 0.0)/JUMPING Space=false E=false → 12.67:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 13.03:(-1.0, 0.0)/GROUNDED Space=false E=false → 13.05:(-1.0, 0.0)/GROUNDED Space=true E=false
+#03 17.42s 跨間隙/GROUNDED space_pressed pos=(-0.858923, 3.002108, -1.949034) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949034) 
+  前一秒輸入（變化點）：16.42:(0.0, -1.0)/CLIMBING Space=false E=false → 16.52:(0.0, -1.0)/MANTLING Space=false E=false → 16.90:(0.997389, 0.072219)/GROUNDED Space=false E=false → 16.98:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.00:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.05:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.07:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false
+#03 17.42s 跨間隙/GROUNDED action_locked pos=(-0.858923, 3.002108, -1.949034) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949034) gap 行動=gap 鎖定落點=(3.65, 3.04, -1.949034)
+  前一秒輸入（變化點）：16.42:(0.0, -1.0)/CLIMBING Space=false E=false → 16.52:(0.0, -1.0)/MANTLING Space=false E=false → 16.90:(0.997389, 0.072219)/GROUNDED Space=false E=false → 16.98:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.00:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.05:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.07:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false
+#03 17.42s 跨間隙/JUMPING space_consumed pos=(-0.858923, 3.002108, -1.949034) target=none landing=(3.65, 3.04, -1.949034)  行動=gap 鎖定落點=(3.65, 3.04, -1.949034)
+  前一秒輸入（變化點）：16.42:(0.0, -1.0)/CLIMBING Space=false E=false → 16.52:(0.0, -1.0)/MANTLING Space=false E=false → 16.90:(0.997389, 0.072219)/GROUNDED Space=false E=false → 16.98:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.00:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.05:(0.997389, 0.072218)/GROUNDED Space=false E=false → 17.07:(0.997389, 0.072219)/GROUNDED Space=false E=false → 17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false
+#03 18.40s 返回/GROUNDED space_pressed pos=(3.585182, 3.002054, 0.067632) target=none landing=(2.736654, 0.04, 0.916161) 
+  前一秒輸入（變化點）：17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false → 17.43:(0.0, 0.0)/JUMPING Space=false E=false → 18.02:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 18.38:(-1.0, 0.0)/GROUNDED Space=false E=false → 18.40:(-1.0, 0.0)/GROUNDED Space=true E=false
+#03 18.40s 返回/GROUNDED action_locked pos=(3.585182, 3.002054, 0.067632) target=none landing=(2.736654, 0.04, 0.916161) drop 行動=drop 鎖定落點=(2.736654, 0.04, 0.916161)
+  前一秒輸入（變化點）：17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false → 17.43:(0.0, 0.0)/JUMPING Space=false E=false → 18.02:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 18.38:(-1.0, 0.0)/GROUNDED Space=false E=false → 18.40:(-1.0, 0.0)/GROUNDED Space=true E=false
+#03 18.40s 返回/JUMPING space_consumed pos=(3.585182, 3.002054, 0.067632) target=none landing=(2.736654, 0.04, 0.916161)  行動=drop 鎖定落點=(2.736654, 0.04, 0.916161)
+  前一秒輸入（變化點）：17.40:(0.0, 0.0)/GROUNDED Space=false E=false → 17.42:(0.0, 0.0)/GROUNDED Space=true E=false → 17.43:(0.0, 0.0)/JUMPING Space=false E=false → 18.02:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 18.38:(-1.0, 0.0)/GROUNDED Space=false E=false → 18.40:(-1.0, 0.0)/GROUNDED Space=true E=false
+#04 22.77s 跨間隙/GROUNDED space_pressed pos=(-0.858417, 3.002108, -1.949451) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949451) 
+  前一秒輸入（變化點）：21.77:(0.0, -1.0)/CLIMBING Space=false E=false → 21.87:(0.0, -1.0)/MANTLING Space=false E=false → 22.25:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.48:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.50:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.55:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.57:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.70:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.72:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.73:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false
+#04 22.77s 跨間隙/GROUNDED action_locked pos=(-0.858417, 3.002108, -1.949451) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949451) gap 行動=gap 鎖定落點=(3.65, 3.04, -1.949451)
+  前一秒輸入（變化點）：21.77:(0.0, -1.0)/CLIMBING Space=false E=false → 21.87:(0.0, -1.0)/MANTLING Space=false E=false → 22.25:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.48:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.50:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.55:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.57:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.70:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.72:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.73:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false
+#04 22.77s 跨間隙/JUMPING space_consumed pos=(-0.858417, 3.002108, -1.949451) target=none landing=(3.65, 3.04, -1.949451)  行動=gap 鎖定落點=(3.65, 3.04, -1.949451)
+  前一秒輸入（變化點）：21.77:(0.0, -1.0)/CLIMBING Space=false E=false → 21.87:(0.0, -1.0)/MANTLING Space=false E=false → 22.25:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.48:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.50:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.55:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.57:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.70:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.72:(0.997403, 0.072019)/GROUNDED Space=false E=false → 22.73:(0.997403, 0.072018)/GROUNDED Space=false E=false → 22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false
+#04 23.75s 返回/GROUNDED space_pressed pos=(3.585182, 3.002054, 0.067216) target=none landing=(2.736654, 0.04, 0.915744) 
+  前一秒輸入（變化點）：22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false → 22.78:(0.0, 0.0)/JUMPING Space=false E=false → 23.37:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 23.73:(-1.0, 0.0)/GROUNDED Space=false E=false → 23.75:(-1.0, 0.0)/GROUNDED Space=true E=false
+#04 23.75s 返回/GROUNDED action_locked pos=(3.585182, 3.002054, 0.067216) target=none landing=(2.736654, 0.04, 0.915744) drop 行動=drop 鎖定落點=(2.736654, 0.04, 0.915744)
+  前一秒輸入（變化點）：22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false → 22.78:(0.0, 0.0)/JUMPING Space=false E=false → 23.37:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 23.73:(-1.0, 0.0)/GROUNDED Space=false E=false → 23.75:(-1.0, 0.0)/GROUNDED Space=true E=false
+#04 23.75s 返回/JUMPING space_consumed pos=(3.585182, 3.002054, 0.067216) target=none landing=(2.736654, 0.04, 0.915744)  行動=drop 鎖定落點=(2.736654, 0.04, 0.915744)
+  前一秒輸入（變化點）：22.75:(0.0, 0.0)/GROUNDED Space=false E=false → 22.77:(0.0, 0.0)/GROUNDED Space=true E=false → 22.78:(0.0, 0.0)/JUMPING Space=false E=false → 23.37:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 23.73:(-1.0, 0.0)/GROUNDED Space=false E=false → 23.75:(-1.0, 0.0)/GROUNDED Space=true E=false
+#05 28.12s 跨間隙/GROUNDED space_pressed pos=(-0.858374, 3.002108, -1.949487) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949487) 
+  前一秒輸入（變化點）：27.12:(0.0, -1.0)/CLIMBING Space=false E=false → 27.22:(0.0, -1.0)/MANTLING Space=false E=false → 27.60:(0.997405, 0.072002)/GROUNDED Space=false E=false → 27.83:(0.997405, 0.072001)/GROUNDED Space=false E=false → 28.03:(0.997405, 0.072002)/GROUNDED Space=false E=false → 28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false
+#05 28.12s 跨間隙/GROUNDED action_locked pos=(-0.858374, 3.002108, -1.949487) target=/root/MovementLab/@Node3D@20 landing=(3.65, 3.04, -1.949487) gap 行動=gap 鎖定落點=(3.65, 3.04, -1.949487)
+  前一秒輸入（變化點）：27.12:(0.0, -1.0)/CLIMBING Space=false E=false → 27.22:(0.0, -1.0)/MANTLING Space=false E=false → 27.60:(0.997405, 0.072002)/GROUNDED Space=false E=false → 27.83:(0.997405, 0.072001)/GROUNDED Space=false E=false → 28.03:(0.997405, 0.072002)/GROUNDED Space=false E=false → 28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false
+#05 28.12s 跨間隙/JUMPING space_consumed pos=(-0.858374, 3.002108, -1.949487) target=none landing=(3.65, 3.04, -1.949487)  行動=gap 鎖定落點=(3.65, 3.04, -1.949487)
+  前一秒輸入（變化點）：27.12:(0.0, -1.0)/CLIMBING Space=false E=false → 27.22:(0.0, -1.0)/MANTLING Space=false E=false → 27.60:(0.997405, 0.072002)/GROUNDED Space=false E=false → 27.83:(0.997405, 0.072001)/GROUNDED Space=false E=false → 28.03:(0.997405, 0.072002)/GROUNDED Space=false E=false → 28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false
+#05 29.10s 返回/GROUNDED space_pressed pos=(3.585182, 3.002054, 0.06718) target=none landing=(2.736654, 0.04, 0.915708) 
+  前一秒輸入（變化點）：28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false → 28.13:(0.0, 0.0)/JUMPING Space=false E=false → 28.72:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 29.08:(-1.0, 0.0)/GROUNDED Space=false E=false → 29.10:(-1.0, 0.0)/GROUNDED Space=true E=false
+#05 29.10s 返回/GROUNDED action_locked pos=(3.585182, 3.002054, 0.06718) target=none landing=(2.736654, 0.04, 0.915708) drop 行動=drop 鎖定落點=(2.736654, 0.04, 0.915708)
+  前一秒輸入（變化點）：28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false → 28.13:(0.0, 0.0)/JUMPING Space=false E=false → 28.72:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 29.08:(-1.0, 0.0)/GROUNDED Space=false E=false → 29.10:(-1.0, 0.0)/GROUNDED Space=true E=false
+#05 29.10s 返回/JUMPING space_consumed pos=(3.585182, 3.002054, 0.06718) target=none landing=(2.736654, 0.04, 0.915708)  行動=drop 鎖定落點=(2.736654, 0.04, 0.915708)
+  前一秒輸入（變化點）：28.10:(0.0, 0.0)/GROUNDED Space=false E=false → 28.12:(0.0, 0.0)/GROUNDED Space=true E=false → 28.13:(0.0, 0.0)/JUMPING Space=false E=false → 28.72:(-0.707107, 0.707107)/GROUNDED Space=false E=false → 29.08:(-1.0, 0.0)/GROUNDED Space=false E=false → 29.10:(-1.0, 0.0)/GROUNDED Space=true E=false
+圈外 #00 14.85s 未開始/GROUNDED contact_separated pos=(-2.938821, 0.023844, 0.888492) target=none landing=(0.0, 0.0, 0.0) 微量接觸分離：(-2.938821, -0.002239, 0.888492) → (-2.938821, 0.023844, 0.888492)
+  前一秒輸入（變化點）：13.87:(-0.825632, -0.56421)/GROUNDED Space=false E=false → 14.50:(-0.825632, -0.564209)/GROUNDED Space=false E=false → 14.52:(-0.825632, -0.56421)/GROUNDED Space=false E=false → 14.60:(-0.825631, -0.56421)/GROUNDED Space=false E=false → 14.65:(0.707107, -0.707107)/GROUNDED Space=false E=false
+圈外 #00 20.20s 未開始/GROUNDED contact_separated pos=(-2.937955, 0.02384, 0.888278) target=none landing=(0.0, 0.0, 0.0) 微量接觸分離：(-2.937955, -0.00227, 0.888278) → (-2.937955, 0.02384, 0.888278)
+  前一秒輸入（變化點）：19.20:(-0.826088, -0.563542)/GROUNDED Space=false E=false → 19.98:(-0.826087, -0.563542)/GROUNDED Space=false E=false → 20.00:(0.707107, -0.707107)/GROUNDED Space=false E=false
+圈外 #00 25.55s 未開始/GROUNDED contact_separated pos=(-2.937881, 0.02384, 0.888259) target=none landing=(0.0, 0.0, 0.0) 微量接觸分離：(-2.937881, -0.002271, 0.888259) → (-2.937881, 0.02384, 0.888259)
+  前一秒輸入（變化點）：24.55:(-0.826127, -0.563484)/GROUNDED Space=false E=false → 25.35:(0.707107, -0.707107)/GROUNDED Space=false E=false
+完整診斷日誌：/Users/howard/Library/Application Support/Godot/app_userdata/Zoo Breakout/movement_diagnostics.jsonl

@@ -1,0 +1,442 @@
+員工可讀性統計｜來源：真實 InputMap 追捕→攀爬→牆下搜索→放棄（非手玩）
+追捕開始 2｜追捕到達 1｜搜索放棄 1｜搜索延長 1
+歇崗 0 次｜歇崗聽見 0 次（離散聲音事件）
+目前 RETURN｜awareness 0.0 → 0.0
+來源 無視覺接觸｜視覺倍率 ×0.00｜聽覺貢獻 +0.0
+原因 視錐外｜感知投影 (-3.0, 0.0, -0.15)
+搜索剩餘 0.0s｜同源冷卻 是｜記憶來源 視覺＋攀爬暴露
+本次全部追捕來源（保留至重置）
+3.40s 視覺｜最後感知投影 (-3.0, 0.0, 2.0)
+4.17s 視覺｜最後感知投影 (-3.0, 0.0, 2.0)
+事件（保留最近 200 筆）
+0.98s state｜視覺
+  {"cause":"視覺","from":"WORK","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"SUSPICIOUS"}
+2.15s state｜確認最後感知位置
+  {"cause":"確認最後感知位置","from":"SUSPICIOUS","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"INVESTIGATE"}
+3.08s state｜搜索最後感知位置
+  {"cause":"搜索最後感知位置","from":"INVESTIGATE","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"SEARCH"}
+3.08s search_started｜視覺
+  {"deadline":11.0833333333333,"memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0}}
+3.40s state｜視覺
+  {"cause":"視覺","from":"SEARCH","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"CHASE"}
+3.40s chase_started｜視覺
+  {"cause":"視覺","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0}}
+3.40s arrival｜視覺
+  {"memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0}}
+3.40s state｜搜索最後感知位置
+  {"cause":"搜索最後感知位置","from":"CHASE","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"SEARCH"}
+3.40s search_started｜視覺
+  {"deadline":11.4,"memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0}}
+4.17s state｜視覺
+  {"cause":"視覺","from":"SEARCH","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0},"to":"CHASE"}
+4.17s chase_started｜視覺
+  {"cause":"視覺","memory":{"actual":"(-3.0, 0.003333, 2.0)","approach":"(-3.0, 0.0, 2.0)","climbing":false,"key":"","projection":"(-3.0, 0.0, 2.0)","reachable":true,"source":"視覺","speed":0.0}}
+4.37s unreachable｜
+  {"target":"(-3.0, 0.0, 0.9)"}
+4.62s state｜搜索最後感知位置
+  {"cause":"搜索最後感知位置","from":"CHASE","memory":{"actual":"(-3.0, 0.173333, 0.9)","approach":"(-3.0, 0.0, 1.7)","climbing":true,"key":"Building","projection":"(-3.0, 0.0, 0.9)","reachable":false,"source":"視覺＋攀爬暴露","speed":0.0},"to":"SEARCH"}
+4.62s search_started｜視覺＋攀爬暴露
+  {"deadline":12.6166666666667,"memory":{"actual":"(-3.0, 0.173333, 0.9)","approach":"(-3.0, 0.0, 1.7)","climbing":true,"key":"Building","projection":"(-3.0, 0.0, 0.9)","reachable":false,"source":"視覺＋攀爬暴露","speed":0.0}}
+4.98s heard｜climb
+  {"during_rest":false,"kind":"climb","position":"(-3.0, 0.94, 0.9)","time":4.98333333333332}
+4.98s search_extended｜
+  {"deadline":20.6166666666667,"source":"聽覺：climb"}
+5.45s heard｜climb
+  {"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999}
+5.92s heard｜climb
+  {"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665}
+20.62s search_abandoned｜視覺＋攀爬暴露
+  {"memory":{"actual":"(-3.0, 0.173333, 0.9)","approach":"(-3.0, 0.0, 1.7)","climbing":true,"key":"Building","projection":"(-3.0, 0.0, 0.9)","reachable":false,"source":"視覺＋攀爬暴露","speed":0.0}}
+20.62s state｜搜索到時放棄
+  {"cause":"搜索到時放棄","from":"SEARCH","memory":{"actual":"(-3.0, 1.34, 0.9)","approach":"(-3.0, 0.0, 1.7)","climbing":true,"key":"Building","projection":"(-3.0, 0.0, 0.9)","reachable":false,"source":"視覺＋攀爬暴露","speed":0.0},"to":"RETURN"}
+awareness 時間線（取樣 0.10s；保留最近 1800 筆）
+0.02s WORK｜0.0→0.4｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.033889, 2.0)","awareness":0.373333333333333,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.13s WORK｜2.6→3.0｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":2.98666666666667,"before":2.61333333333333,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.25s WORK｜5.2→5.6｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":5.6,"before":5.22666666666666,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.35s WORK｜7.5→7.8｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":7.84,"before":7.46666666666666,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.45s WORK｜9.7→10.1｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":10.08,"before":9.70666666666666,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.55s WORK｜11.9→12.3｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":12.32,"before":11.9466666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.65s WORK｜14.2→14.6｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":14.56,"before":14.1866666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.75s WORK｜16.4→16.8｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":16.8,"before":16.4266666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.85s WORK｜18.7→19.0｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":19.04,"before":18.6666666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+0.95s WORK｜20.9→21.3｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":21.28,"before":20.9066666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"WORK","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.07s SUSPICIOUS｜23.5→23.9｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":23.8933333333334,"before":23.52,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.18s SUSPICIOUS｜26.1→26.5｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":26.5066666666667,"before":26.1333333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.30s SUSPICIOUS｜28.7→29.1｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":29.12,"before":28.7466666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.42s SUSPICIOUS｜31.4→31.7｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":31.7333333333334,"before":31.3600000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.53s SUSPICIOUS｜34.0→34.3｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":34.3466666666667,"before":33.9733333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.65s SUSPICIOUS｜36.6→37.0｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":36.9600000000001,"before":36.5866666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.77s SUSPICIOUS｜39.2→39.6｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":39.5733333333334,"before":39.2000000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+1.88s SUSPICIOUS｜41.8→42.2｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":42.1866666666668,"before":41.8133333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+2.00s SUSPICIOUS｜44.4→44.8｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":44.8000000000001,"before":44.4266666666668,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+2.12s SUSPICIOUS｜47.0→47.4｜視覺倍率 ×0.53／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":47.4133333333334,"before":47.0400000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"SUSPICIOUS","visibility_mult":0.533333333333333,"visual":"視覺"}
+2.23s INVESTIGATE｜49.7→50.1｜視覺倍率 ×0.55／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":50.0538888629279,"before":49.6696666510901,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.548888874053955,"visual":"視覺"}
+2.35s INVESTIGATE｜52.4→52.8｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":52.8188887461028,"before":52.4163887461028,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+2.47s INVESTIGATE｜55.2→55.6｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":55.6363887461028,"before":55.2338887461028,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+2.58s INVESTIGATE｜58.1→58.5｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":58.4538887461028,"before":58.0513887461028,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+2.70s INVESTIGATE｜60.9→61.3｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":61.2713887461028,"before":60.8688887461028,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+2.82s INVESTIGATE｜63.7→64.1｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":64.0888887461029,"before":63.6863887461029,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+2.93s INVESTIGATE｜66.5→66.9｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":66.9063887461029,"before":66.5038887461029,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+3.05s INVESTIGATE｜69.3→69.7｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":69.7238887461029,"before":69.3213887461029,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":0.0,"state":"INVESTIGATE","visibility_mult":0.575,"visual":"視覺"}
+3.17s SEARCH｜72.1→72.5｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":72.5413887461029,"before":72.1388887461029,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.91666666666667,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.28s SEARCH｜75.0→75.4｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":75.358888746103,"before":74.956388746103,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.8,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.40s SEARCH｜77.8→78.2｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":78.176388746103,"before":77.773888746103,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":8.0,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.52s SEARCH｜80.6→81.0｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":80.993888746103,"before":80.591388746103,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.88333333333333,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.63s SEARCH｜83.4→83.8｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":83.811388746103,"before":83.408888746103,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.76666666666667,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.75s SEARCH｜86.2→86.6｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":86.6288887461031,"before":86.2263887461031,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.65,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.87s SEARCH｜89.0→89.4｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":89.4463887461031,"before":89.0438887461031,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.53333333333333,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+3.98s SEARCH｜91.9→92.3｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":92.2638887461031,"before":91.8613887461031,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.41666666666667,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+4.08s SEARCH｜94.3→94.7｜視覺倍率 ×0.57／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.003333, 2.0)","awareness":94.6788887461031,"before":94.2763887461031,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 2.0)","reason":"可見","search_remaining":7.31666666666667,"state":"SEARCH","visibility_mult":0.575,"visual":"視覺"}
+4.18s CHASE｜96.7→97.5｜視覺倍率 ×1.15／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.002336, 1.908333)","awareness":97.4963887461032,"before":96.6913887461031,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 1.908333)","reason":"可見","search_remaining":0.0,"state":"CHASE","visibility_mult":1.15,"visual":"視覺"}
+4.28s CHASE｜100.0→100.0｜視覺倍率 ×1.15／聽覺貢獻 +0.0｜視覺｜可見
+  {"actual":"(-3.0, 0.002015, 1.358333)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺","projection":"(-3.0, 0.0, 1.358333)","reason":"可見","search_remaining":0.0,"state":"CHASE","visibility_mult":1.15,"visual":"視覺"}
+4.38s CHASE｜100.0→100.0｜視覺倍率 ×1.72／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.002882, 0.834272)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":0.0,"state":"CHASE","visibility_mult":1.725,"visual":"視覺＋攀爬暴露"}
+4.48s CHASE｜100.0→100.0｜視覺倍率 ×1.29／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.028256, 0.879203)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":0.0,"state":"CHASE","visibility_mult":1.29375,"visual":"視覺＋攀爬暴露"}
+4.58s CHASE｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.106667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":0.0,"state":"CHASE","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+4.68s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.306667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":7.93333333333333,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+4.78s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.506667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":7.83333333333333,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+4.88s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.706667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":7.73333333333334,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+4.98s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 0.906667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":7.63333333333334,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+5.08s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 1.106667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 0.94, 0.9)","time":4.98333333333332},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":15.5333333333333,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+5.18s SEARCH｜100.0→100.0｜視覺倍率 ×0.86／聽覺貢獻 +0.0｜視覺＋攀爬暴露｜可見
+  {"actual":"(-3.0, 1.306667, 0.9)","awareness":100.0,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 0.94, 0.9)","time":4.98333333333332},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"可見","search_remaining":15.4333333333333,"state":"SEARCH","visibility_mult":0.8625,"visual":"視覺＋攀爬暴露"}
+5.28s SEARCH｜98.7→98.3｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 1.506667, 0.9)","awareness":98.3333333333334,"before":98.6666666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 0.94, 0.9)","time":4.98333333333332},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":15.3333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.38s SEARCH｜96.7→96.3｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 1.706666, 0.9)","awareness":96.3333333333334,"before":96.6666666666667,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 0.94, 0.9)","time":4.98333333333332},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":15.2333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.48s SEARCH｜100.0→99.7｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 1.906666, 0.9)","awareness":99.6666666666667,"before":100.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":15.1333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.58s SEARCH｜98.0→97.7｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 2.106666, 0.9)","awareness":97.6666666666667,"before":98.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":15.0333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.68s SEARCH｜96.0→95.7｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 2.306666, 0.9)","awareness":95.6666666666667,"before":96.0000000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":14.9333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.78s SEARCH｜94.0→93.7｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 2.506666, 0.9)","awareness":93.6666666666668,"before":94.0000000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":14.8333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.88s SEARCH｜92.0→91.7｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 2.706666, 0.9)","awareness":91.6666666666668,"before":92.0000000000001,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 1.873333, 0.9)","time":5.44999999999999},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":14.7333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+5.98s SEARCH｜99.3→99.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 2.906665, 0.9)","awareness":99.0,"before":99.3333333333333,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.9)","reason":"視錐外","search_remaining":14.6333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.08s SEARCH｜97.3→97.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.065899, 0.761842)","awareness":97.0,"before":97.3333333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.761842)","reason":"視錐外","search_remaining":14.5333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.18s SEARCH｜95.3→95.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.134505, 0.485526)","awareness":95.0000000000001,"before":95.3333333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.485526)","reason":"視錐外","search_remaining":14.4333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.28s SEARCH｜93.3→93.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.136629, 0.209211)","awareness":93.0000000000001,"before":93.3333333333334,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, 0.209211)","reason":"視錐外","search_remaining":14.3333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.38s SEARCH｜91.3→91.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.072271, -0.067105)","awareness":91.0000000000001,"before":91.3333333333335,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.067105)","reason":"視錐外","search_remaining":14.2333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.48s SEARCH｜89.3→89.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":89.0000000000002,"before":89.3333333333335,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":14.1333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.58s SEARCH｜87.3→87.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":87.0000000000002,"before":87.3333333333335,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":14.0333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.68s SEARCH｜85.3→85.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":85.0000000000002,"before":85.3333333333335,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.9333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.78s SEARCH｜83.3→83.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":83.0000000000002,"before":83.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.8333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.88s SEARCH｜81.3→81.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":81.0000000000003,"before":81.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.7333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+6.98s SEARCH｜79.3→79.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":79.0000000000003,"before":79.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.6333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.08s SEARCH｜77.3→77.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":77.0000000000003,"before":77.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.5333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.18s SEARCH｜75.3→75.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":75.0000000000004,"before":75.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.4333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.28s SEARCH｜73.3→73.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":73.0000000000004,"before":73.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.3333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.38s SEARCH｜71.3→71.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":71.0000000000004,"before":71.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.2333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.48s SEARCH｜69.3→69.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":69.0000000000004,"before":69.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.1333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.58s SEARCH｜67.3→67.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":67.0000000000005,"before":67.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":13.0333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.68s SEARCH｜65.3→65.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":65.0000000000005,"before":65.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.9333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.78s SEARCH｜63.3→63.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":63.0000000000005,"before":63.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.8333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.88s SEARCH｜61.3→61.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":61.0000000000005,"before":61.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.7333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+7.98s SEARCH｜59.3→59.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":59.0000000000005,"before":59.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.6333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.08s SEARCH｜57.3→57.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":57.0000000000005,"before":57.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.5333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.18s SEARCH｜55.3→55.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":55.0000000000004,"before":55.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.4333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.28s SEARCH｜53.3→53.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":53.0000000000004,"before":53.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.3333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.38s SEARCH｜51.3→51.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":51.0000000000004,"before":51.3333333333338,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.2333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.48s SEARCH｜49.3→49.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":49.0000000000004,"before":49.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.1333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.58s SEARCH｜47.3→47.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":47.0000000000004,"before":47.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":12.0333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.68s SEARCH｜45.3→45.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":45.0000000000004,"before":45.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.9333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.78s SEARCH｜43.3→43.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":43.0000000000004,"before":43.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.8333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.88s SEARCH｜41.3→41.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":41.0000000000003,"before":41.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.7333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+8.98s SEARCH｜39.3→39.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":39.0000000000003,"before":39.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.6333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.08s SEARCH｜37.3→37.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":37.0000000000003,"before":37.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.5333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.18s SEARCH｜35.3→35.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":35.0000000000003,"before":35.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.4333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.28s SEARCH｜33.3→33.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":33.0000000000003,"before":33.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.3333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.38s SEARCH｜31.3→31.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":31.0000000000003,"before":31.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.2333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.48s SEARCH｜29.3→29.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":29.0000000000003,"before":29.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.1333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.58s SEARCH｜27.3→27.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":27.0000000000003,"before":27.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":11.0333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.68s SEARCH｜25.3→25.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":25.0000000000003,"before":25.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.9333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.78s SEARCH｜23.3→23.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":23.0000000000003,"before":23.3333333333336,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.8333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.88s SEARCH｜21.3→21.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":21.0000000000003,"before":21.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.7333333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+9.98s SEARCH｜19.3→19.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":19.0000000000003,"before":19.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.6333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.08s SEARCH｜17.3→17.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":17.0000000000003,"before":17.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.5333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.18s SEARCH｜15.3→15.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":15.0000000000003,"before":15.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.4333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.28s SEARCH｜13.3→13.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":13.0000000000003,"before":13.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.3333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.38s SEARCH｜11.3→11.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":11.0000000000003,"before":11.3333333333337,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.2333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.48s SEARCH｜9.3→9.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":9.00000000000033,"before":9.33333333333366,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.1333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.58s SEARCH｜7.3→7.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":7.00000000000033,"before":7.33333333333366,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":10.0333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.68s SEARCH｜5.3→5.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":5.00000000000033,"before":5.33333333333366,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.93333333333321,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.78s SEARCH｜3.3→3.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":3.00000000000033,"before":3.33333333333366,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.83333333333321,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.88s SEARCH｜1.3→1.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":1.00000000000033,"before":1.33333333333366,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.7333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+10.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.6333333333332,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.53333333333319,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.43333333333319,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.28s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.33333333333318,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.23333333333318,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":9.13333333333317,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.58s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":9.03333333333317,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.93333333333316,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.83333333333316,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.88s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.73333333333315,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+11.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.63333333333315,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.53333333333314,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.43333333333314,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.28s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.33333333333313,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.23333333333313,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.13333333333312,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.58s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":8.03333333333312,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":7.93333333333311,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.83333333333311,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.88s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.7333333333331,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+12.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.6333333333331,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.53333333333309,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.43333333333309,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.28s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.33333333333308,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.23333333333308,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.13333333333307,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.58s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":7.03333333333307,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.93333333333306,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.83333333333306,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.88s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.73333333333305,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+13.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.63333333333305,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.53333333333304,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.43333333333304,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.28s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.33333333333303,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.23333333333303,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.13333333333302,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.58s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":6.03333333333302,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.93333333333301,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.83333333333301,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.88s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.733333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+14.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.633333333333,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.53333333333299,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.43333333333299,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.28s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.33333333333298,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.23333333333298,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.13333333333297,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.58s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":5.03333333333297,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.93333333333296,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.83333333333296,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.88s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.73333333333295,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+15.98s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.63333333333295,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.10s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.51666666666629,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.22s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.39999999999963,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.33s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.28333333333297,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.45s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.16666666666631,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.57s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":4.04999999999965,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.68s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.93333333333299,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.80s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.81666666666633,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+16.92s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.69999999999967,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.03s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.58333333333301,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.15s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.46666666666635,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.27s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.34999999999969,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.38s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.23333333333303,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.50s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":3.11666666666637,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.62s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.99999999999971,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.73s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.88333333333305,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.85s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.76666666666639,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+17.97s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.64999999999973,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.08s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.53333333333307,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.20s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.41666666666641,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.32s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.29999999999975,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.43s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.18333333333309,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.55s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":2.06666666666643,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.67s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":1.94999999999977,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.78s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":1.83333333333311,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+18.90s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":1.71666666666645,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.02s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":1.59999999999979,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.13s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":1.48333333333313,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.25s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":1.36666666666647,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.37s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":1.24999999999981,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.48s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":1.13333333333315,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.60s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":1.01666666666649,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.72s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":0.899999999999828,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.83s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":0.783333333333168,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+19.95s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":0.666666666666508,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+20.07s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":0.549999999999848,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+20.18s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜被建築遮擋
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"被建築遮擋","search_remaining":0.433333333333188,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+20.30s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":0.316666666666528,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+20.42s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":0.199999999999868,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}
+20.53s SEARCH｜0.0→0.0｜視覺倍率 ×0.00／聽覺貢獻 +0.0｜無視覺接觸｜視錐外
+  {"actual":"(-3.0, 3.000295, -0.15)","awareness":0.0,"before":0.0,"cooling":false,"hearing_spike":0.0,"last_noise":{"during_rest":false,"kind":"climb","position":"(-3.0, 2.806665, 0.9)","time":5.91666666666665},"memory_source":"視覺＋攀爬暴露","projection":"(-3.0, 0.0, -0.15)","reason":"視錐外","search_remaining":0.0833333333332078,"state":"SEARCH","visibility_mult":0.0,"visual":"無視覺接觸"}

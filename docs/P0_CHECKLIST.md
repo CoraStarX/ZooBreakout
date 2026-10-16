@@ -1,5 +1,7 @@
 # Zoo Breakout — P0 清单
 
+> 適用範圍：舊雙動物關卡的設計／實作／回歸資料；保留作歷史參考，不自動授權恢復未完成工作。現行擬態階段見 [P2_CHECKLIST.md](P2_CHECKLIST.md)。
+
 > **P0 Done (2026-10-01)** — QA 门闩回归全绿后正式结项。后续见 [P1_CHECKLIST.md](P1_CHECKLIST.md)。
 
 ## 验证题

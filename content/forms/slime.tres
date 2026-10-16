@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FormDef" load_steps=3 format=3]
+[ext_resource type="Script" path="res://gameplay/forms/form_def.gd" id="1"]
+[ext_resource type="Resource" path="res://content/traversal/traversal_params.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"slime"
+display_name = "本體"
+abilities = Array[int]([7,5])
+body_size = Vector3(0.3,0.3,0.3)
+move_speed = 4.0
+footstep_noise = 0.0
+visibility_mult = 0.6
+movement_profile = ExtResource("2")
+body_color = Color(0.65,0.42,0.85,1)

@@ -1,30 +1,38 @@
 # Zoo Breakout
 
-动物园集体出逃（Godot 4.7 · HD2D 斜俯视）。
+Godot 4.7 · GDScript 靜態型別 · 3D 灰盒 · 45° 正交。
 
-## 文档
+目前方向為單角色擬態。移動、獨立員工可讀性、變形 A 三項白盒基線已結項；下一步準備量產管線驗證，範圍尚待確定。舊雙動物關卡保留作歷史玩法與回歸基準。
 
-- [设计](docs/DESIGN.md) · [架构](docs/ARCHITECTURE.md) · [技术](docs/TECH.md) · [P0](docs/P0_CHECKLIST.md) · [P1](docs/P1_CHECKLIST.md) · [P2](docs/P2_CHECKLIST.md)
+## 開啟專案
 
-## 运行
+以 Godot 4.7 開啟根目錄 `project.godot`。選擇下列場景，再執行目前場景（F6；Mac 可能需 Fn+F6）：
 
-Godot **4.7** 打开仓库根目录 → F5。开局固定浣熊（猴关在笼里，开锁救出）。
+| 入口 | 用途 | 操作 |
+|---|---|---|
+| `scenes/traversal/movement_lab.tscn` | 已驗收猴移動 | WASD、Space 跳躍／放手、F3 統計 |
+| `scenes/traversal/staff_readability_lab.tscn` | 已驗收獨立員工基線 | 同上；F3 感知摘要／完整診斷 |
+| `scenes/forms/form_lab.tscn` | 已驗收變形 A | WASD、Q 本體／猴切換、Space 猴移動、F3 |
+| `scenes/boot/start_select.tscn` | 舊雙動物關卡 | F5 預設仍進此入口；見[舊關卡操作](docs/LEGACY_PLAY_GUIDE.md) |
 
-| 输入 | 作用 |
-|------|------|
-| WASD / 左摇杆 | 相对相机移动 |
-| E / 手柄 A | 交互（黄柱标签 / 办公室金柜）；施工点前 HUD 先预览 Soft/强行、扣料与会留下的痕迹 |
-| X / 手柄 X | 放下物品；在施工点旁＝存料（HUD 先提示存入/丢下） |
-| G / 手柄 B | 叫嚷引开职员（冷却 6 秒，全队每天 4 次，用尽「嗓子哑了」） |
-| T / 上十字键 | 投掷石子（需「投掷」才能＝猴；落点发声，冷却 8 秒） |
-| Tab / 手柄 Y | 换控 |
-| F·H / LB·RB | 跟随 / 待命 |
-| V / 下十字键 | 放标记，队友前往 |
-| Esc / 手柄 Start | 暂停菜单（操作说明、引导开关、音量、回标题） |
-| F3 | 开发者调试面板（默认隐藏） |
-| N | **【Debug 默认关】** 推进时段（原 T，已改给投掷） |
-| R | **【Debug 默认关】** 跳过笼门解救（正式路径：打开同伴笼门） |
+根目錄 `movement_lab.tscn`、`staff_readability_lab.tscn` 保留為舊入口相容場景；新工作統一使用 `scenes/` 入口。`prototypes/` 是驗證場景與測試，不是遊戲入口。
 
-本局节奏：**白天**搜集原料——木料/绳索/金属（蓝点，金属稀缺，可冒险去职员工具间或趁职员停步从背后偷工具车）、捡施工套件（全图 1 个，挖洞/攀爬通用）、侦察职员（紫点）；**夜里**到西/南外墙分 3 档施工（挖洞每档 木料+金属，攀爬每档 绳索+金属，或套件顶 2 档），打通出园线后全队进出口。第 **5** 天封园检修为期限（`DayCycleParams`；Open 时长见同资源）。可选：打开同伴笼门解救、办公室夺回被没收的物资（背包与地上被收走的东西都在那里）。
+## 文件入口
 
-被抓：物品进办公室金柜；送回笼内短押 15 秒（笼里可搜集零件，同伴可撬门营救），笼门当天加固；警戒升高会拉长 **Night-Patrol**。
+- [現行階段與範圍](docs/P2_CHECKLIST.md) · [技術現況](docs/TECH.md) · [當前 QA](docs/qa_reports/latest_report.md)
+- [設計決策](docs/DESIGN.md) · [架構與門禁](docs/ARCHITECTURE.md) · [開發紀律](AGENTS.md)
+- [移動規格](docs/MOVEMENT_SLICE.md) · [員工規格](docs/STAFF_READABILITY.md) · [變形規格](docs/FORMS_SLICE.md)
+- [整理紀錄與下一階段前置](docs/PROJECT_BASELINE.md)
+
+## 驗證
+
+```bash
+# 首次開啟／新增 class_name 後刷新快取
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
+# 全部 31 套件
+tools/run_tests.sh
+# 三項白盒專項
+tools/run_tests.sh p2_traversal p2_staff_readability p2_forms
+```
+
+退出碼非 0 或輸出含 FAIL／FINDING／SCRIPT ERROR／ERROR: 即失敗。舊 `p2_full_loop` 的 `pending=1` 是既有 Soft 通關天數待決，不能視為全項驗收完成。視覺／手感變更另做非 headless 檢查。

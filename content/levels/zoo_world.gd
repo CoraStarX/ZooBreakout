@@ -129,18 +129,45 @@ func get_staff() -> StaffActor:
 	return staff
 
 
+## 唯讀呈現快照；支付及才能判定沿用交互點原有函式。
+func guidance_snapshot() -> Dictionary:
+	var me := controlled_animal()
+	var routes: Array[Dictionary] = []
+	for site: Interactable in [_geometry.dig_interactable, _geometry.climb_interactable]:
+		if site == null:
+			continue
+		var can_work := false
+		var soft_ready := false
+		var deposit_useful := false
+		for actor: AnimalActor in party.party():
+			if actor.is_confined:
+				continue
+			var soft := site._qualifies(actor, true)
+			var paid := site._tier_pay != &"" or site._kit_credit > 0
+			if soft and (paid or site._plan_payment(actor) != &""):
+				soft_ready = true
+			if (soft and (paid or site._plan_payment(actor) != &"")) or (not soft and site._hard_allowed_now()):
+				can_work = true
+			if actor == me and not paid and soft:
+				for item in actor.inventory:
+					if site.accepts_stash(item):
+						deposit_useful = true
+		routes.append({
+			"id": str(site.breach_style), "name": site.display_name, "ready": site._done,
+			"progress": (float(site.tier_done) + site.tier_progress) / float(site.tiers),
+			"invested": site.tier_done > 0 or site.tier_progress > 0.0 or not site.stash.is_empty() or site._tier_pay != &"" or site._kit_credit > 0,
+			"can_work": can_work, "soft_ready": soft_ready, "deposit_useful": deposit_useful,
+		})
+	return {
+		"finished": session.is_finished(), "outcome_reason": session.outcome_reason,
+		"detained": me != null and me.is_confined, "full_search": Alert.is_full_search(),
+		"pending_rescue": not party.pending_rescue_ids().is_empty(),
+		"night": Clock.allows_escape_actions(), "routes": routes,
+	}
+
+
 func current_objective() -> String:
-	if session == null:
-		return ""
-	var me := party.controlled() if party else null
-	if me and me.is_confined and not session.is_finished():
-		return "短押中（%.0fs）：笼内可搜集原料；或 Tab 换控让同伴来撬门" % CaptureFlow.detention_left(me)
-	if me and not session.is_finished() and session.exhibit_escaped and not Clock.allows_escape_actions():
-		return "%s｜背包：木%d 绳%d 金属%d%s" % [
-			session.current_objective(), me.item_count(KitIds.WOOD), me.item_count(KitIds.ROPE), me.item_count(KitIds.METAL),
-			"、施工套件" if me.has_item(KitIds.ROUTE) else "",
-		]
-	return session.current_objective()
+	return String(GuidanceModel.derive(guidance_snapshot(), "", load("res://content/ui/guidance_params.tres")).title)
 
 
 func _on_intel_gained(id: StringName) -> void:

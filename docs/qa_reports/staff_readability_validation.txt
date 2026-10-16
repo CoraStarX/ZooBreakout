@@ -1,0 +1,122 @@
+員工可讀性 B 驗證摘要｜2026-10-15
+來源：自動化，非使用者手玩。
+
+
+✓ p0_regression              === REGRESSION SUMMARY pass=20 fail=0 ===
+✓ p0_walkthrough             === 跟班摘要 OK=14 FINDINGS=0 ===
+✓ p0_enclosure_check         
+✓ p0_climb_fly_repro         
+✓ p1_win_routes              === P1 WIN SUMMARY pass=6 fail=0 ===
+✓ p2_outer_walls             === P2 OUTER SUMMARY pass=6 fail=0 ===
+✓ p2_run_reset               === P2 RESET SUMMARY pass=8 fail=0 ===
+✓ p2_day_cycle               === P2 DAY SUMMARY pass=12 fail=0 ===
+✓ p2_gather                  === P2 GATHER SUMMARY pass=35 fail=0 ===
+✓ p2_capture                 === P2 CAPTURE SUMMARY pass=16 fail=0 ===
+✓ p2_intel                   === P2 INTEL SUMMARY pass=17 fail=0 ===
+✓ p2_route_work              === P2 ROUTE WORK SUMMARY pass=30 fail=0 ===
+✓ p2_cart                    === P2 CART SUMMARY pass=15 fail=0 ===
+✓ p2_hygiene                 === P2 HYGIENE SUMMARY pass=5 fail=0 ===
+✓ p2_ui                      === P2 UI SUMMARY pass=15 fail=0 ===
+✓ p2_full_loop               === P2 FULL LOOP SUMMARY pass=21 fail=0 pending=1 ===
+✓ p2_staff_awareness         === P2 STAFF AWARENESS SUMMARY pass=12 fail=0 ===
+✓ p2_staff_patrol            === P2 STAFF PATROL SUMMARY pass=12 fail=0 ===
+✓ p2_follow_trail            === P2 FOLLOW TRAIL SUMMARY pass=11 fail=0 ===
+✓ p2_action_cost             === P2 ACTION COST SUMMARY pass=38 fail=0 ===
+✓ p2_rescue_rendezvous       === P2 RESCUE RENDEZVOUS SUMMARY pass=17 fail=0 ===
+✓ p2_route_clear             === P2 ROUTE CLEAR SUMMARY pass=45 fail=0 ===
+✓ p2_stash                   === P2 STASH SUMMARY pass=29 fail=0 ===
+✓ p2_alert_tiers             === P2 ALERT TIERS SUMMARY pass=55 fail=0 ===
+✓ p2_noise_tools             === P2 NOISE TOOLS SUMMARY pass=28 fail=0 ===
+✓ p2_confiscate              === P2 CONFISCATE SUMMARY pass=18 fail=0 ===
+✓ p2_exposure                === P2 EXPOSURE SUMMARY pass=19 fail=0 ===
+✓ p2_guidance                === P2 GUIDANCE SUMMARY pass=48 fail=0 ===
+✓ p2_traversal               === P2 TRAVERSAL SUMMARY pass=149 fail=0 ===
+✓ p2_staff_readability       === P2 STAFF READABILITY SUMMARY pass=57 fail=0 ===
+
+ALL GREEN (30 suites) — logs: /var/folders/cz/pfk9vvyj6s1grb_gk5wckh500000gn/T//zoo_breakout_tests
+
+
+原生專項
+PASS 沙盒 AI 資源獨立，調參不改正式員工
+PASS 屋頂近側內緣 0.49 格可見
+PASS 屋頂內緣超過 0.5 格遮擋
+PASS 不可穿過建築看另一側
+PASS 攀爬投影牆外落點可見
+PASS 貼牆暴露倍率 1.5
+PASS 空中建築外投影按一般地面判定
+PASS 195 個取樣位置的顯示三角網格與判定一致
+PASS 預警參數不低於 0.5 秒
+PASS 歇崗仍可聽到高處聲音
+PASS 歇崗聽距縮小
+PASS 歇崗聽覺資料誤設零仍保留最低聽距
+PASS 搜索延長一次且最多兩倍
+PASS 追捕來源不被聲音事件淘汰，始終可複製追溯
+PASS 沙盒只有一名員工
+PASS 歇崗關閉視覺且顯示休息圖示
+PASS 歇崗聽見事件一次並中斷休息去調查
+PASS 每圈都安排一次歇崗：1
+PASS 每圈都安排一次歇崗：2
+PASS 每圈都安排一次歇崗：3
+PASS 調查期間保留待歇崗，不強制中斷
+PASS 故障注入的快累積參數不污染沙盒原始 Resource
+PASS 高累積速度仍先顯示起疑預警
+PASS 預警未達 0.5 秒不能追捕
+PASS 實際追捕事件距預警至少 0.5 秒
+PASS 遠處丟失高處目標，先到牆下而非提早開始八秒計時
+PASS 抵達牆下後才獲得完整八秒搜索
+PASS 已追捕後高處目標到牆下開始八秒搜索
+PASS 高處噪音只延長一次，反覆噪音不超過十六秒
+PASS 到時放棄搜索並進入同源冷卻
+PASS 五秒冷卻內同源視覺／噪音不無限重追
+PASS 同源冷卻五秒後解除
+PASS 看不見的玩家位置不能更新最後已知記憶
+PASS 追捕到達計數並觸發畫面／短音回饋
+PASS 三秒冷卻內反覆接觸不重複計數
+PASS 到達冷卻結束可記錄下一次
+PASS F3 時間線含視覺倍率與聽覺貢獻
+PASS F3 合併員工與凍結移動統計
+PASS 複製統計輸出合併純文字
+PASS 員工地面路徑不能走上斜坡
+PASS 牆下路徑沿既有地面點網繞行
+PASS 真實物理巡邏兩圈各歇崗一次，員工全程地面
+PASS 屋頂深處玩家不因正式巡邏被隔牆發現
+PASS 真實輸入流程使用原始累積速度，參數實例獨立
+REAL_INPUT_PARAMS accumulate_per_sec=42.0
+PASS 正常視覺累積觸發追捕，未人工設定警覺度
+PASS 真實輸入：被追捕後自動附牆
+PASS 真實輸入：追捕中爬上屋頂，不摔落
+PASS 員工到牆下改為搜索
+PASS 高處搜索到時放棄，不永遠追逐
+PASS 完整追捕中員工留地面，玩家留屋頂
+PASS 真實角色屋頂內緣可見
+PASS 地面貼牆玩家仍按地面追捕，不因員工碰撞半徑誤判高處
+PASS 同一攀爬面從剛附著到高處維持同源冷卻識別
+PASS 真實攀爬來源記錄在時間線
+PASS 真實空中跨間隙投影按一般視覺，不誤套攀爬
+PASS 員工在牆後也參與淡出，碰撞未改
+PASS F3 重置同步清除員工統計
+=== P2 STAFF READABILITY SUMMARY pass=57 fail=0 ===
+
+凍結檔案比對
+UNCHANGED gameplay/traversal/traversal_actor.gd
+UNCHANGED gameplay/traversal/traversal_math.gd
+UNCHANGED content/traversal/traversal_params.gd
+UNCHANGED content/traversal/traversal_params.tres
+UNCHANGED content/traversal/movement_lab_data.tres
+UNCHANGED core/camera/follow_camera.gd
+
+F3 實際輸入流程摘要
+員工可讀性統計｜來源：真實 InputMap 追捕→攀爬→牆下搜索→放棄（非手玩）
+追捕開始 2｜追捕到達 1｜搜索放棄 1｜搜索延長 1
+歇崗 0 次｜歇崗聽見 0 次（離散聲音事件）
+目前 RETURN｜awareness 0.0 → 0.0
+來源 無視覺接觸｜視覺倍率 ×0.00｜聽覺貢獻 +0.0
+原因 視錐外｜感知投影 (-3.0, 0.0, -0.15)
+搜索剩餘 0.0s｜同源冷卻 是｜記憶來源 視覺＋攀爬暴露
+本次全部追捕來源（保留至重置）
+3.40s 視覺｜最後感知投影 (-3.0, 0.0, 2.0)
+4.17s 視覺｜最後感知投影 (-3.0, 0.0, 2.0)
+事件（保留最近 200 筆）
+0.98s state｜視覺
+
+原生截圖：/tmp/staff_readability_{roof,climb,air,occlusion,f3,rest,arrival}_{1280,1920}.png

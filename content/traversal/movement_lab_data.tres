@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="MovementLabData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://content/traversal/movement_lab_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+blocks = Array[Dictionary]([{
+"name": "NorthBoundary", "position": Vector3(0, 1, -12), "size": Vector3(28, 2, 0.3)
+}, {
+"name": "SouthBoundary", "position": Vector3(0, 1, 12), "size": Vector3(28, 2, 0.3)
+}, {
+"name": "WestBoundary", "position": Vector3(-14, 1, 0), "size": Vector3(0.3, 2, 24)
+}, {
+"name": "EastBoundary", "position": Vector3(14, 1, 0), "size": Vector3(0.3, 2, 24)
+}, {
+"name": "Ground", "position": Vector3(0, -0.25, 0), "size": Vector3(28, 0.5, 24), "color": Color(0.19, 0.26, 0.25, 1)
+}, {
+"name": "Building", "position": Vector3(-3, 1.5, -2), "size": Vector3(6, 3, 5), "color": Color(0.42, 0.49, 0.55, 1)
+}, {
+"name": "LandingPlatform", "position": Vector3(5, 1.5, -2), "size": Vector3(4, 3, 5), "color": Color(0.42, 0.56, 0.51, 1)
+}, {
+"name": "ReturnRamp", "position": Vector3(5.5, 1.525, 3.45), "size": Vector3(2, 3.05, 6.1), "shape": "ramp", "color": Color(0.45, 0.50, 0.41, 1)
+}])
+jumps = Array[Dictionary]([{
+"from": Vector3(-0.65, 3.04, -3.6), "edge_end": Vector3(-0.65, 3.04, -0.6), "to": Vector3(3.65, 3.04, -3.6)
+}, {
+"from": Vector3(3.65, 3.04, -3.6), "edge_end": Vector3(3.65, 3.04, -0.6), "to": Vector3(-0.65, 3.04, -3.6)
+}])
+labels = Array[Dictionary]([{
+"position": Vector3(-3, 3.5, -3.4), "text": "屋頂\n靠近邊緣按 Space 跨越；朝青色牆外緣走可下牆"
+}, {
+"position": Vector3(-5.35, 2.0, 0.7), "text": "攀爬面"
+}, {
+"position": Vector3(6.8, 3.4, 0.0), "text": "返回斜坡"
+}])

@@ -301,7 +301,12 @@ func _alert_5(raccoon: AnimalActor) -> void:
 	Alert.level = 4
 	Game.work_time_scale = 0.3
 	dig.try_use(raccoon)
-	await get_tree().create_timer(0.1).timeout
+	# 等真正產生施工進度再測中止；固定0.1秒Timer在慢幀可能先於第一次讀條更新。
+	var progress_wait := 0.0
+	var progress_timeout := dig.tier_seconds(true) * Game.work_time_scale
+	while dig._busy and dig.tier_progress <= 0.0 and progress_wait < progress_timeout:
+		await get_tree().process_frame
+		progress_wait += get_process_delta_time()
 	var mid_busy := dig._busy
 	var mid_total := raccoon.inventory.size() + dig.stash.size()
 	_msgs.clear()
