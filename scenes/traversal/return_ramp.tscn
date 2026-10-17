@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://content/traversal/return_ramp_component.gd" id="1"]
+[ext_resource type="Material" path="res://content/shared/return_ramp_material.tres" id="2"]
+
+[node name="ReturnRamp" type="StaticBody3D"]
+script = ExtResource("1")
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+
+[node name="TriggerZone" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerZone"]
+
+[node name="VisualMarker" type="MeshInstance3D" parent="."]
+material_override = ExtResource("2")

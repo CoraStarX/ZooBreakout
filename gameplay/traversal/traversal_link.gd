@@ -5,8 +5,18 @@ extends Node3D
 @export var landing: Vector3 = Vector3.ZERO
 @export var required_capability: CapabilityIds.Id = CapabilityIds.Id.CLIMB
 
+@export var enabled: bool = true:
+	set(value):
+		enabled = value
+		if is_inside_tree() and not Engine.is_editor_hint():
+			if enabled:
+				add_to_group("traversal_links")
+			else:
+				remove_from_group("traversal_links")
+
 func _ready() -> void:
-	add_to_group("traversal_links")
+	if enabled and not Engine.is_editor_hint():
+		add_to_group("traversal_links")
 
 func destination() -> Vector3:
 	return to_global(landing)

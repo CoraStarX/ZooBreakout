@@ -1,6 +1,6 @@
 class_name MovementLab
 extends Node3D
-## 獨立移動驗證入口；不建立 zoo_world，因此不推進舊日程，也不讀寫 UserPrefs。
+## 移動驗證宿主：建立灰盒、鏡頭與診斷；形態入口共用此腳本。
 @export var data: MovementLabData = preload("res://content/traversal/movement_lab_data.tres")
 @export var params: TraversalParams = preload("res://content/traversal/traversal_params.tres")
 var actor: TraversalActor
@@ -27,49 +27,27 @@ func _ready() -> void:
 		InputMap.action_add_event("traversal_jump", key)
 	for block in data.blocks:
 		make_block(block)
-	var wall := ClimbSurface.new()
+	var wall := preload("res://scenes/traversal/climb_surface.tscn").instantiate() as ClimbSurface
 	wall.position = data.climb_position
 	wall.width = data.climb_width
 	wall.height = data.climb_height
+	wall.set("params", params)
 	add_child(wall)
-	var wall_marker := MeshInstance3D.new()
-	var wall_mesh := BoxMesh.new()
-	wall_mesh.size = Vector3(data.climb_width, data.climb_height, 0.025)
-	wall_marker.mesh = wall_mesh
-	wall_marker.position = data.climb_position + Vector3(0, data.climb_height * 0.5, 0.025)
-	wall_marker.material_override = material(Color(0.21, 0.75, 0.72))
-	add_child(wall_marker)
+	_configure_mechanism_visual(wall.get_node("VisualMarker") as MeshInstance3D, true)
 	for entry in data.jumps:
-		var link := TraversalLink.new()
+		var link := preload("res://scenes/traversal/traversal_link.tscn").instantiate() as TraversalLink
 		link.position = entry["from"]
 		link.landing = (entry["to"] as Vector3) - link.position
 		link.edge_end = (entry.get("edge_end", entry["from"]) as Vector3) - link.position
+		link.set("params", params)
 		add_child(link)
-		var edge := MeshInstance3D.new()
-		var line := BoxMesh.new()
-		line.size = Vector3(params.marker_radius * 0.3, 0.012, maxf(link.edge_end.length(), params.marker_radius))
-		edge.mesh = line
-		edge.position = link.position + link.edge_end * 0.5
-		edge.material_override = material(Color(1.0, 0.78, 0.24))
-		add_child(edge)
+		_configure_mechanism_visual(link.get_node("VisualMarker") as MeshInstance3D, false)
 	for entry in data.labels:
 		var label := ProximityLabel.new()
 		label.position = entry["position"]
 		label.set_info(entry["text"])
 		add_child(label)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-55, -25, 0)
-	sun.shadow_enabled = true
-	add_child(sun)
-	var environment := WorldEnvironment.new()
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.09, 0.13, 0.18)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.75, 0.85, 1.0)
-	env.ambient_light_energy = 0.65
-	environment.environment = env
-	add_child(environment)
+	_build_environment()
 	rig = FollowCamera.new()
 	rig.follow_target_height = true
 	rig.height_provider_method = &"camera_focus_height"
@@ -113,15 +91,46 @@ func _ready() -> void:
 	add_child(shadow)
 	_build_hud()
 
+func _build_environment() -> void:
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-55, -25, 0)
+	sun.shadow_enabled = true
+	add_child(sun)
+	var environment := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.09, 0.13, 0.18)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.75, 0.85, 1.0)
+	env.ambient_light_energy = 0.65
+	environment.environment = env
+	add_child(environment)
+
+func _configure_mechanism_visual(_visual_node: MeshInstance3D, _climb: bool) -> void:
+	pass
+
 func make_block(block: Dictionary) -> StaticBody3D:
+	if block.get("shape", "box") == "ramp":
+		var ramp := preload("res://scenes/traversal/return_ramp.tscn").instantiate() as ReturnRampComponent
+		ramp.name = block.get("name", "ReturnRamp")
+		ramp.position = block["position"]
+		ramp.rotation_degrees.x = block.get("rotation_x", 0.0)
+		var size: Vector3 = block["size"]
+		ramp.width = size.x
+		ramp.height = size.y
+		ramp.depth = size.z
+		add_child(ramp)
+		var visual := ramp.get_node("VisualMarker") as MeshInstance3D
+		# 舊入口的遮擋淡出會改 alpha；只在宿主複製共用材質，避免影響其他實例。
+		var mat := visual.material_override.duplicate() as StandardMaterial3D
+		mat.albedo_color = block.get("color", Color.GRAY)
+		visual.material_override = mat
+		_block_materials[ramp] = mat
+		return ramp
 	var body := StaticBody3D.new()
 	body.name = block.get("name", "Block")
 	body.position = block["position"]
 	body.rotation_degrees.x = block.get("rotation_x", 0.0)
-	if block.get("shape", "box") == "ramp":
-		_build_ramp(body, block)
-		add_child(body)
-		return body
 	var collision := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = block["size"]
@@ -137,35 +146,6 @@ func make_block(block: Dictionary) -> StaticBody3D:
 	add_child(body)
 	return body
 
-
-func _build_ramp(body: StaticBody3D, block: Dictionary) -> void:
-	# 真正楔形的上表面接上平台；避免旋轉薄盒的端面留下阻擋上坡的小台階。
-	var half: Vector3 = (block["size"] as Vector3) * 0.5
-	var points := PackedVector3Array([
-		Vector3(-half.x, -half.y, -half.z), Vector3(half.x, -half.y, -half.z),
-		Vector3(-half.x, half.y, -half.z), Vector3(half.x, half.y, -half.z),
-		Vector3(-half.x, -half.y, half.z), Vector3(half.x, -half.y, half.z),
-	])
-	var collision := CollisionShape3D.new()
-	var wedge := ConvexPolygonShape3D.new()
-	wedge.points = points
-	collision.shape = wedge
-	body.add_child(collision)
-	var builder := SurfaceTool.new()
-	builder.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for face in [[2, 4, 5], [2, 5, 3], [0, 1, 5], [0, 5, 4],
-			[0, 2, 3], [0, 3, 1], [0, 4, 2], [1, 3, 5]]:
-		var normal := (points[face[1]] - points[face[0]]).cross(points[face[2]] - points[face[0]]).normalized()
-		for index in face:
-			builder.set_normal(normal)
-			builder.add_vertex(points[index])
-	var visual := MeshInstance3D.new()
-	visual.mesh = builder.commit()
-	var mat := material(block.get("color", Color.GRAY))
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	visual.material_override = mat
-	body.add_child(visual)
-	_block_materials[body] = mat
 
 func _build_hud() -> void:
 	var canvas := CanvasLayer.new()
@@ -231,14 +211,12 @@ func _process(delta: float) -> void:
 	_hint.text = hint if actor.has_jump_preview else (_message if _message_left > 0.0 else hint)
 
 func _update_occlusion() -> void:
-	# 只淡出擋住鏡頭的灰盒材質；碰撞不變，不新增 Shader 或影響員工感知。
+	# 只更新擋住鏡頭的視覺透明度；查詢與碰撞規則保持不變。
 	for body in _block_materials.keys():
 		if not is_instance_valid(body):
 			_block_materials.erase(body)
 			continue
-		var mat: StandardMaterial3D = _block_materials[body]
-		mat.albedo_color.a = 1.0
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+		_set_block_opacity(body, 1.0)
 	var excluded: Array[RID] = [actor.get_rid()]
 	for i in params.occluder_layers:
 		var query := PhysicsRayQueryParameters3D.create(actor.camera.global_position,
@@ -249,9 +227,12 @@ func _update_occlusion() -> void:
 		var body := result["collider"] as CollisionObject3D
 		excluded.append(body.get_rid())
 		if _block_materials.has(body):
-			var mat: StandardMaterial3D = _block_materials[body]
-			mat.albedo_color.a = params.occluder_alpha
-			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			_set_block_opacity(body, params.occluder_alpha)
+
+func _set_block_opacity(body: CollisionObject3D, opacity: float) -> void:
+	var mat: StandardMaterial3D = _block_materials[body]
+	mat.albedo_color.a = opacity
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED if opacity >= 1.0 else BaseMaterial3D.TRANSPARENCY_ALPHA
 
 func _on_feedback(message: String) -> void:
 	_message = message

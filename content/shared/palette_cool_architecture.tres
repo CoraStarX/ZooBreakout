@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="StylePalette" load_steps=2 format=3]
+[ext_resource type="Script" path="res://content/shared/style_palette.gd" id="1"]
+[resource]
+script = ExtResource("1")
+building = Color(0.658823529, 0.725490196, 0.788235294, 1)
+platform = Color(0.470588235, 0.552941176, 0.600000000, 1)
+ground = Color(0.207843137, 0.266666667, 0.321568627, 1)
+highlight = Color(0.866666667, 0.905882353, 0.917647059, 1)
+ink = Color(0.133333333, 0.176470588, 0.250980392, 1)

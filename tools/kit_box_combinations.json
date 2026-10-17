@@ -1,0 +1,157 @@
+{
+  "combinations": [
+    {
+      "name": "wall_on_floor",
+      "instances": [
+        {
+          "id": "floor",
+          "asset": "floor_w4_h1_d4.tscn",
+          "position": [
+            "0",
+            "0",
+            "0"
+          ],
+          "turns": 0
+        },
+        {
+          "id": "wall",
+          "asset": "wall_straight_w2_h5_d1.tscn",
+          "position": [
+            "0",
+            "0.5",
+            "0"
+          ],
+          "turns": 0
+        }
+      ],
+      "seams": [
+        {
+          "from": "floor",
+          "to": "wall",
+          "axis": "y",
+          "area_m2": "0.5"
+        }
+      ]
+    },
+    {
+      "name": "corner_with_two_walls",
+      "instances": [
+        {
+          "id": "corner",
+          "asset": "wall_corner_w2_h5_d2.tscn",
+          "position": [
+            "0",
+            "0",
+            "0"
+          ],
+          "turns": 0
+        },
+        {
+          "id": "wall_x",
+          "asset": "wall_straight_w4_h5_d1.tscn",
+          "position": [
+            "2",
+            "0",
+            "0"
+          ],
+          "turns": 0
+        },
+        {
+          "id": "wall_z",
+          "asset": "wall_straight_w4_h5_d1.tscn",
+          "position": [
+            "0",
+            "0",
+            "2"
+          ],
+          "turns": 1
+        }
+      ],
+      "seams": [
+        {
+          "from": "corner",
+          "to": "wall_x",
+          "axis": "x",
+          "area_m2": "1.25"
+        },
+        {
+          "from": "corner",
+          "to": "wall_z",
+          "axis": "z",
+          "area_m2": "1.25"
+        }
+      ]
+    },
+    {
+      "name": "wall_2_5m_with_upper_slab",
+      "instances": [
+        {
+          "id": "lower_floor",
+          "asset": "floor_w4_h1_d4.tscn",
+          "position": [
+            "0",
+            "0",
+            "0.5"
+          ],
+          "turns": 0
+        },
+        {
+          "id": "wall",
+          "asset": "wall_straight_w4_h5_d1.tscn",
+          "position": [
+            "0",
+            "0.5",
+            "0"
+          ],
+          "turns": 0
+        },
+        {
+          "id": "upper_slab",
+          "asset": "floor_w4_h1_d4.tscn",
+          "position": [
+            "0",
+            "3",
+            "-0.5"
+          ],
+          "turns": 0
+        }
+      ],
+      "seams": [
+        {
+          "from": "lower_floor",
+          "to": "wall",
+          "axis": "y",
+          "area_m2": "1"
+        },
+        {
+          "from": "wall",
+          "to": "upper_slab",
+          "axis": "y",
+          "area_m2": "1"
+        }
+      ]
+    },
+    {
+      "name": "ramp_high_edge_to_floor",
+      "kind": "ramp_high_edge_coordinates",
+      "ramp": {
+        "asset": "ramp_w4_h6_d12.tscn",
+        "position": [
+          "0",
+          "0",
+          "3"
+        ],
+        "turns": 0
+      },
+      "floor": {
+        "asset": "floor_w4_h1_d4.tscn",
+        "position": [
+          "0",
+          "2.5",
+          "-1"
+        ],
+        "turns": 0
+      }
+    }
+  ]
+}

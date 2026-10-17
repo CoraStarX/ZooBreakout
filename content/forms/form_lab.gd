@@ -3,6 +3,8 @@ extends MovementLab
 ## A只驗證形態操作；B才追加窄縫，C才接員工。原三個沙盒入口不變。
 @export var form_setup: FormSetup = preload("res://content/forms/prototype_setup.tres")
 @export var form_params: FormParams = preload("res://content/forms/form_params.tres")
+var style: StyleFoundation
+var _styled_blocks: Dictionary[CollisionObject3D, MeshInstance3D] = {}
 var forms: FormController
 var _action_added := false
 var _effect: MeshInstance3D
@@ -14,6 +16,7 @@ var _guidance_title: Control
 var _guidance_toggle: CheckButton
 
 func _ready() -> void:
+	style = preload("res://content/shared/environment_preset.tscn").instantiate() as StyleFoundation
 	super._ready()
 	if not InputMap.has_action(form_params.switch_action):
 		_action_added = true
@@ -45,6 +48,33 @@ func _ready() -> void:
 		push_error("變形沙盒開局配置無效")
 	_build_guidance_settings()
 	set_guidance_enabled(bool(UserPrefs.get_value("form_lab","show_guidance",form_params.show_guidance_default)))
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--style-capture="):
+			var capture := preload("res://content/shared/style_capture.gd").new()
+			add_child(capture)
+			capture.call_deferred("run", self, style, argument.trim_prefix("--style-capture="))
+
+func _build_environment() -> void:
+	add_child(style)
+
+func _configure_mechanism_visual(visual_node: MeshInstance3D, climb: bool) -> void:
+	style.configure_marker(visual_node, climb)
+
+func make_block(block: Dictionary) -> StaticBody3D:
+	var body := super.make_block(block)
+	for child in body.get_children():
+		if child is MeshInstance3D:
+			var visual_node := child as MeshInstance3D
+			style.configure_block(visual_node, block)
+			_styled_blocks[body] = visual_node
+	return body
+
+func _set_block_opacity(body: CollisionObject3D, opacity: float) -> void:
+	if _styled_blocks.has(body):
+		# Forward+ 逐實例透明度保留共用材質；仍沿用原本的遮擋查詢與 alpha。
+		_styled_blocks[body].transparency = 1.0 - opacity
+	else:
+		super._set_block_opacity(body, opacity)
 
 func _build_guidance_settings() -> void:
 	_guidance_toggle = CheckButton.new()

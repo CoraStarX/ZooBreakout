@@ -5,8 +5,18 @@ extends Node3D
 @export var height: float = 3.0
 @export var required_capability: CapabilityIds.Id = CapabilityIds.Id.CLIMB
 
+@export var enabled: bool = true:
+	set(value):
+		enabled = value
+		if is_inside_tree() and not Engine.is_editor_hint():
+			if enabled:
+				add_to_group("climb_surfaces")
+			else:
+				remove_from_group("climb_surfaces")
+
 func _ready() -> void:
-	add_to_group("climb_surfaces")
+	if enabled and not Engine.is_editor_hint():
+		add_to_group("climb_surfaces")
 
 func anchor(point: Vector3, params: TraversalParams) -> Vector3:
 	var local := to_local(point)
