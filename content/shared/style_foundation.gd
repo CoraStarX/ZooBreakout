@@ -4,18 +4,23 @@ extends Node3D
 @export var settings: StyleSettings = preload("res://content/shared/style_settings.tres")
 var surface_material: ShaderMaterial
 var mechanism_material: ShaderMaterial
+var kit_building_material: KitRoleMaterial
+var kit_platform_material: KitRoleMaterial
 var active_palette: StylePalette
 var _environment: Environment
 
 func _init() -> void:
 	surface_material = preload("res://content/shared/architecture_material.tres").duplicate() as ShaderMaterial
 	mechanism_material = preload("res://content/shared/mechanism_material.tres").duplicate() as ShaderMaterial
+	kit_building_material = preload("res://content/shared/kit_material.tres").duplicate() as KitRoleMaterial
+	kit_platform_material = preload("res://content/shared/kit_platform_material.tres").duplicate() as KitRoleMaterial
 
 func _ready() -> void:
 	var world := get_node("WorldEnvironment") as WorldEnvironment
 	_environment = world.environment.duplicate() as Environment
 	world.environment = _environment
-	apply_palette(settings.palette)
+	settings.changed.connect(refresh_from_settings)
+	refresh_from_settings()
 	mechanism_material.set_shader_parameter("climb_color", settings.climb_color)
 	mechanism_material.set_shader_parameter("jump_color", settings.jump_color)
 	mechanism_material.set_shader_parameter("ink_color", settings.marker_ink)
@@ -24,8 +29,12 @@ func _ready() -> void:
 	surface_material.set_shader_parameter("toon_steps", settings.toon_steps)
 	set_features(settings.post_enabled, settings.outline_enabled, settings.toon_enabled)
 
-func apply_palette(palette: StylePalette) -> void:
+func refresh_from_settings() -> void:
+	var palette := settings.palette
 	active_palette = palette
+	for material in [kit_building_material, kit_platform_material]:
+		material.settings = settings
+		material.refresh()
 	surface_material.set_shader_parameter("building_color", palette.building)
 	surface_material.set_shader_parameter("platform_color", palette.platform)
 	surface_material.set_shader_parameter("ground_color", palette.ground)
@@ -38,6 +47,10 @@ func apply_palette(palette: StylePalette) -> void:
 	var sun := get_node_or_null("Sun") as DirectionalLight3D
 	if sun:
 		sun.light_color = palette.highlight
+
+func configure_kit(visual: MeshInstance3D, role: int) -> void:
+	visual.material_override = kit_platform_material if role == 1 else kit_building_material
+	visual.set_instance_shader_parameter("color_role", role)
 
 func set_features(post: bool, outline: bool, toon: bool) -> void:
 	_environment.fog_enabled = post

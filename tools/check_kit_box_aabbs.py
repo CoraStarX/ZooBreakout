@@ -18,6 +18,8 @@ Unsupported (FAIL, nonzero exit; never silently skip):
   AnimationPlayer or other node types, disabled colliders, expressions/multiline
   syntax, external shapes, inherited/instanced nodes, unknown collision types.
 * Unknown headers/properties in nodes or Box shapes, duplicate keys, missing parents.
+* Three literal visual instance uniforms are accepted on MeshInstance3D only;
+  they never contribute to collision geometry.
 The existing ramp_w4_h6_d12.tscn is explicitly excluded as NON-BOX scope, not
 claimed checked. Its declared collider must remain ConvexPolygonShape3D; any Box
 or other collider there is an error. No other non-Box exclusions are implicit.
@@ -136,6 +138,18 @@ def read_boxes(path):
     for name, (attrs, props) in nodes.items():
         require(attrs["type"] in NODE_TYPES, f"{path.name}:{name}: unsupported node type {attrs['type']}")
         for key in props:
+            if key.startswith("instance_shader_parameters/"):
+                require(attrs["type"] == "MeshInstance3D", f"{path.name}:{name}: visual uniform on non-Mesh node")
+                value = props[key]
+                if key == "instance_shader_parameters/shape_size":
+                    require(all(n > ZERO for n in vector(value)), "Invalid visual shape_size")
+                elif key == "instance_shader_parameters/color_role":
+                    require(value in {"0", "1"}, "Invalid kit color_role")
+                elif key == "instance_shader_parameters/ramp_shape":
+                    require(value in {"true", "false"}, "Invalid ramp_shape")
+                else:
+                    raise ValueError(f"{path.name}:{name}: unsupported visual uniform {key}")
+                continue
             require(key in NODE_PROPERTIES or key.startswith("metadata/"), f"{path.name}:{name}: unsupported node property {key}")
     boxes = []
     for name, props, (resource, shape) in declared:

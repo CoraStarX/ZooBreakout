@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" script_class="KitRoleMaterial" load_steps=4 format=3]
+[ext_resource type="Shader" path="res://content/shared/architecture.gdshader" id="1"]
+[ext_resource type="Script" path="res://content/shared/kit_role_material.gd" id="2"]
+[ext_resource type="Resource" path="res://content/shared/style_settings.tres" id="3"]
+[resource]
+shader = ExtResource("1")
+script = ExtResource("2")
+settings = ExtResource("3")
+role = 1

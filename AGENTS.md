@@ -93,13 +93,12 @@ Godot 4.7、靜態型別 GDScript；3D 斜俯視、正交相機。
 | 跨越水平位移 | ≤4.8 m；現行連結 4.3 m、淨間隙 3 m | max_jump_distance 與 `content/traversal/movement_lab_data.tres`；淨間隙系列**待確認**。本體無跳躍，見 `gameplay/forms/ground_form_actor.gd`。 |
 | 現有返回坡 | 高3.05／長6.1，比例0.5（推算） | `movement_lab_data.tres` ReturnRamp；樣件取高3、長6，保持比例0.5及整數格。最大可走坡度、坡端通行餘量**待確認**。 |
 
-**樣件尺寸的選擇理由**：牆高 3 m 參照現有攀爬面，但牆件自身沒有攀爬能力；牆長 2 m、地板 2×2 m、斜坡寬 2 m 是本輪作者流程樣本，不能由角色或跳躍數值唯一推出，是否作量產標準**待確認**。牆厚／地板厚 0.5 m 是新網格最小正整數厚度的選擇，不沿用既有0.3 m牆厚。通行尺寸、層高與標準牆高已由使用者另作上述設計決定，不宣稱它們能由角色大小唯一推導或已操作驗收；同高猴形態跨越至少涉及1.0+0.65＝1.65 m理想身體高度，尚須起跳落點抬升、碰撞與安全餘量，不能直接將1.65取整當層高規格。
+**樣件尺寸的選擇理由**：牆件自身沒有攀爬能力；牆長 2 m、地板 2×2 m、斜坡寬 2 m 是本輪作者流程樣本，不能由角色或跳躍數值唯一推出，是否作量產標準**待確認**。牆厚／地板厚 0.5 m 是新網格最小正整數厚度的選擇，不沿用既有0.3 m牆厚。通行尺寸、層高與標準牆高已由使用者另作上述設計決定，不宣稱它們能由角色大小唯一推導或已操作驗收；同高猴形態跨越至少涉及1.0+0.65＝1.65 m理想身體高度，尚須起跳落點抬升、碰撞與安全餘量，不能直接將1.65取整當層高規格。
 
 | scene（`art/kit/`） | 預設寬×高×深（格／m） | 碰撞與方向 |
 |---|---|---|
 | `wall_straight_w2_h5_d1.tscn` | 2×5×1／1×2.5×0.5 | 固定短牆；BoxShape3D，沿用直牆pivot。 |
 | `wall_straight_w4_h5_d1.tscn` | 4×5×1／2×2.5×0.5 | 標準牆；BoxShape3D，X牆長、Y向上、Z厚度。 |
-| `wall_straight_w4_h6_d1.tscn` | 4×6×1／2×3×0.5 | BoxShape3D；X牆長、Y向上、Z厚度。 |
 | `wall_corner_w2_h5_d2.tscn` | 2×5×2／1×2.5×1 | L形Mesh＋兩獨立Box，外角底部pivot。 |
 | `filler_w1_h1_d1.tscn` | 1×1×1／0.5×0.5×0.5 | BoxMesh＋BoxShape3D，底角pivot。 |
 | `floor_w4_h1_d4.tscn` | 4×1×4／2×0.5×2 | BoxShape3D；頂面＝根Y+0.5。 |
@@ -130,7 +129,6 @@ Godot 4.7、靜態型別 GDScript；3D 斜俯視、正交相機。
 | 件 | 根局部外邊界與子節點偏移 | 0.5m格線核對 |
 |---|---|---|
 | 標準牆2×2.5×0.5 | X[-1,1]、Y[0,2.5]、Z[0,0.5]；兩子節點皆在(0,1.25,0.25)。 | 三軸外邊界皆0.5倍數，沿用基準面水平中心／Y底部。 |
-| 3m樣件牆2×3×0.5 | X[-1,1]、Y[0,3]、Z[0,0.5]，Z=0為基準面，厚度向+Z；Visual/MeshInstance3D與Body/CollisionShape3D皆在(0,1.5,0.25)。 | 三軸最小／最大邊界皆0.5倍數；根可放在0.5m格點。 |
 | 地板2×0.5×2 | X/Z[-1,1]、Y[0,0.5]；兩個子節點皆在(0,0.25,0)。 | 三軸最小／最大邊界皆0.5倍數，維持XZ中心／Y底部。 |
 | 預設坡2×3×6 | X[-1,1]、Y[0,3]、Z[-3,3]；兩個子節點皆在(0,1.5,0)。 | 預設各邊界及6楔形頂點皆在0.5格點。寬／長奇數格時，該軸子節點中心向正軸偏移0.25m，不移根；例如寬1.5m範圍[-0.5,1]。 |
 
@@ -144,7 +142,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
     └── CollisionShape3D
 ```
 
-所有已建立件視覺統一引用 `content/shared/kit_material.tres`。正式Mesh仍以幾何中心建模，沿用對應子節點偏移；碰撞不讀取視覺Mesh。牆／地板Box、坡為獨立實心楔形凸包。
+牆／牆角／填充塊預設引用 `content/shared/kit_material.tres`（building），地板／斜坡引用 `content/shared/kit_platform_material.tres`（platform）；兩者共用現有architecture shader，詳見「風格Resource化」。正式Mesh仍以幾何中心建模，沿用對應子節點偏移；碰撞不讀取視覺Mesh。牆／地板Box、坡為獨立實心楔形凸包。
 
 根只允許Y軸90°倍數旋轉。格點邊界旋轉後仍落0.5格線；90°／270°交換寬深，180°把牆厚翻到基準面另一側或反轉坡高低端，**不保證原地旋轉仍佔相同矩形**。旋轉後須檢查新佔位與支撐。內部子節點0.25偏移合法，平移吸附限制適用根與拼接邊界。
 
@@ -209,16 +207,6 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 
 攀爬面與翻越路徑所在的面保持平齊；牆面／樓板側面連續共平面，不能因裝飾加凸台、退台或斜角改變碰撞通路。屋簷、倒角、飾條只用在非攀爬面；若用在攀爬面，**只能是無碰撞視覺Mesh，且不凸出攀爬平面**。例如外法線+Z、攀爬平面Z=0.5時，該裝飾所有頂點須Z≤0.5，不能把機制VisualMarker的既有偏移當作裝飾凸出的許可。翻越落點、膠囊掃掠與頭頂淨空仍須保持；無碰撞外觀也不能遮住機制標記或使路徑判讀失真。
 
-### 舊3m牆的引用與去留建議
-
-對工作區來源以 `rg --hidden --no-ignore` 搜尋檔名、資產路徑、art/kit引用及動態載入／目錄枚舉，排除.git與.godot再生快取：**沒有程式、Resource或scene引用** `art/kit/wall_straight_w4_h6_d1.tscn`，未發現動態載入此資產的路徑。該scene沒有UID，沒有需另追的UID引用。所有來源文字提及都在本文件：
-
-1. 「尺寸依據與待確認項」的資產表（3m樣件）。
-2. 本節引用審查／去留說明。
-3. 「前輪方案A與0.5m邊界驗證」的歷史編輯器命令。
-
-舊預覽PNG／暫存驗證腳本屬工作區外歷史證據，不是遊戲依賴；編輯器快取也不是來源引用。**建議刪除舊3m牆**，減少誤選非標準牆高；此前建議保留已由本次無引用核對取代。**依使用者指示，等使用者提交後另行通知才刪除**；提交完成本身不構成刪除通知，本輪不刪除、不提交。將來獲明確通知後再移除現行資產表項目、保留歷史驗證紀錄。
-
 ### 批次01已批准件：牆角與填充塊
 
 使用者已確認牆角與填充塊；本輪僅製作這兩件。共用材質 `content/shared/kit_material.tres`，根吸附0.5m、Y旋轉90°、Scale=1；根Y在底部、水平以已批准底角格點定位。沒有玩法腳本或機制。
@@ -254,7 +242,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 - 平台／屋頂進深製作檢查門檻1.5m；1m僅為物理絕對下限，見「步驟10」。
 - 新內容轉角一律使用牆角件；不恢復兩直牆貫通／抵住對接法。
 - **機制色不屬於色板角色**；青色攀爬與黃色跨越提示使用固定機制色，不隨A/B切換。
-- 風格仍僅為**三個共享角色材質提案**：建築→building、平台→platform、地面→ground。尚未實作kit色板接線；基座／收口取消不新增材質角色。
+- 當時三角色材質為提案；現行kit僅building／platform兩角色，FormLab保留既有ground，接線見「風格Resource化」。基座／收口取消不新增角色。
 
 本輪補充的是「決定不做」原因與現行狀態、歷史提案失效標示，以及上述盤點索引；既有六項決定無缺漏。未新增資產、未搭關卡、未做風格實作、未提交。
 
@@ -337,7 +325,6 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 ### 前輪方案A與0.5m邊界驗證（歷史紀錄，2026-10-17）
 
 - 修改：牆scene的Mesh／Shape同步偏移至(0,1.5,0.25)，根為基準面水平中心／Y底部；坡腳本為奇數格寬／長補子節點偏移，更新其pivot metadata。地板不需改動。預覽已遷移牆根，沒有新增或更動關卡實例。
-- **編輯器開啟：通過。** Godot `4.7.stable.official.5b4e0cb0f`，沙盒外執行 `/Applications/Godot.app/Contents/MacOS/Godot --editor --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_pivot_a_editor.log --quit-after 180 res://art/kit/wall_straight_w4_h6_d1.tscn`，必要載入完成、無錯誤或警告。quit-after主動結束，退出碼0，不宣稱手動正常關閉驗收。
 - **資產邊界核對：通過（無頭）。** 沙盒外執行 `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_pivot_a_check.log --script /tmp/borrowed_shapes_pivot_a_check.gd`。暫存腳本逐件載入既有三件，四種90°朝向核對凸包／盒體頂點及Mesh包圍邊界；坡另測16組寬／長奇偶格組合、高2.5m，共3241項檢查通過，退出碼0、無錯誤或警告。不把離線圖當引擎檢查結果，亦未新增專案測試檔或scene。
 - **大型坡回歸：通過（無頭）。** 沿用前輪暫存檢查腳本，沙盒外命令同前輪但log改為 `/tmp/borrowed_shapes_pivot_a_large_ramp.log`；59項楔形幾何／物理與視覺獨立性檢查再次通過，退出碼0、無錯誤或警告。預設2×3×6m幾何保持。
 - **主場景啟動：通過（無頭）。** 沙盒外執行 `tools/run_tests.sh`，只執行既有FormLab、固定60 FPS／180幀，超過120物理幀；退出碼0、無錯誤或警告。日誌 `${TMPDIR}/borrowed_shapes_tests/form_lab.log`。
@@ -350,18 +337,17 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 - **編輯器開啟：通過。** Godot `4.7.stable.official.5b4e0cb0f`，沙盒外執行 `/Applications/Godot.app/Contents/MacOS/Godot --editor --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_standard_wall_editor.log --quit-after 180 res://art/kit/wall_straight_w4_h5_d1.tscn`，必要載入完成，沒有錯誤或警告。quit-after主動結束，退出碼0，不宣稱手動正常關閉驗收。
 - **主場景啟動：通過（無頭）。** 沙盒外執行 `tools/run_tests.sh`，只跑既有FormLab、固定60 FPS／180幀，超過120物理幀，退出碼0、無錯誤或警告；日誌 `${TMPDIR}/borrowed_shapes_tests/form_lab.log`。新件未接入FormLab，這項僅確認原入口維持正常。
 - **畫面與操作：未執行。** 剖面PNG為離線示意，沒有在遊戲中組裝或實測新牆／樓板接縫、3m攀爬與翻越落點，不宣稱整組已驗收。
-- **工作區保護：** 與本輪開始雜湊比對，僅修改AGENTS.md、新增 `art/kit/wall_straight_w4_h5_d1.tscn`；其他既有變更保留，無刪除，無新增腳本或其他件。預覽位於工作區外。保留3m樣件待決；11件候選未開始。未搭關卡、未提交、未推送。
+- **工作區保護：** 與本輪開始雜湊比對，僅修改AGENTS.md、新增 `art/kit/wall_straight_w4_h5_d1.tscn`；其他既有變更保留，無刪除，無新增腳本或其他件。預覽位於工作區外。11件候選未開始。未搭關卡、未提交、未推送。
 
 ### 前輪規則與前三件預覽核對（歷史紀錄，2026-10-17）
 
 - **靜態核對：通過。** 翻越退縮0.65＋猴半寬0.32＝0.97m，整格下限1m；完整步行保護圈需求0.65＋0.37＝1.02m，整格建議1.5m；來源與兩種判定界線已區分。三件提案的Box邊界／L形拼接均0.5m倍數，L形兩Box只端面相接；四種90°旋轉仍保留格線，根Scale=1。預覽已目視核對文字與幾何。
-- **引用核對：通過。** 舊3m牆在來源中僅有本文件三處文字提及，沒有運行引用；建議刪除但尚未刪除。
 - **編輯器開啟：未執行。主場景啟動：未執行。畫面與操作：未執行。** 本輪只改規則與離線預覽，不修改或建立資產／場景，未重新啟動Godot，不沿用前輪結果宣稱新件通過。
 - **工作區保護：** 與本輪起點雜湊比對僅AGENTS.md修改，無新增／刪除專案檔案；PNG／繪圖腳本在工作區外。牆角／牆端／填充塊等預覽待審，基座下一批，屋簷／邊緣收口只作文字提案，短牆方案待選；柱子／倒角／樓梯延後至M4實際缺件時再記錄。未搭關卡、未提交／推送。
 
 ### 前輪批次01製作與短牆預覽驗證（歷史紀錄，2026-10-17）
 
-- **靜態核對：通過。** 角件OBJ為封閉L形，面法線朝外，體積1.875m³等於兩個無體積重疊Box的聯集；角件與填充塊外包尺寸／底角pivot、四種90°旋轉格線與共用材質已核對。1m短牆預覽沿用直牆pivot，尚無短牆scene。舊3m牆仍在，牆端資產不存在。
+- **靜態核對：通過。** 角件OBJ為封閉L形，面法線朝外，體積1.875m³等於兩個無體積重疊Box的聯集；角件與填充塊外包尺寸／底角pivot、四種90°旋轉格線與共用材質已核對。1m短牆預覽沿用直牆pivot，尚無短牆scene。牆端資產不存在。
 - **編輯器開啟：通過。** Godot `4.7.stable.official.5b4e0cb0f`，沙盒外逐件執行 `/Applications/Godot.app/Contents/MacOS/Godot --editor --path /Users/howard/game/borrowed-shapes --log-file <log> --quit-after 180 res://art/kit/<scene>`；scene分別為wall_corner_w2_h5_d2.tscn、filler_w1_h1_d1.tscn，OBJ匯入與必要載入完成、無錯誤或警告。日誌 `/tmp/borrowed_shapes_batch_01_corner_editor.log`、`/tmp/borrowed_shapes_batch_01_filler_editor.log`，退出碼均0；quit-after主動結束驗證，不宣稱手動正常關閉驗收。
 - **暫存資產物理核對：失敗（驗證腳本型別錯誤，未完成）。** 沙盒外執行 `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_batch_01_assets_check.log --script /tmp/borrowed_shapes_batch_01_assets_check.gd`；腳本第30行將條件式產生的Array賦值給Array[Vector3]，引發SCRIPT ERROR。這是本次暫存驗證腳本錯誤，不直接判定為專案資產錯誤。依驗證標準立即停止後續Godot驗證，未修復或重試；對本次程序PID41863送SIGTERM，退出碼143，屬錯誤後主動結束，不另列異常退出或正常關閉通過。未完成射線、凹口與各朝向物理核對。
 - **主場景啟動：未執行。** 因上述錯誤停止，未執行本輪FormLab門禁，不用前輪結果替代。
@@ -370,7 +356,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 
 ### 前輪1m短牆與唯一獲准補測重跑（歷史紀錄，2026-10-17）
 
-- 新增僅 `art/kit/wall_straight_w2_h5_d1.tscn` 這一件；尺寸、直牆pivot、獨立碰撞、共用材質與節點結構靜態核對通過。其他件／玩家規格不改，舊3m牆保留。
+- 新增僅 `art/kit/wall_straight_w2_h5_d1.tscn` 這一件；尺寸、直牆pivot、獨立碰撞、共用材質與節點結構靜態核對通過。其他件／玩家規格不改。
 - **編輯器開啟：通過。** 引擎 `4.7.stable.official.5b4e0cb0f`，沙盒外執行 `/Applications/Godot.app/Contents/MacOS/Godot --editor --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_short_wall_editor.log --quit-after 180 res://art/kit/wall_straight_w2_h5_d1.tscn`，載入完成、無錯誤或警告。quit-after主動結束，退出碼0，不宣稱手動正常關閉驗收。
 - **物理補測：失敗（暫存驗證腳本排除清單錯誤，未完成）。** 依本輪明確授權修正Array型別並只重跑一次，日誌 `/tmp/borrowed_shapes_batch_01_assets_retry.log`；第一件牆角的「no penetrating floor overlap (0.1mm inset)」斷言失敗，退出碼1。靜態診斷確認`query.exclude.append(...)`只修改getter回傳複本，排除自身未生效；不可把此結果判定為資產與地板穿插。未再次修正／執行，三件完整碰撞範圍、不重疊及地板接觸驗證尚未通過。詳見[成本與互動紀錄](docs/cost_log.md)。
 - **主場景啟動：未執行。畫面與操作：未執行。** 按使用者「若再失敗停下」指示，不執行後續Godot驗證，不用前輪結果替代。
@@ -382,7 +368,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 - **正式數學檢查：通過。** `python3 tools/check_kit_box_aabbs.py`僅執行一次，退出碼0：6個Box資產、共7個Box，各四種90°朝向的格線／資產內不重疊／與地板接觸核對通過。斜坡明列SKIP，未涵蓋非Box碰撞。未使用暫存腳本或物理查詢。
 - **編輯器開啟：未執行。主場景啟動：未執行。畫面與操作：未執行。** 本輪只新增Python數學工具與文件分類，不啟動Godot，不宣稱角色通行／操作通過。
 - **cost-log：** 前兩次驗證腳本失敗均歸為「驗證重工」，與資產修改拆列；本輪為「驗證工具建置」，可見迭代共3輪、所用模型GPT-6／精確ID未知。
-- **工作區保護：** 新增tools/check_kit_box_aabbs.py，只改本文件與docs/cost_log.md；資產、場景、移動規格與既有修改保留。第二批未開始，舊3m牆未刪除；未搭關卡、未提交／推送。
+- **工作區保護：** 新增tools/check_kit_box_aabbs.py，只改本文件與docs/cost_log.md；資產、場景、移動規格與既有修改保留。第二批未開始，未搭關卡、未提交／推送。
 ### 前輪AABB補強輸出與驗證（歷史紀錄，2026-10-17）
 
 以下數字均為PASS數量；「N/A(0)」代表單Box沒有內部配對。資產測四種90°朝向，格線按min/max純量座標計數。
@@ -394,7 +380,6 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 | wall_corner_w2_h5_d2.tscn | 2 | 48 | 4 | 8 | 8 |
 | wall_straight_w2_h5_d1.tscn | 1 | 24 | N/A(0) | 4 | 4 |
 | wall_straight_w4_h5_d1.tscn | 1 | 24 | N/A(0) | 4 | 4 |
-| wall_straight_w4_h6_d1.tscn | 1 | 24 | N/A(0) | 4 | 4 |
 | ramp_w4_h6_d12.tscn | 0（EXCLUDED） | 未檢查 | 未檢查 | 未檢查 | 未檢查 |
 
 | 固定組合 | Box數 | 格線PASS | 不重疊PASS | 零間距／面積接縫PASS |
@@ -406,7 +391,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 - 正式檢查：通過，`python3 tools/check_kit_box_aabbs.py`執行1次、退出碼0，6個Box資產／7個Box／3組固定清單。
 - 負向測試：通過，`python3 tools/test_kit_box_aabbs.py`執行1次、退出碼0；7個案例各自子程序退出碼1且錯誤訊息吻合，無非預期失敗或重試。指定兩案副本為 `/tmp/borrowed_shapes_aabb_0y_uf81e/art/kit`（0.1m位移）、`/tmp/borrowed_shapes_aabb_vqb5jnkf/art/kit`（Box重疊）。
 - 編輯器開啟：未執行。畫面與操作：未執行。FormLab無頭門禁：通過。沙盒外最後執行一次`tools/run_tests.sh`，只跑FormLab、固定60 FPS／180幀，超過120物理幀，退出碼0，無錯誤或警告。引擎`4.7.stable.official.5b4e0cb0f`，日誌`${TMPDIR}/borrowed_shapes_tests/form_lab.log`；依quit-after主動結束，不宣稱手動正常關閉或角色操作驗收。
-- 工作區保護：只更新tools內的檢查／測試／固定組合資料及AGENTS.md／cost-log，原資產不改、舊3m牆仍保留，第二批未開始，未提交／推送。
+- 工作區保護：只更新tools內的檢查／測試／固定組合資料及AGENTS.md／cost-log，原資產不改、第二批未開始，未提交／推送。
 
 ### 前輪批次01結案小項與第二批提案（歷史紀錄，2026-10-17）
 
@@ -435,7 +420,7 @@ KitPiece (Node3D，根Y在底部；水平pivot依上表)
 
 ### 批次02：測試修復、收口剖面與風格提案（歷史紀錄，2026-10-17）
 
-基座與收口製作提案已由上方「批次02結案：決定不做」取代；下列尺寸、替代放置與待確認語句僅為歷史，不構成製作授權。三角色材質仍為未實作提案。
+基座與收口製作提案已由上方「批次02結案：決定不做」取代；下列尺寸、替代放置與待確認語句僅為歷史，不構成製作授權。下方三角色／StandardMaterial提案已由「風格Resource化」取代，只保留歷史。
 
 **唯一獲准的測試器修復**：將抬牆案例的文字比對改為解析seam gap數值，採Decimal與0.1比較、容差1e−6，另要求子程序退出碼非0及FAIL診斷。依本輪授權只修正並執行 `python3 tools/test_kit_box_aabbs.py` 一次；8個負向案例全部通過，測試器退出碼0。抬牆案例gap=0.10m、差值0、子程序退出碼1；副本 `/tmp/borrowed_shapes_aabb_ugsh6n3k/art/kit`。未改檢查器、組合清單或資產；本次歸類cost-log「驗證重工」。
 
@@ -477,6 +462,50 @@ highlight保留給既有光照／環境與建築Shader亮部；ink保留給既�
 
 **本輪驗證與保護**：只重跑一次正式負向測試器，8案通過、退出碼0；原資產雜湊不變。未啟動Godot，編輯器／FormLab／視窗操作本輪未執行。新增僅工作區外剖面PNG；專案只修改測試器、本文件及cost-log。沒有製作基座／收口、沒有改材質／色板／preset／其他資產，未提交／推送、未搭關卡。
 
+
+## 風格Resource化（2026-10-17，現行）
+
+本輪只做風格接線；沒有新增kit件／關卡scene，沒有改Mesh、碰撞、位置、尺寸或玩法。舊提案中3個kit角色／StandardMaterial更新方案由本節取代。
+
+- 共用材質方案：沿用`content/shared/kit_material.tres`作building，僅新增`kit_platform_material.tres`作platform；共用一份`kit_role_material.gd`（及引擎UID）。兩材質都是KitRoleMaterial／ShaderMaterial，引用**既有且未修改**的`architecture.gdshader`，與FormLab建築同shader，包含現有toon／描邊能力。不建立kit ground材質。
+- 唯一選擇入口是`style_settings.tres.palette`。材質引用StyleSettings，palette getter保留該Resource引用，不保存各自A/B選項或RGB副本。StyleSettings.palette setter發出changed；StyleFoundation由settings刷新既有建築／環境及每角色一份共用材質實例。不深複製色板、不ResourceSaver寫回來源、不逐模型Make Unique。
+- 編輯器：@tool材質在資源載入／延後初始化及palette引用切換時刷新；不自動保存來源。色板內容原地改欄位、其他風格參數的即時Inspector同步不作本輪承諾；本輪驗收只切換palette Resource。
+- 每Mesh的`color_role`、`shape_size`、`ramp_shape`保留為**instance uniform**，不在共用材質上改寫尺寸。固定scene明寫其參數；kit_ramp.gd每次重建同步Vector3(width,height,length)及ramp_shape=true，奇數格子節點偏移／Mesh與凸包生成保持原樣。
+
+| kit scene | 角色 | instance shape_size／ramp_shape |
+|---|---|---|
+| wall_straight_w2_h5_d1.tscn | building | (1,2.5,0.5)／false |
+| wall_straight_w4_h5_d1.tscn | building | (2,2.5,0.5)／false |
+| wall_corner_w2_h5_d2.tscn | building | (1,2.5,1)／false |
+| filler_w1_h1_d1.tscn | 預設building | (0.5,0.5,0.5)／false |
+| floor_w4_h1_d4.tscn | platform | (2,0.5,2)／false |
+| ramp_w4_h6_d12.tscn | platform | 預設(2,3,6)，依參數刷新／true |
+
+填充塊補平台時由作者明確替換為共用platform材質，並把Visual/MeshInstance3D的color_role設為1；預設building為0。不按位置猜用途、不複製材質或新增填充塊變體。材質role欄位供辨識／驗收，實際著色使用Mesh的color_role。
+
+**決定不做**：暗色帶與額外shader功能升級。本輪只改接現有shader，不新增shader或修改shader演算法。重評條件：**M4實際畫面顯示樓層線不足**。
+
+**已知限制**：現有描邊按Box／楔形推算，L形牆角凹角描邊不完整；**M4截圖時需檢查**，本輪不擴寫演算法。預設outline／toon均關閉；A/B驗收維持來源開關，不為驗收切換效果。
+
+### 本輪驗收與工具
+
+- `tools/check_kit_style.py`唯讀追蹤kit scene及其引用的.tres／.gd／shader：15個依賴，角色色常數只能在A/B palette Resource；StyleSettings中固定機制色為明確例外。兩角色材質引用相同architecture shader／StyleSettings。
+- `tools/style_color_reference.py`離線列出青、黃對A/B五個色板欄位的相對亮度、亮度對比與HSV環形色相差。sRGB線性化後用0.2126/0.7152/0.0722計算亮度、(L高+0.05)/(L低+0.05)計算比值；HSV色相差不是感知色差，也不代表遊戲受光照像素對比。僅供參考、沒有門檻。B platform對青色比值1.533、色相差24.88°。
+- `style_capture.gd`仍只從FormLab的`--style-capture=絕對路徑`入口執行。A→B→原色板只賦值settings.palette，不直接套色板函式，不切後製／描邊／toon。檢查色值、palette引用、共用材質身分、原FormLab幾何、固定機制青／黃／描邊色完全不變；原設定恢復，不保存Resource或偏好。
+- 驗收例外：同一工具在獨立SubViewport／World3D記憶體實例化既有下層地板(0,0,0.5)、2.5m牆(0,0.5,0)、上層板(0,3,-0.5)，另用既有青色標記覆蓋牆與樓板側面；沒有保存組合scene，不作玩法驗收。相機正交size=5.5、位置(5,4.5,8)、朝向(0,1.65,0)。標記width=0.8、height=3、位置(-0.5,0.5,0.5)，禁用候選登記，只顯示原機制材質。
+- **已通過的剖面基準圖**：[A](docs/style_section_a.png)、[B](docs/style_section_b.png)，由前輪視窗renderer的原PNG逐位元複製，不重新渲染或改色。圖中青色標記寬0.8m，是驗收工具本輪風格實作時明確選的材質取樣寬度：0.8÷2m牆寬=40%，中心X=-0.5、橫向X[-0.9,-0.1]，保留旁邊背景以同時觀察牆／樓板角色色與機制色。不是原本完整攀爬配置，也不是shader把標記縮窄；僅存在截圖工具的記憶體剖面、禁用攀爬候選。上方「新標準牆使用與堆疊剖面」規定的有效攀爬配置線仍為width=2、height=3；既有FormLab仍為width=3、height=3，位於(-3,0,0.5)，並無改動。基準圖核准的是角色材質／辨識度，不能把0.8m解讀為新的攀爬寬度規格。
+- **黃色跨越線A/B證據**：[FormLab A](docs/style_form_lab_a.png)、[FormLab B](docs/style_form_lab_b.png)，沿用前輪同相機／同效果開關截圖；本輪只複製及檢視，未啟動Godot或改色。畫面左上屋頂黃線為起跳線X=-0.65、Y=3.04、Z[-3.6,-0.6]，位於Building頂面Y=3（building角色，A #C9BEA8／B #A8B9C9）；右側平台黃線為反向起跳線X=3.65、相同Y/Z範圍，位於LandingPlatform頂面Y=3（platform角色，A #829384／B #788D99）。黃線比承重頂面高0.04m，不是畫在空隙或ground角色上；兩線都使用既有固定機制黃#FFC73D及深色邊。A/B兩張中兩條黃線均可辨識，右側平台本體部分超出畫面；不外推所有視角。PNG受光照的背景像素不等於上述來源albedo色值。
+- 工具逐資源核對6個kit scene角色／同shader與shape參數；斜坡測(1.5,2.5,5.5)及恢復(2,3,6)，核對shader尺寸、Mesh包圍盒與恢復後凸包點相同。
+
+引擎`4.7.stable.official.5b4e0cb0f`；Godot均在沙盒外執行，無錯誤／警告，退出碼0：
+
+1. **編輯器載入通過**：首次`Godot --editor --path /Users/howard/game/borrowed-shapes --log-file /tmp/borrowed_shapes_style_editor_initial.log --quit-after 180 res://art/kit/wall_straight_w4_h5_d1.tscn`完成匯入。其後逐一對6個kit scene執行`Godot --editor --path <專案> --quit-after 180 res://art/kit/<scene>`；日誌`/tmp/borrowed_shapes_style_editor_<scene名>.log`。每次前後203個來源檔SHA256與`git status --porcelain=v1 --untracked-files=all`完全不變，證據`/tmp/borrowed_shapes_editor_guard.json`。工作區含本輪未提交實作差異，非字面乾淨；通過的是載入未產生額外來源改動。quit-after為主動結束，不宣稱手動正常關閉。
+2. **主場景啟動通過（無頭）**：`tools/run_tests.sh`只執行FormLab，固定60FPS／180幀，超過120物理幀；日誌`${TMPDIR}/borrowed_shapes_tests/form_lab.log`。
+3. **A/B自動核對通過（無頭與視窗各一次）**：`Godot [--headless] --path <專案> --log-file <log> res://scenes/forms/form_lab.tscn -- --style-capture=/tmp/borrowed_shapes_style_capture`；log分別`/tmp/borrowed_shapes_style_check.log`與`/tmp/borrowed_shapes_style_window.log`。至少150物理幀後開始；工具完成後主動quit(0)。截圖為`form_lab_a.png`、`form_lab_b.png`、`section_a.png`、`section_b.png`，皆在該輸出目錄。
+4. **畫面檢查通過（本次限定項目）**：已檢視視窗renderer輸出的FormLab B畫面及A/B剖面；相機／HUD可見，B平台側面上青色標記在該固定視角仍可辨識，沒有改色。不外推到所有距離／角度；未執行移動／變形／攀爬／跨越操作。
+5. **幾何回歸通過**：`python3 tools/check_kit_box_aabbs.py`一次，現有5個Box資產／6個Box／4組（3組Box＋1組坡高邊座標）通過；凸包仍不列Box碰撞通過。`python3 tools/test_kit_box_aabbs.py`一次，8案通過；原始件的節點結構／位置／Shape數值／碰撞圖層與本輪開始快照相同。解析器只新增MeshInstance3D上3項合法視覺uniform的嚴格字面解析，沒有放寬script／transform／碰撞檢查。
+
+沒有新增kit件、關卡或保存驗收scene，沒有提交／推送；本輪工作記於docs/cost_log.md。
 
 ## 美術與場景保護
 風格集中管理於色板、光照、共用材質與環境 preset，不逐模型客製風格。青色攀爬面、黃色跨越線應使用共用材質；尚未共用的部分須先提案，不能自行擴建系統。

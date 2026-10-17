@@ -1,7 +1,11 @@
+@tool
 class_name StyleSettings
 extends Resource
 ## 共用風格的唯一選擇與參數入口。機制色獨立於建築色板。
-@export var palette: StylePalette
+@export var palette: StylePalette:
+	set(value):
+		palette = value
+		emit_changed()
 @export var outline_enabled: bool = false
 @export var toon_enabled: bool = false
 @export var post_enabled: bool = true

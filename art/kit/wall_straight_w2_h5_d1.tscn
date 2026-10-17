@@ -20,6 +20,9 @@ metadata/pivot = "reference_face_x_center_y_bottom"
 position = Vector3(0, 1.25, 0.25)
 mesh = SubResource("Mesh")
 material_override = ExtResource("1")
+instance_shader_parameters/color_role = 0
+instance_shader_parameters/shape_size = Vector3(1, 2.5, 0.5)
+instance_shader_parameters/ramp_shape = false
 
 [node name="Body" type="StaticBody3D" parent="."]
 collision_layer = 1

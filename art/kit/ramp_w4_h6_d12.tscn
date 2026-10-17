@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Material" path="res://content/shared/kit_material.tres" id="1"]
+[ext_resource type="Material" path="res://content/shared/kit_platform_material.tres" id="1"]
 [ext_resource type="Script" path="res://content/traversal/kit_ramp.gd" id="3"]
 [ext_resource type="Mesh" path="res://art/kit/ramp_w4_h6_d12.obj" id="2"]
 
@@ -20,6 +20,9 @@ metadata/pivot = "xz_grid_anchor_y_bottom"
 position = Vector3(0, 1.5, 0)
 mesh = ExtResource("2")
 material_override = ExtResource("1")
+instance_shader_parameters/color_role = 1
+instance_shader_parameters/shape_size = Vector3(2, 3, 6)
+instance_shader_parameters/ramp_shape = true
 
 [node name="Body" type="StaticBody3D" parent="."]
 collision_layer = 1

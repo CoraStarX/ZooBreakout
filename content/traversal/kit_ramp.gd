@@ -52,6 +52,9 @@ func _rebuild() -> void:
 	collision.position = center_offset
 	var visual := $Visual/MeshInstance3D as MeshInstance3D
 	visual.position = collision.position
+	visual.set_instance_shader_parameter("color_role", 1)
+	visual.set_instance_shader_parameter("shape_size", Vector3(width, height, length))
+	visual.set_instance_shader_parameter("ramp_shape", true)
 	if visual_mesh != null:
 		visual.mesh = visual_mesh
 	else:
