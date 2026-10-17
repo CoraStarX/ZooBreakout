@@ -4,7 +4,7 @@
 
 ## 開啟與操作
 
-在原 Zoo Breakout 專案開啟 scenes/traversal/staff_readability_lab.tscn，執行目前場景（macOS 可用 Fn+F6 或右上「執行目前場景」）。F5 的正式舊關卡與原 movement_lab 入口保留。
+在 Borrowed Shapes 專案開啟 `scenes/traversal/staff_readability_lab.tscn`，執行目前場景（macOS 可用 Fn+F6 或右上「執行目前場景」）。F5 執行 FormLab；純移動回歸入口為 MovementLab。舊正式關卡已移除。
 
 WASD、Space、E 語意沿用移動 A。F3 開啟統計，「複製統計」預設輸出員工事件摘要＋移動計數短摘要；「複製完整診斷」才附事件 JSON、0.1秒警覺時間線與移動輸入記錄，「重置統計」同時清除兩者。重置不傳送玩家或重設員工行為。
 
@@ -38,7 +38,9 @@ WASD、Space、E 語意沿用移動 A。F3 開啟統計，「複製統計」預�
                                     ├─ 到達回饋 → UIKit／佔位短音
                                     └─ StaffReadabilityMetrics → F3／複製
 
-局部狀態為 WORK／SUSPICIOUS／INVESTIGATE／CHASE／SEARCH／RETURN／REST。高處接近沿用 INVESTIGATE，沒有全域狀態機。正式 StaffActor、StaffSense、Clock、Alert、CaptureFlow 不改。
+局部狀態為 WORK／SUSPICIOUS／INVESTIGATE／CHASE／SEARCH／RETURN／REST。高處接近沿用 INVESTIGATE，沒有全域狀態機。本沙盒使用 ReadabilityStaff 與局部感知流程，未接入 FormLab。
+
+歷史實作邊界原文：「正式 StaffActor、StaffSense、Clock、Alert、CaptureFlow 不改。」這些舊模組現已移除，此記錄不代表現行依賴。
 
 ## 檔案清單
 

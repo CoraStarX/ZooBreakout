@@ -202,7 +202,7 @@ func integration_checks() -> void:
 	check(staff.metrics.counters.arrival == 2,"到達冷卻結束可記錄下一次")
 	check(staff.metrics.timeline.size() > 0 and staff.metrics.report(false,true).contains("visibility_mult") and staff.metrics.report(false,true).contains("hearing_spike"),"F3 時間線含視覺倍率與聽覺貢獻")
 	var stats := lab.debug_hud.call("movement_report") as String
-	check(stats.contains("員工可讀性統計") and stats.contains("猴形態移動統計"),"F3 合併員工與凍結移動統計")
+	check(stats.contains("員工可讀性統計") and stats.contains("移動統計｜來源："),"F3 合併員工與凍結移動統計")
 	var clipboard := DisplayServer.clipboard_get() if DisplayServer.get_name() != "headless" else ""
 	check(lab.debug_hud.call("copy_movement_stats") == stats,"複製統計輸出合併純文字")
 	var detailed := lab.debug_hud.call("copy_detailed_stats") as String

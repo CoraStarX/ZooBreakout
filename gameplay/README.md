@@ -1,3 +1,3 @@
-# GamePlay layer
-# Rules frameworks: party, interaction, capture, clock wiring, prep/kits, win conditions.
-# Must not hardcode species or level coordinates.
+# GamePlay
+
+移動、攀爬、跨越、形態控制與局部感知／診斷規則。只認能力與Resource，不按具體形態id或關卡座標分支。

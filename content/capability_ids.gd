@@ -6,11 +6,11 @@ enum Id {
 	NONE = 0,
 	DEXTERITY = 1, ## 巧手
 	CLIMB = 2, ## 攀爬
-	DIG = 3, ## 挖掘 — 留给獾；现有路线均不要求
+	DIG = 3, ## 挖掘（預留能力）
 	RAM = 4, ## 冲撞
 	SQUEEZE = 5, ## 钻缝
-	THROW = 6, ## 投掷 — 丢石子到远处制造声响引开职员
-	TINY_GAP = 7, ## 極小通道；與舊SQUEEZE語意分開
+	THROW = 6, ## 投擲（預留能力）
+	TINY_GAP = 7, ## 極小通道；與一般鑽縫能力區分
 }
 
 

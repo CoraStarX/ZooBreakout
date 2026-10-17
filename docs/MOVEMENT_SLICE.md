@@ -4,7 +4,7 @@
 
 ## 啟動與操作
 
-Godot 開啟 `scenes/traversal/movement_lab.tscn`，執行目前場景（Mac 可用工具列的場記板播放按鈕，或 Fn+F6）。根目錄同名副本也使用同一腳本。F5 仍進舊遊戲。
+Godot 開啟 `scenes/traversal/movement_lab.tscn`，執行目前場景（Mac 可用工具列的場記板播放按鈕，或 Fn+F6）。根目錄同名副本也使用同一腳本。F5 執行主入口 `scenes/forms/form_lab.tscn`；純移動回歸請執行目前的 MovementLab 場景。
 
 - WASD：地面相對鏡頭移動；牆上 W/S 上下、A/D 螢幕左右。
 - 朝青色牆走：輸入對「朝牆內」方向在 45° 內並維持 0.15s 才附著。鬆開方向仍保持掛牆。

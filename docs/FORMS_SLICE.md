@@ -19,7 +19,7 @@
 - 變成猴須接地（含平台／屋頂）並容納完整碰撞體；掛牆、空中與路徑過渡均明確拒絕。主動與強制回本體任何狀態允許；掛牆／空中退回自然下落，落地噪音沿用原規則。
 - 本體速度4、腳步0、可見度0.6、不跳躍；猴數值與移動算法凍結。DURATION_INFINITE=0，負持續時間載入拒絕，本輪不倒數。
 - 變形聲音量1；transform近距接收上限3與hear_noise_range13同為XZ世界距離，1單位約1公尺。3公尺上限C接收端實作，A只發事件；強制退回不再發聲／目擊追捕。
-- A無員工；避免可見度與變形接線尚未完成時以舊員工產生錯誤體感。F5與原移動／員工沙盒不變。B追加窄縫，不重做已驗收地形；C才接員工。
+- A無員工；避免可見度與變形接線尚未完成時以舊員工產生錯誤體感。F5執行FormLab；MovementLab與StaffReadabilityLab保留為獨立回歸入口，使用執行目前場景開啟。B追加窄縫，不重做已驗收地形；C才接員工。
 - 身份倍率（原生區域／禁入區）、投擲、形態獲得／請求名牌、持續時間消耗均在backlog，不實作。
 
 ## 狀態
@@ -51,11 +51,11 @@ A新場景無員工，尚不驗證目擊變形、強制被抓或形態F3計數�
 - 原灰盒已包含Building（頂面y=3）、LandingPlatform（頂面y=3），兩者實體邊緣x=0／3，間隙3世界單位，保留兩個雙向TraversalLink。不因A截圖視角未完整拍到就刪除間隙。此為地面／屋頂兩個高度層，不是可進入的兩層室內建築；B原計畫不新增室內樓層、不重建凍結動線。
 - 接地陰影既有MovementLab.shadow，每幀向下射線投影到實際地面／平台，FormLab隨形態調整半徑；不是只有方向光投影。B沿用並回歸，無須重做。
 - F3新增FormGuidance勾選；關閉後隱藏頂部任務、被動形態能力／路線文字（包括世界ProximityLabel），保留中性按鍵說明。明確操作拒絕仍顯示，避免違反拒絕可讀原則。偏好走UserPrefs，section=form_lab,key=show_guidance；預設由FormParams.show_guidance_default提供。不影響判定、角色、落點預覽或陰影。
-- C來源待確認：專案沒有獨立員工Actor .tscn；正式世界ZooP0Geometry以StaffActor.new建立，已驗收沙盒StaffReadabilityLab以ReadabilityStaff.new建立。建議把後者封裝成PackedScene後實例化、重用同份StaffPerceptionFootprint／感知／追捕與搜索，不能把換成場景誤稱替身。若要求正式StaffActor則先提Clock／Alert／抓捕耦合隔離方案，不自行替換。原「新子類」計畫依使用者這次要求重新確認後才落地。
+- 歷史提案（已由下方「C來源已確認」取代；ZooP0Geometry、StaffActor及舊Autoload現已移除）：C來源待確認：專案沒有獨立員工Actor .tscn；正式世界ZooP0Geometry以StaffActor.new建立，已驗收沙盒StaffReadabilityLab以ReadabilityStaff.new建立。建議把後者封裝成PackedScene後實例化、重用同份StaffPerceptionFootprint／感知／追捕與搜索，不能把換成場景誤稱替身。若要求正式StaffActor則先提Clock／Alert／抓捕耦合隔離方案，不自行替換。原「新子類」計畫依使用者這次要求重新確認後才落地。
 
 ### C來源已確認
 
-使用者選擇「採已驗收ReadabilityStaff場景封裝」。C將封裝並實例化該Actor，沿用原StaffPerceptionFootprint、同份視錐顯示與遮擋判定、追捕／牆下搜索／歇崗邏輯，不改用正式StaffActor也不建立簡化替身。無形態事件時須通過既有97項回歸；是否目擊、延遲與追捕到達新增測試另列。前述來源問卷已結案。
+使用者選擇「採已驗收ReadabilityStaff場景封裝」。C將封裝並實例化該Actor，沿用原StaffPerceptionFootprint、同份視錐顯示與遮擋判定、追捕／牆下搜索／歇崗邏輯，C的現行來源方案為ReadabilityStaff；此封裝與接線仍未實作或驗收。無形態事件時須通過既有97項回歸；是否目擊、延遲與追捕到達新增測試另列。前述來源問卷已結案。
 
 ## 歷史：A屋頂邊緣拒絕版回歸（已由下方自動推開取代）
 

@@ -1,6 +1,6 @@
 name: tests
 
-# Headless regression gate: runs tools/run_tests.sh (all prototypes/p*_*.tscn suites).
+# Core gate: two Lab loads plus the retained gameplay and architecture suites.
 # NOTE: written without being able to run it locally; if the Godot download URL for the pinned
 # version changes, adjust GODOT_VERSION below.
 
@@ -37,7 +37,13 @@ jobs:
           chmod +x ~/godot/godot
 
       - name: Import project (build class cache)
-        run: ~/godot/godot --headless --path . --import || true
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/borrowed_shapes_tests
+          ~/godot/godot --headless --path . --import 2>&1 | tee /tmp/borrowed_shapes_tests/import.log
+          if grep -E 'SCRIPT ERROR|ERROR:|WARNING:' /tmp/borrowed_shapes_tests/import.log; then
+            exit 1
+          fi
 
       - name: Run regression suites
         env:
@@ -49,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
-          path: /tmp/zoo_breakout_tests
+          path: /tmp/borrowed_shapes_tests

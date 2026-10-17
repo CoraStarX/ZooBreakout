@@ -9,7 +9,7 @@ extends Node3D
 @export var ortho_size: float = 14.0
 @export var follow_smooth: float = 10.0 ## higher = snappier
 @export var snap_on_switch: bool = true
-## 預設關閉，舊關卡仍看地面；新移動切片可跟隨平台／攀爬高度。
+## 高度跟隨預設關閉；啟用後可跟隨平台／攀爬高度。
 @export var follow_target_height: bool = false
 ## 可選的通用高度介面，Core 不認角色型別或移動狀態。
 @export var height_provider_method: StringName = &""
@@ -27,21 +27,6 @@ func _ready() -> void:
 		_camera.size = ortho_size
 		_camera.current = true
 		_camera.far = 200.0
-	Bus.animal_switched.connect(_on_animal_switched)
-	# Resolve initial target next frame after zoo_world spawns party.
-	call_deferred("_bind_initial_target")
-
-
-func _bind_initial_target() -> void:
-	var world := get_tree().get_first_node_in_group("zoo_world")
-	if world and world.has_method("controlled_animal"):
-		var a: Node3D = world.call("controlled_animal") as Node3D
-		if a:
-			set_follow_target(a, true)
-
-
-func _on_animal_switched(animal: Node3D) -> void:
-	set_follow_target(animal, snap_on_switch)
 
 
 func set_follow_target(target: Node3D, immediate: bool = false) -> void:

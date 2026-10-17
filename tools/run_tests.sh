@@ -1,44 +1,51 @@
 #!/usr/bin/env bash
-# Zoo Breakout 回归门禁：跑全部 headless 套件。
-# 失败条件：退出码非 0，或输出含 FAIL / FINDING / SCRIPT ERROR / ERROR:。
-# 单套件超时 TEST_TIMEOUT 秒（默认180）。新增 class_name 后先跑 godot --headless --import 刷新类缓存。
-# 用法：tools/run_tests.sh [suite ...]   （GODOT 环境变量可覆盖引擎路径）
+# Borrowed Shapes 核心門禁：預設只驗證 form_lab。
+# 其他既有套件僅於使用者明確要求時指定執行。
+# 退出碼非0，或ERROR／WARNING／FAIL／FINDING／TIMEOUT即停止。
+# 用法：tools/run_tests.sh [form_lab|movement_lab|suite ...]
 set -u
 cd "$(dirname "$0")/.."
 GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
 SUITES=("$@")
 if [ ${#SUITES[@]} -eq 0 ]; then
-  SUITES=(p0_regression p0_walkthrough p0_enclosure_check p0_climb_fly_repro
-          p1_win_routes
-          p2_outer_walls p2_run_reset p2_day_cycle p2_gather p2_capture p2_intel p2_route_work p2_cart p2_hygiene p2_ui p2_full_loop
-          p2_staff_awareness p2_staff_patrol p2_follow_trail p2_action_cost p2_rescue_rendezvous p2_route_clear p2_stash p2_alert_tiers p2_noise_tools p2_confiscate p2_exposure p2_guidance p2_traversal p2_staff_readability p2_forms)
+  SUITES=(form_lab)
 fi
-LOG_DIR="${TMPDIR:-/tmp}/zoo_breakout_tests"
+LOG_DIR="${TEST_LOG_DIR:-${TMPDIR:-/tmp}/borrowed_shapes_tests}"
 mkdir -p "$LOG_DIR"
-failed=()
 for s in "${SUITES[@]}"; do
+  args=("$GODOT" --headless --path .)
+  case "$s" in
+    form_lab) scene="res://scenes/forms/form_lab.tscn"; args=("${args[@]}" --fixed-fps 60 --quit-after 180) ;;
+    movement_lab) scene="res://scenes/traversal/movement_lab.tscn"; args=("${args[@]}" --quit-after 120) ;;
+    *) scene="res://prototypes/$s.tscn" ;;
+  esac
+  if [ ! -f "${scene#res://}" ]; then
+    printf 'ERROR: 找不到套件場景：%s\n' "$scene"
+    exit 1
+  fi
   log="$LOG_DIR/$s.log"
-  "$GODOT" --headless --path . "res://prototypes/$s.tscn" >"$log" 2>&1 &
+  "${args[@]}" "$scene" >"$log" 2>&1 &
   pid=$!
-  ( sleep "${TEST_TIMEOUT:-180}"; kill -9 $pid 2>/dev/null ) &
+  ( sleep "${TEST_TIMEOUT:-180}"; kill -9 "$pid" 2>/dev/null ) &
   dog=$!
-  wait $pid; code=$?
-  kill $dog 2>/dev/null; wait $dog 2>/dev/null
-  [ $code -eq 137 ] && echo "TIMEOUT" >>"$log"
-  bad=$(grep -E '^(FAIL|FINDING|TIMEOUT)|SCRIPT ERROR|^ERROR:' "$log" | head -5)
+  while kill -0 "$pid" 2>/dev/null; do
+    if grep -Eq '^(FAIL|FINDING|TIMEOUT)|SCRIPT ERROR|(^|[[:space:]])(ERROR:|WARNING:)|[Cc]rashed' "$log"; then
+      kill "$pid" 2>/dev/null
+      break
+    fi
+    sleep 0.1
+  done
+  wait "$pid"; code=$?
+  kill "$dog" 2>/dev/null; wait "$dog" 2>/dev/null
+  [ "$code" -eq 137 ] && echo "TIMEOUT" >>"$log"
+  bad=$(grep -E '^(FAIL|FINDING|TIMEOUT)|SCRIPT ERROR|(^|[[:space:]])(ERROR:|WARNING:)|[Cc]rashed' "$log" | head -5)
   summary=$(grep -E 'SUMMARY|摘要' "$log" | tail -1)
-  if [ $code -ne 0 ] || [ -n "$bad" ]; then
+  if [ "$code" -ne 0 ] || [ -n "$bad" ]; then
     printf '✗ %-26s exit=%d %s\n' "$s" "$code" "$summary"
     [ -n "$bad" ] && printf '%s\n' "$bad" | sed 's/^/    /'
-    failed+=("$s")
-  else
-    printf '✓ %-26s %s\n' "$s" "$summary"
+    printf 'RED: %s — logs: %s\n' "$s" "$LOG_DIR"
+    exit 1
   fi
+  printf '✓ %-26s %s\n' "$s" "$summary"
 done
-echo
-if [ ${#failed[@]} -eq 0 ]; then
-  echo "ALL GREEN (${#SUITES[@]} suites) — logs: $LOG_DIR"
-  exit 0
-fi
-echo "RED: ${failed[*]} — logs: $LOG_DIR"
-exit 1
+printf '\nALL GREEN (%d checks) — logs: %s\n' "${#SUITES[@]}" "$LOG_DIR"

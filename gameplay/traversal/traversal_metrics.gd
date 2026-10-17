@@ -200,7 +200,7 @@ static func slow_segments(samples: Array[Dictionary], ratio: float) -> PackedStr
 
 func report() -> String:
 	var lines := PackedStringArray([
-		"猴形態移動統計｜來源：" + source,
+		"移動統計｜來源：" + source,
 		"完成 %d 圈｜進行中：%s" % [completed_count, ["未開始", "爬牆", "跨間隙", "返回"][phase]],
 		"多餘輸入 %d｜意外墜落 %d｜跳躍中斷 %d｜卡住恢復 %d%s" % [extra_inputs, accidental_falls, interrupted_jumps, recoveries, "（BUG）" if recoveries > 0 else ""],
 	])

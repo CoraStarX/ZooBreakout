@@ -1,6 +1,6 @@
 class_name TraversalParams
 extends Resource
-## 移動切片專用。數值集中調整，舊關卡不載入此資源。
+## 移動、碰撞與呈現參數；共用於角色與驗證宿主。
 
 @export_group("角色")
 @export var speed: float = 5.5

@@ -19,6 +19,7 @@ func check(ok: bool, message: String) -> void:
 		print("FAIL ", message)
 
 func run() -> void:
+	await input_lifecycle_checks()
 	pure_checks()
 	lab = preload("res://scenes/traversal/movement_lab.tscn").instantiate() as MovementLab
 	add_child(lab)
@@ -51,18 +52,18 @@ func run() -> void:
 		get_tree().root.size = Vector2i(1920,1080)
 		await get_tree().create_timer(0.3).timeout
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("/tmp/zoo_usability_f3_1920.png")
+		get_viewport().get_texture().get_image().save_png("/tmp/borrowed_shapes_usability_f3_1920.png")
 		get_tree().root.size = Vector2i(1280,720)
 		await get_tree().create_timer(0.3).timeout
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("/tmp/zoo_usability_f3_1280.png")
+		get_viewport().get_texture().get_image().save_png("/tmp/borrowed_shapes_usability_f3_1280.png")
 		var clipboard := DisplayServer.clipboard_get()
 		lab.debug_hud.call("copy_movement_stats")
 		check(DisplayServer.clipboard_get() == lab.metrics.report(), "非 headless 複製統計與純文字報告一致")
 		DisplayServer.clipboard_set(clipboard)
 	lab.queue_free()
 	await frames()
-	check(not InputMap.has_action("traversal_jump"), "測試場景退出清除專用按鍵")
+	check(InputMap.has_action("traversal_jump"), "測試場景退出保留工程跳躍按鍵")
 	print("=== P2 TRAVERSAL SUMMARY pass=%d fail=%d ===" % [passed, failed])
 	get_tree().quit(0 if failed == 0 else 1)
 
@@ -683,7 +684,7 @@ func complete_loops() -> void:
 	check(lab.metrics.counts() == Vector4i.ZERO, "正常十圈無多餘輸入、意外墜落、中斷或卡住恢復")
 	if DisplayServer.get_name() == "headless":
 		check(lab.debug_hud.call("copy_movement_stats") == lab.metrics.report(), "F3 複製輸出純文字統計")
-	FileAccess.open("/tmp/zoo_traversal_metrics_ramp.txt", FileAccess.WRITE).store_string(lab.metrics.report())
+	FileAccess.open("/tmp/borrowed_shapes_traversal_metrics_ramp.txt", FileAccess.WRITE).store_string(lab.metrics.report())
 	lab.metrics.reset()
 	good = true
 	stand(lab.data.spawn)
@@ -708,5 +709,45 @@ func complete_loops() -> void:
 	check(lab.metrics.counts() == Vector4i.ZERO, "主要下牆返回十圈沒有無效輸入與失誤／恢復")
 	check(lab.metrics.rows[0]["route"] == "下牆" and lab.metrics.rows[-1]["route"] == "下牆", "F3 主要返回路線一致")
 	check(lab.metrics.report().contains("同路線末圈比首圈快：否"), "相同自動操作的浮點誤差不誤判為手感進步")
-	FileAccess.open("/tmp/zoo_traversal_metrics.txt", FileAccess.WRITE).store_string(lab.metrics.report())
+	FileAccess.open("/tmp/borrowed_shapes_traversal_metrics.txt", FileAccess.WRITE).store_string(lab.metrics.report())
 	print(lab.metrics.report())
+
+func input_lifecycle_checks() -> void:
+	var action: StringName = &"traversal_jump"
+	var existed := InputMap.has_action(action)
+	var original_deadzone := InputMap.action_get_deadzone(action) if existed else 0.5
+	var original_events: Array[InputEvent] = InputMap.action_get_events(action) if existed else []
+	# 用自訂鍵位與 deadzone 證明場景不會覆寫工程設定。
+	if existed:
+		InputMap.erase_action(action)
+	InputMap.add_action(action, 0.37)
+	var custom_key := InputEventKey.new()
+	custom_key.physical_keycode = KEY_F8
+	InputMap.action_add_event(action, custom_key)
+	var existing_lab := preload("res://scenes/traversal/movement_lab.tscn").instantiate() as MovementLab
+	add_child(existing_lab)
+	check(is_equal_approx(InputMap.action_get_deadzone(action), 0.37) and InputMap.action_get_events(action).size() == 1 and InputMap.action_get_events(action)[0] == custom_key, "traversal_jump：載入保留既有鍵位與 deadzone")
+	existing_lab.queue_free()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(InputMap.has_action(action), "traversal_jump：退出保留既有 action")
+	if InputMap.has_action(action):
+		check(is_equal_approx(InputMap.action_get_deadzone(action), 0.37) and InputMap.action_get_events(action).size() == 1 and InputMap.action_get_events(action)[0] == custom_key, "traversal_jump：退出不改既有鍵位與 deadzone")
+		InputMap.erase_action(action)
+	var temporary_lab := preload("res://scenes/traversal/movement_lab.tscn").instantiate() as MovementLab
+	add_child(temporary_lab)
+	check(InputMap.has_action(action) and not InputMap.action_get_events(action).is_empty(), "traversal_jump：缺少 action 時建立預設鍵位")
+	temporary_lab.queue_free()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(not InputMap.has_action(action), "traversal_jump：退出清除場景自行建立的 action")
+	# 無論斷言結果，恢復本測試進入前的 InputMap。
+	if InputMap.has_action(action):
+		InputMap.erase_action(action)
+	if existed:
+		InputMap.add_action(action, original_deadzone)
+		for event in original_events:
+			InputMap.action_add_event(action, event)
+	check(InputMap.has_action(action) == existed, "traversal_jump：恢復測試前 action 存在狀態")
+	if existed:
+		check(InputMap.action_get_deadzone(action) == original_deadzone and InputMap.action_get_events(action) == original_events, "traversal_jump：恢復測試前所有鍵位與 deadzone")

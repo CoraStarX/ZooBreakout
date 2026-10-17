@@ -13,6 +13,7 @@ func check(ok: bool, message: String) -> void:
 func _ready() -> void:
 	call_deferred("run")
 func run() -> void:
+	await input_lifecycle_checks()
 	pure_checks()
 	Bus.noise_made.connect(func(point: Vector3, volume: float, kind: StringName) -> void: noises.append({"point":point,"volume":volume,"kind":kind}))
 	lab = preload("res://scenes/forms/form_lab.tscn").instantiate() as FormLab
@@ -383,3 +384,43 @@ func locked_start_check() -> void:
 	other_lab.queue_free()
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+
+func input_lifecycle_checks() -> void:
+	var action: StringName = &"transform"
+	var existed := InputMap.has_action(action)
+	var original_deadzone := InputMap.action_get_deadzone(action) if existed else 0.5
+	var original_events: Array[InputEvent] = InputMap.action_get_events(action) if existed else []
+	# 用自訂鍵位與 deadzone 證明場景不會覆寫工程設定。
+	if existed:
+		InputMap.erase_action(action)
+	InputMap.add_action(action, 0.37)
+	var custom_key := InputEventKey.new()
+	custom_key.physical_keycode = KEY_F8
+	InputMap.action_add_event(action, custom_key)
+	var existing_lab := preload("res://scenes/forms/form_lab.tscn").instantiate() as FormLab
+	add_child(existing_lab)
+	check(is_equal_approx(InputMap.action_get_deadzone(action), 0.37) and InputMap.action_get_events(action).size() == 1 and InputMap.action_get_events(action)[0] == custom_key, "transform：載入保留既有鍵位與 deadzone")
+	existing_lab.queue_free()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(InputMap.has_action(action), "transform：退出保留既有 action")
+	if InputMap.has_action(action):
+		check(is_equal_approx(InputMap.action_get_deadzone(action), 0.37) and InputMap.action_get_events(action).size() == 1 and InputMap.action_get_events(action)[0] == custom_key, "transform：退出不改既有鍵位與 deadzone")
+		InputMap.erase_action(action)
+	var temporary_lab := preload("res://scenes/forms/form_lab.tscn").instantiate() as FormLab
+	add_child(temporary_lab)
+	check(InputMap.has_action(action) and not InputMap.action_get_events(action).is_empty(), "transform：缺少 action 時建立預設鍵位")
+	temporary_lab.queue_free()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(not InputMap.has_action(action), "transform：退出清除場景自行建立的 action")
+	# 無論斷言結果，恢復本測試進入前的 InputMap。
+	if InputMap.has_action(action):
+		InputMap.erase_action(action)
+	if existed:
+		InputMap.add_action(action, original_deadzone)
+		for event in original_events:
+			InputMap.action_add_event(action, event)
+	check(InputMap.has_action(action) == existed, "transform：恢復測試前 action 存在狀態")
+	if existed:
+		check(InputMap.action_get_deadzone(action) == original_deadzone and InputMap.action_get_events(action) == original_events, "transform：恢復測試前所有鍵位與 deadzone")

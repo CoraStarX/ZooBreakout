@@ -1,7 +1,7 @@
 class_name ProximityLabel
 extends Label3D
 ## World label that stays readable: constant on-screen size, drawn over walls, and level-of-detail by
-## distance — far away only the first line (the name), near the controlled animal the full text.
+## distance — far away only the first line (the name), near the controlled actor the full text.
 
 const NEAR_DIST := 5.5
 const CHECK_SEC := 0.15

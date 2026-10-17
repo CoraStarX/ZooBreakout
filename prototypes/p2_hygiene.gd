@@ -4,13 +4,12 @@ extends Node
 
 ## Core 不得认识的玩法/内容符号。
 const CORE_BANNED := [
-	"AnimalActor", "Interactable", "StaffActor", "StaffCart", "RunSession", "PartyController",
-	"CaptureFlow", "OfficeStorage", "GatherPoint", "ObservePoint", "ZooP0",
-	"res://gameplay", "res://content",
+	"TraversalActor", "FormController", "FormDef", "StaffReadabilityMetrics", "ReadabilityStaff",
+	"MovementLab", "FormLab", "res://gameplay", "res://content",
 ]
-## GamePlay 不得依赖的具体内容（关卡/UI/具体交互物）。数据类 GameConst/CapabilityIds/KitIds/IntelIds/AnimalDef 允许。
+## GamePlay不得依賴具體宿主、UI或關卡；共享資料型別與Resource可用。
 const GAMEPLAY_BANNED := [
-	"ZooP0Geometry", "GatherPoint", "ObservePoint", "StaffCart", "KitPickup",
+	"MovementLab", "FormLab", "StaffReadabilityLab", "UIKit",
 	"res://content/levels", "res://content/ui", "res://content/interactables",
 ]
 
